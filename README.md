@@ -116,14 +116,10 @@ Recommended: Use environment variables for sensitive information.
       "args": [
         "run",
         "--with",
-        "ansible-tower-mcp",
+        "ansible-tower-mcp>=0.0.4",
         "ansible-tower-mcp",
         "--transport",
-        "http",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8012"
+        "stdio"
       ],
       "env": {
         "ANSIBLE_BASE_URL": "${ANSIBLE_BASE_URL}",
