@@ -1973,8 +1973,8 @@ def get_user(
     tags={"users"},
 )
 def create_user(
-    username: str = Field(description="Username for the new user"),
-    password: str = Field(description="Password for the new user"),
+    new_username: str = Field(description="Username for the new user"),
+    new_password: str = Field(description="Password for the new user"),
     first_name: str = Field(default="", description="First name of the user"),
     last_name: str = Field(default="", description="Last name of the user"),
     email: str = Field(default="", description="Email address of the user"),
@@ -1988,10 +1988,10 @@ def create_user(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2003,14 +2003,14 @@ def create_user(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
     return client.create_user(
-        username=username,
-        password=password,
+        username=new_username,
+        password=new_password,
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -2025,8 +2025,8 @@ def create_user(
 )
 def update_user(
     user_id: int = Field(description="ID of the user"),
-    username: Optional[str] = Field(default=None, description="New username"),
-    password: Optional[str] = Field(default=None, description="New password"),
+    new_username: Optional[str] = Field(default=None, description="New username"),
+    new_password: Optional[str] = Field(default=None, description="New password"),
     first_name: Optional[str] = Field(default=None, description="New first name"),
     last_name: Optional[str] = Field(default=None, description="New last name"),
     email: Optional[str] = Field(default=None, description="New email address"),
@@ -2040,10 +2040,10 @@ def update_user(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2055,15 +2055,15 @@ def update_user(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
     return client.update_user(
         user_id=user_id,
-        username=username,
-        password=password,
+        username=new_username,
+        password=new_password,
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -2082,10 +2082,10 @@ def delete_user(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2097,8 +2097,8 @@ def delete_user(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2123,10 +2123,10 @@ def run_ad_hoc_command(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2138,8 +2138,8 @@ def run_ad_hoc_command(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2163,10 +2163,10 @@ def get_ad_hoc_command(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2178,8 +2178,8 @@ def get_ad_hoc_command(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2196,10 +2196,10 @@ def cancel_ad_hoc_command(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2211,8 +2211,8 @@ def cancel_ad_hoc_command(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2233,10 +2233,10 @@ def list_workflow_templates(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2248,8 +2248,8 @@ def list_workflow_templates(
 ) -> List[Dict]:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2266,10 +2266,10 @@ def get_workflow_template(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2281,8 +2281,8 @@ def get_workflow_template(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2303,10 +2303,10 @@ def launch_workflow(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2318,8 +2318,8 @@ def launch_workflow(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2344,10 +2344,10 @@ def list_workflow_jobs(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2359,8 +2359,8 @@ def list_workflow_jobs(
 ) -> List[Dict]:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2377,10 +2377,10 @@ def get_workflow_job(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2392,8 +2392,8 @@ def get_workflow_job(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2410,10 +2410,10 @@ def cancel_workflow_job(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2425,8 +2425,8 @@ def cancel_workflow_job(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2451,10 +2451,10 @@ def list_schedules(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2466,8 +2466,8 @@ def list_schedules(
 ) -> List[Dict]:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2486,10 +2486,10 @@ def get_schedule(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2501,8 +2501,8 @@ def get_schedule(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2527,10 +2527,10 @@ def create_schedule(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2542,8 +2542,8 @@ def create_schedule(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2572,10 +2572,10 @@ def update_schedule(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2587,8 +2587,8 @@ def update_schedule(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2611,10 +2611,10 @@ def delete_schedule(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2626,8 +2626,8 @@ def delete_schedule(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2646,10 +2646,10 @@ def get_ansible_version(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2661,8 +2661,8 @@ def get_ansible_version(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2678,10 +2678,10 @@ def get_dashboard_stats(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2693,8 +2693,8 @@ def get_dashboard_stats(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
@@ -2710,10 +2710,10 @@ def get_metrics(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
     ),
-    username_auth: Optional[str] = Field(
+    username: Optional[str] = Field(
         default=environment_username, description="Username for authentication"
     ),
-    password_auth: Optional[str] = Field(
+    password: Optional[str] = Field(
         default=environment_password, description="Password for authentication"
     ),
     token: Optional[str] = Field(
@@ -2725,8 +2725,8 @@ def get_metrics(
 ) -> Dict:
     client = Api(
         base_url=base_url,
-        username=username_auth,
-        password=password_auth,
+        username=username,
+        password=password,
         token=token,
         verify=verify,
     )
