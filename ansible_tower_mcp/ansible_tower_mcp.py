@@ -41,9 +41,8 @@ environment_password = os.environ.get("ANSIBLE_PASSWORD", None)
 environment_token = os.environ.get("ANSIBLE_TOKEN", None)
 environment_verify = to_boolean(os.environ.get("VERIFY", "False"))
 
+
 # MCP Tools - Inventory Management
-
-
 @mcp.tool(
     exclude_args=["base_url", "username", "password", "token", "verify"],
     tags={"inventory"},
