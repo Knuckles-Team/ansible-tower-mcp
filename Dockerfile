@@ -5,8 +5,7 @@ ARG PORT=8012
 ENV HOST=${HOST}
 ENV PORT=${PORT}
 ENV PATH="/usr/local/bin:${PATH}"
-# Update the base packages
-RUN pip install --upgrade ansible-tower-mcp
+RUN pip install uv \
+    && uv pip install --system ansible-tower-mcp
 
-# set the entrypoint to the start.sh script
-ENTRYPOINT exec ansible-tower-mcp --transport=http --host=${HOST} --port=${PORT}
+ENTRYPOINT exec ansible-tower-mcp --transport "http" --host "${HOST}" --port "${PORT}"
