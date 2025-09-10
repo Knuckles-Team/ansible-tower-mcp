@@ -9,7 +9,7 @@ This server provides tools for interacting with the Ansible API through the Mode
 
 import os
 import sys
-import getopt
+import argparse
 import logging
 from typing import Optional, List, Dict
 from pydantic import Field
@@ -39,12 +39,22 @@ environment_base_url = os.environ.get("ANSIBLE_BASE_URL", None)
 environment_username = os.environ.get("ANSIBLE_USERNAME", None)
 environment_password = os.environ.get("ANSIBLE_PASSWORD", None)
 environment_token = os.environ.get("ANSIBLE_TOKEN", None)
+environment_client_id = os.environ.get("ANSIBLE_CLIENT_ID", None)
+environment_client_secret = os.environ.get("ANSIBLE_CLIENT_SECRET", None)
 environment_verify = to_boolean(os.environ.get("VERIFY", "False"))
 
 
 # MCP Tools - Inventory Management
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"inventory"},
 )
 def list_inventories(
@@ -63,6 +73,13 @@ def list_inventories(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -72,13 +89,23 @@ def list_inventories(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_inventories(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"inventory"},
 )
 def get_inventory(
@@ -96,6 +123,13 @@ def get_inventory(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -105,13 +139,23 @@ def get_inventory(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_inventory(inventory_id=inventory_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"inventory"},
 )
 def create_inventory(
@@ -131,6 +175,13 @@ def create_inventory(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -140,6 +191,8 @@ def create_inventory(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_inventory(
@@ -148,7 +201,15 @@ def create_inventory(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"inventory"},
 )
 def update_inventory(
@@ -170,6 +231,13 @@ def update_inventory(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -179,6 +247,8 @@ def update_inventory(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_inventory(
@@ -187,7 +257,15 @@ def update_inventory(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"inventory"},
 )
 def delete_inventory(
@@ -205,6 +283,13 @@ def delete_inventory(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -214,6 +299,8 @@ def delete_inventory(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_inventory(inventory_id=inventory_id)
@@ -223,7 +310,15 @@ def delete_inventory(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"hosts"},
 )
 def list_hosts(
@@ -245,6 +340,13 @@ def list_hosts(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -254,13 +356,23 @@ def list_hosts(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_hosts(inventory_id=inventory_id, limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"hosts"},
 )
 def get_host(
@@ -278,6 +390,13 @@ def get_host(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -287,13 +406,23 @@ def get_host(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_host(host_id=host_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"hosts"},
 )
 def create_host(
@@ -314,6 +443,13 @@ def create_host(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -323,6 +459,8 @@ def create_host(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_host(
@@ -334,7 +472,15 @@ def create_host(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"hosts"},
 )
 def update_host(
@@ -359,6 +505,13 @@ def update_host(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -368,6 +521,8 @@ def update_host(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_host(
@@ -376,7 +531,15 @@ def update_host(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"hosts"},
 )
 def delete_host(
@@ -394,6 +557,13 @@ def delete_host(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -403,6 +573,8 @@ def delete_host(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_host(host_id=host_id)
@@ -412,7 +584,15 @@ def delete_host(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"groups"},
 )
 def list_groups(
@@ -432,6 +612,13 @@ def list_groups(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -441,13 +628,23 @@ def list_groups(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_groups(inventory_id=inventory_id, limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"groups"},
 )
 def get_group(
@@ -465,6 +662,13 @@ def get_group(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -474,13 +678,23 @@ def get_group(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_group(group_id=group_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"groups"},
 )
 def create_group(
@@ -501,6 +715,13 @@ def create_group(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -510,6 +731,8 @@ def create_group(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_group(
@@ -521,7 +744,15 @@ def create_group(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"groups"},
 )
 def update_group(
@@ -546,6 +777,13 @@ def update_group(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -555,6 +793,8 @@ def update_group(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_group(
@@ -563,7 +803,15 @@ def update_group(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"groups"},
 )
 def delete_group(
@@ -581,6 +829,13 @@ def delete_group(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -590,13 +845,23 @@ def delete_group(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_group(group_id=group_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"groups"},
 )
 def add_host_to_group(
@@ -615,6 +880,13 @@ def add_host_to_group(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -624,13 +896,23 @@ def add_host_to_group(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.add_host_to_group(group_id=group_id, host_id=host_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"groups"},
 )
 def remove_host_from_group(
@@ -649,6 +931,13 @@ def remove_host_from_group(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -658,6 +947,8 @@ def remove_host_from_group(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.remove_host_from_group(group_id=group_id, host_id=host_id)
@@ -667,7 +958,15 @@ def remove_host_from_group(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"job_templates"},
 )
 def list_job_templates(
@@ -686,6 +985,13 @@ def list_job_templates(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -695,13 +1001,23 @@ def list_job_templates(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_job_templates(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"job_templates"},
 )
 def get_job_template(
@@ -719,6 +1035,13 @@ def get_job_template(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -728,13 +1051,23 @@ def get_job_template(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_job_template(template_id=template_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"job_templates"},
 )
 def create_job_template(
@@ -760,6 +1093,13 @@ def create_job_template(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -769,6 +1109,8 @@ def create_job_template(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_job_template(
@@ -783,7 +1125,15 @@ def create_job_template(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"job_templates"},
 )
 def update_job_template(
@@ -810,6 +1160,13 @@ def update_job_template(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -819,6 +1176,8 @@ def update_job_template(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_job_template(
@@ -832,7 +1191,15 @@ def update_job_template(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"job_templates"},
 )
 def delete_job_template(
@@ -850,6 +1217,13 @@ def delete_job_template(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -859,13 +1233,23 @@ def delete_job_template(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_job_template(template_id=template_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"job_templates"},
 )
 def launch_job(
@@ -887,6 +1271,13 @@ def launch_job(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -896,6 +1287,8 @@ def launch_job(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.launch_job(template_id=template_id, extra_vars=extra_vars)
@@ -905,7 +1298,15 @@ def launch_job(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"jobs"},
 )
 def list_jobs(
@@ -928,6 +1329,13 @@ def list_jobs(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -937,13 +1345,23 @@ def list_jobs(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_jobs(status=status, limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"jobs"},
 )
 def get_job(
@@ -961,6 +1379,13 @@ def get_job(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -970,13 +1395,23 @@ def get_job(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_job(job_id=job_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"jobs"},
 )
 def cancel_job(
@@ -994,6 +1429,13 @@ def cancel_job(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1003,13 +1445,23 @@ def cancel_job(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.cancel_job(job_id=job_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"jobs"},
 )
 def get_job_events(
@@ -1029,6 +1481,13 @@ def get_job_events(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1038,13 +1497,23 @@ def get_job_events(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_job_events(job_id=job_id, limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"jobs"},
 )
 def get_job_stdout(
@@ -1065,6 +1534,13 @@ def get_job_stdout(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1074,6 +1550,8 @@ def get_job_stdout(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_job_stdout(job_id=job_id, format=format)
@@ -1083,7 +1561,15 @@ def get_job_stdout(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"projects"},
 )
 def list_projects(
@@ -1102,6 +1588,13 @@ def list_projects(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1111,13 +1604,23 @@ def list_projects(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_projects(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"projects"},
 )
 def get_project(
@@ -1135,6 +1638,13 @@ def get_project(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1144,13 +1654,23 @@ def get_project(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_project(project_id=project_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"projects"},
 )
 def create_project(
@@ -1178,6 +1698,13 @@ def create_project(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1187,6 +1714,8 @@ def create_project(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_project(
@@ -1201,7 +1730,15 @@ def create_project(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"projects"},
 )
 def update_project(
@@ -1230,6 +1767,13 @@ def update_project(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1239,6 +1783,8 @@ def update_project(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_project(
@@ -1252,7 +1798,15 @@ def update_project(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"projects"},
 )
 def delete_project(
@@ -1270,6 +1824,13 @@ def delete_project(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1279,13 +1840,23 @@ def delete_project(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_project(project_id=project_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"projects"},
 )
 def sync_project(
@@ -1303,6 +1874,13 @@ def sync_project(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1312,6 +1890,8 @@ def sync_project(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.sync_project(project_id=project_id)
@@ -1321,7 +1901,15 @@ def sync_project(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"credentials"},
 )
 def list_credentials(
@@ -1340,6 +1928,13 @@ def list_credentials(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1349,13 +1944,23 @@ def list_credentials(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_credentials(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"credentials"},
 )
 def get_credential(
@@ -1373,6 +1978,13 @@ def get_credential(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1382,13 +1994,23 @@ def get_credential(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_credential(credential_id=credential_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"credentials"},
 )
 def list_credential_types(
@@ -1407,6 +2029,13 @@ def list_credential_types(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1416,13 +2045,23 @@ def list_credential_types(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_credential_types(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"credentials"},
 )
 def create_credential(
@@ -1446,6 +2085,13 @@ def create_credential(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1455,6 +2101,8 @@ def create_credential(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_credential(
@@ -1467,7 +2115,15 @@ def create_credential(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"credentials"},
 )
 def update_credential(
@@ -1492,6 +2148,13 @@ def update_credential(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1501,6 +2164,8 @@ def update_credential(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_credential(
@@ -1509,7 +2174,15 @@ def update_credential(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"credentials"},
 )
 def delete_credential(
@@ -1527,6 +2200,13 @@ def delete_credential(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1536,6 +2216,8 @@ def delete_credential(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_credential(credential_id=credential_id)
@@ -1545,7 +2227,15 @@ def delete_credential(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"organizations"},
 )
 def list_organizations(
@@ -1564,6 +2254,13 @@ def list_organizations(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1573,13 +2270,23 @@ def list_organizations(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_organizations(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"organizations"},
 )
 def get_organization(
@@ -1597,6 +2304,13 @@ def get_organization(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1606,13 +2320,23 @@ def get_organization(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_organization(organization_id=organization_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"organizations"},
 )
 def create_organization(
@@ -1631,6 +2355,13 @@ def create_organization(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1640,13 +2371,23 @@ def create_organization(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_organization(name=name, description=description)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"organizations"},
 )
 def update_organization(
@@ -1668,6 +2409,13 @@ def update_organization(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1677,6 +2425,8 @@ def update_organization(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_organization(
@@ -1685,7 +2435,15 @@ def update_organization(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"organizations"},
 )
 def delete_organization(
@@ -1703,6 +2461,13 @@ def delete_organization(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1712,6 +2477,8 @@ def delete_organization(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_organization(organization_id=organization_id)
@@ -1721,7 +2488,15 @@ def delete_organization(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"teams"},
 )
 def list_teams(
@@ -1743,6 +2518,13 @@ def list_teams(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1752,6 +2534,8 @@ def list_teams(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_teams(
@@ -1760,7 +2544,15 @@ def list_teams(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"teams"},
 )
 def get_team(
@@ -1778,6 +2570,13 @@ def get_team(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1787,13 +2586,23 @@ def get_team(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_team(team_id=team_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"teams"},
 )
 def create_team(
@@ -1813,6 +2622,13 @@ def create_team(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1822,6 +2638,8 @@ def create_team(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_team(
@@ -1830,7 +2648,15 @@ def create_team(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"teams"},
 )
 def update_team(
@@ -1850,6 +2676,13 @@ def update_team(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1859,13 +2692,23 @@ def update_team(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_team(team_id=team_id, name=name, description=description)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"teams"},
 )
 def delete_team(
@@ -1883,6 +2726,13 @@ def delete_team(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1892,6 +2742,8 @@ def delete_team(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_team(team_id=team_id)
@@ -1901,7 +2753,15 @@ def delete_team(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"users"},
 )
 def list_users(
@@ -1920,6 +2780,13 @@ def list_users(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1929,13 +2796,23 @@ def list_users(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_users(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"users"},
 )
 def get_user(
@@ -1953,6 +2830,13 @@ def get_user(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -1962,13 +2846,23 @@ def get_user(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_user(user_id=user_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"users"},
 )
 def create_user(
@@ -1996,6 +2890,13 @@ def create_user(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2005,6 +2906,8 @@ def create_user(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_user(
@@ -2019,7 +2922,15 @@ def create_user(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"users"},
 )
 def update_user(
@@ -2048,6 +2959,13 @@ def update_user(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2057,6 +2975,8 @@ def update_user(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_user(
@@ -2072,7 +2992,15 @@ def update_user(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"users"},
 )
 def delete_user(
@@ -2090,6 +3018,13 @@ def delete_user(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2099,6 +3034,8 @@ def delete_user(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_user(user_id=user_id)
@@ -2108,7 +3045,15 @@ def delete_user(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"ad_hoc_commands"},
 )
 def run_ad_hoc_command(
@@ -2131,6 +3076,13 @@ def run_ad_hoc_command(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2140,6 +3092,8 @@ def run_ad_hoc_command(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.run_ad_hoc_command(
@@ -2153,7 +3107,15 @@ def run_ad_hoc_command(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"ad_hoc_commands"},
 )
 def get_ad_hoc_command(
@@ -2171,6 +3133,13 @@ def get_ad_hoc_command(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2180,13 +3149,23 @@ def get_ad_hoc_command(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_ad_hoc_command(command_id=command_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"ad_hoc_commands"},
 )
 def cancel_ad_hoc_command(
@@ -2204,6 +3183,13 @@ def cancel_ad_hoc_command(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2213,6 +3199,8 @@ def cancel_ad_hoc_command(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.cancel_ad_hoc_command(command_id=command_id)
@@ -2222,7 +3210,15 @@ def cancel_ad_hoc_command(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"workflow_templates"},
 )
 def list_workflow_templates(
@@ -2241,6 +3237,13 @@ def list_workflow_templates(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2250,13 +3253,23 @@ def list_workflow_templates(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_workflow_templates(limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"workflow_templates"},
 )
 def get_workflow_template(
@@ -2274,6 +3287,13 @@ def get_workflow_template(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2283,13 +3303,23 @@ def get_workflow_template(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_workflow_template(template_id=template_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"workflow_templates"},
 )
 def launch_workflow(
@@ -2311,6 +3341,13 @@ def launch_workflow(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2320,6 +3357,8 @@ def launch_workflow(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.launch_workflow(template_id=template_id, extra_vars=extra_vars)
@@ -2329,7 +3368,15 @@ def launch_workflow(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"workflow_jobs"},
 )
 def list_workflow_jobs(
@@ -2352,6 +3399,13 @@ def list_workflow_jobs(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2361,13 +3415,23 @@ def list_workflow_jobs(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_workflow_jobs(status=status, limit=limit, offset=offset)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"workflow_jobs"},
 )
 def get_workflow_job(
@@ -2385,6 +3449,13 @@ def get_workflow_job(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2394,13 +3465,23 @@ def get_workflow_job(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_workflow_job(job_id=job_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"workflow_jobs"},
 )
 def cancel_workflow_job(
@@ -2418,6 +3499,13 @@ def cancel_workflow_job(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2427,6 +3515,8 @@ def cancel_workflow_job(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.cancel_workflow_job(job_id=job_id)
@@ -2436,7 +3526,15 @@ def cancel_workflow_job(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"schedules"},
 )
 def list_schedules(
@@ -2459,6 +3557,13 @@ def list_schedules(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2468,6 +3573,8 @@ def list_schedules(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.list_schedules(
@@ -2476,7 +3583,15 @@ def list_schedules(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"schedules"},
 )
 def get_schedule(
@@ -2494,6 +3609,13 @@ def get_schedule(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2503,13 +3625,23 @@ def get_schedule(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_schedule(schedule_id=schedule_id)
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"schedules"},
 )
 def create_schedule(
@@ -2535,6 +3667,13 @@ def create_schedule(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2544,6 +3683,8 @@ def create_schedule(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.create_schedule(
@@ -2556,7 +3697,15 @@ def create_schedule(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"schedules"},
 )
 def update_schedule(
@@ -2580,6 +3729,13 @@ def update_schedule(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2589,6 +3745,8 @@ def update_schedule(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.update_schedule(
@@ -2601,7 +3759,15 @@ def update_schedule(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"schedules"},
 )
 def delete_schedule(
@@ -2619,6 +3785,13 @@ def delete_schedule(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2628,6 +3801,8 @@ def delete_schedule(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.delete_schedule(schedule_id=schedule_id)
@@ -2637,7 +3812,15 @@ def delete_schedule(
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"system"},
 )
 def get_ansible_version(
@@ -2654,6 +3837,13 @@ def get_ansible_version(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2663,13 +3853,23 @@ def get_ansible_version(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_ansible_version()
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"system"},
 )
 def get_dashboard_stats(
@@ -2686,6 +3886,13 @@ def get_dashboard_stats(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2695,13 +3902,23 @@ def get_dashboard_stats(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_dashboard_stats()
 
 
 @mcp.tool(
-    exclude_args=["base_url", "username", "password", "token", "verify"],
+    exclude_args=[
+        "base_url",
+        "username",
+        "password",
+        "token",
+        "verify",
+        "client_id",
+        "client_secret",
+    ],
     tags={"system"},
 )
 def get_metrics(
@@ -2718,6 +3935,13 @@ def get_metrics(
     token: Optional[str] = Field(
         default=environment_token, description="API token for authentication"
     ),
+    client_id: Optional[str] = Field(
+        default=environment_client_id, description="Client ID for OAuth authentication"
+    ),
+    client_secret: Optional[str] = Field(
+        default=environment_client_secret,
+        description="Client secret for OAuth authentication",
+    ),
     verify: bool = Field(
         default=environment_verify, description="Whether to verify SSL certificates"
     ),
@@ -2727,43 +3951,39 @@ def get_metrics(
         username=username,
         password=password,
         token=token,
+        client_id=client_id,
+        client_secret=client_secret,
         verify=verify,
     )
     return client.get_metrics()
 
 
-def ansible_tower_mcp(argv):
-    transport = "stdio"
-    host = "0.0.0.0"
-    port = 8000
-    try:
-        opts, args = getopt.getopt(
-            argv,
-            "ht:h:p:",
-            ["help", "transport=", "host=", "port="],
-        )
-    except getopt.GetoptError:
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            sys.exit()
-        elif opt in ("-t", "--transport"):
-            transport = arg
-        elif opt in ("-h", "--host"):
-            host = arg
-        elif opt in ("-p", "--port"):
-            try:
-                port = int(arg)
-                if not (0 <= port <= 65535):
-                    print(f"Error: Port {arg} is out of valid range (0-65535).")
-                    sys.exit(1)
-            except ValueError:
-                print(f"Error: Port {arg} is not a valid integer.")
-                sys.exit(1)
-    if transport == "stdio":
+def ansible_tower_mcp():
+    parser = argparse.ArgumentParser(description="Ansible Tower MCP")
+    parser.add_argument(
+        "-t",
+        "--transport",
+        default="stdio",
+        choices=["stdio", "http"],
+        help="Transport method (default: stdio)",
+    )
+    parser.add_argument(
+        "--host", default="0.0.0.0", help="Host address (default: 0.0.0.0)"
+    )
+    parser.add_argument(
+        "-p", "--port", type=int, default=8000, help="Port number (default: 8000)"
+    )
+
+    args = parser.parse_args()
+
+    if args.port < 0 or args.port > 65535:
+        print(f"Error: Port {args.port} is out of valid range (0-65535).")
+        sys.exit(1)
+
+    if args.transport == "stdio":
         mcp.run(transport="stdio")
-    elif transport == "http":
-        mcp.run(transport="http", host=host, port=port)
+    elif args.transport == "http":
+        mcp.run(transport="http", host=args.host, port=args.port)
     else:
         logger = logging.getLogger("AnsibleMCP")
         logger.error("Transport not supported")
@@ -2771,8 +3991,8 @@ def ansible_tower_mcp(argv):
 
 
 def main():
-    ansible_tower_mcp(sys.argv[1:])
+    ansible_tower_mcp()
 
 
 if __name__ == "__main__":
-    ansible_tower_mcp(sys.argv[1:])
+    ansible_tower_mcp()

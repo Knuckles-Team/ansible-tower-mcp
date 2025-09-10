@@ -4,8 +4,9 @@
 import json
 import requests
 from typing import Dict, List, Optional
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlencode
 import re
+import urllib3
 
 
 class Api:
@@ -15,21 +16,82 @@ class Api:
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None,
         verify: bool = False,
+        proxies: Optional[Dict[str, str]] = None,
     ):
         self.base_url = base_url
         self.username = username
         self.password = password
         self.token = token
-        self.session = requests.Session()
-        self.session.verify = verify
-        if not self.token and self.username and self.password:
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self._session = requests.Session()
+        self._session.verify = verify
+        self.proxies = proxies
+
+        if proxies:
+            self._session.proxies = proxies
+
+        if not verify:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        if token:
+            self.token = token
+        elif client_id and client_secret:
+            self._authenticate_oauth()
+        elif username and password:
             self.get_token()
+        else:
+            raise ValueError(
+                "Must provide either a token, or (username and password), or (client_id and client_secret) for authentication."
+            )
+
+        # Validate authentication
+        try:
+            self.request("GET", "/api/v2/ping/")
+        except Exception as e:
+            raise Exception(f"Authentication validation failed: {str(e)}")
+
+    def _authenticate_oauth(self):
+        """Authenticate using OAuth 2.0."""
+        auth_url = urljoin(self.base_url, "/o/token/")
+        grant_type = (
+            "password" if self.username and self.password else "client_credentials"
+        )
+        auth_data = {
+            "grant_type": grant_type,
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+        }
+        if self.username and self.password:
+            auth_data["username"] = self.username
+            auth_data["password"] = self.password
+
+        encoded_data_str = urlencode(auth_data)
+        auth_headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+        response = self._session.post(
+            url=auth_url,
+            data=encoded_data_str,
+            headers=auth_headers,
+        )
+
+        if response.status_code != 200:
+            raise Exception(
+                f"OAuth authentication failed: {response.status_code} - {response.text}"
+            )
+
+        token_info = response.json()
+        self.token = token_info.get("access_token")
+        if not self.token:
+            raise Exception("No access_token received from OAuth response")
 
     def get_token(self) -> str:
         """Authenticate and get token using web session approach."""
         # Step 1: Get the CSRF token
-        login_page = self.session.get(f"{self.base_url}/api/login/")
+        login_page = self._session.get(f"{self.base_url}/api/login/")
 
         # Get CSRF token from cookies
         csrf_token = None
@@ -55,7 +117,7 @@ class Api:
             "next": "/api/v2/",
         }
 
-        login_response = self.session.post(
+        login_response = self._session.post(
             f"{self.base_url}/api/login/", data=login_data, headers=headers
         )
 
@@ -71,8 +133,8 @@ class Api:
         }
 
         # Use the updated CSRF token
-        if "csrftoken" in self.session.cookies:
-            token_headers["X-CSRFToken"] = self.session.cookies["csrftoken"]
+        if "csrftoken" in self._session.cookies:
+            token_headers["X-CSRFToken"] = self._session.cookies["csrftoken"]
 
         token_data = {
             "description": "MCP Server Token",
@@ -80,7 +142,7 @@ class Api:
             "scope": "write",  # Using write scope for full access
         }
 
-        token_response = self.session.post(
+        token_response = self._session.post(
             f"{self.base_url}/api/v2/tokens/", json=token_data, headers=token_headers
         )
 
@@ -107,7 +169,7 @@ class Api:
         url = urljoin(self.base_url, endpoint)
         headers = self.get_headers()
 
-        response = self.session.request(
+        response = self._session.request(
             method=method, url=url, headers=headers, params=params, json=data
         )
 
@@ -418,7 +480,7 @@ class Api:
         if format == "json":
             return self.request("GET", url)
         else:
-            response = self.session.get(
+            response = self._session.get(
                 urljoin(self.base_url, url), headers=self.get_headers()
             )
             response.raise_for_status()
@@ -832,6 +894,6 @@ class Api:
             return self.request("GET", "/api/v2/metrics/")
         except Exception:
             url = urljoin(self.base_url, "/api/v2/metrics/")
-            response = self.session.get(url, headers=self.get_headers())
+            response = self._session.get(url, headers=self.get_headers())
             response.raise_for_status()
             return {"status": "success", "raw_data": response.text[:1000]}
