@@ -4,7 +4,7 @@
 import json
 import requests
 from typing import Dict, List, Optional
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urljoin
 import re
 import urllib3
 
@@ -56,26 +56,24 @@ class Api:
 
     def _authenticate_oauth(self):
         """Authenticate using OAuth 2.0."""
-        auth_url = urljoin(self.base_url, "/o/token/")
+        auth_url = urljoin(self.base_url, "/api/o/token/")
         grant_type = (
             "password" if self.username and self.password else "client_credentials"
         )
-        auth_data = {
+        payload = {
             "grant_type": grant_type,
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
+            "username": self.username,
+            "password": self.password,
+            "scope": "write",
         }
-        if self.username and self.password:
-            auth_data["username"] = self.username
-            auth_data["password"] = self.password
 
-        encoded_data_str = urlencode(auth_data)
-        auth_headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         response = self._session.post(
             url=auth_url,
-            data=encoded_data_str,
-            headers=auth_headers,
+            data=payload,
+            headers=headers,
+            auth=(self.client_id, self.client_secret),
         )
 
         if response.status_code != 200:
@@ -166,7 +164,11 @@ class Api:
         self, method: str, endpoint: str, params: Dict = None, data: Dict = None
     ) -> Dict:
         """Make a request to the Ansible API."""
-        url = urljoin(self.base_url, endpoint)
+        if endpoint.startswith("http"):
+            url = endpoint
+        else:
+            url = urljoin(self.base_url, endpoint)
+
         headers = self.get_headers()
 
         response = self._session.request(
@@ -179,52 +181,43 @@ class Api:
             )
             raise Exception(error_message)
 
-        if response.status_code == 204:  # No content
+        if response.status_code == 204:
             return {"status": "success"}
 
-        # Handle empty responses
         if not response.text.strip():
             return {"status": "success", "message": "Empty response"}
 
-        # Try to parse as JSON, but handle non-JSON responses gracefully
         try:
             return response.json()
         except json.JSONDecodeError:
-            # For non-JSON responses, return the text content
             return {
                 "status": "success",
                 "content_type": response.headers.get("Content-Type", "unknown"),
-                "text": response.text[
-                    :1000
-                ],  # Return first 1000 chars to avoid massive responses
+                "text": response.text[:1000],
             }
 
     def handle_pagination(self, endpoint: str, params: Dict = None) -> List[Dict]:
         """Handle paginated results from Ansible API."""
-        if params is None:
-            params = {}
-
         results = []
-        next_url = endpoint
+        next_url = urljoin(self.base_url, endpoint)
+        first_request = True
 
         while next_url:
-            response = self.request("GET", next_url, params=params)
+            if first_request:
+                response = self.request("GET", next_url, params=params)
+                first_request = False
+            else:
+                response = self.request("GET", next_url)
             if "results" in response:
                 results.extend(response["results"])
+                next_url = response.get("next")
             else:
-                # If the response is not paginated, return it directly
-                return [response]
-
-            next_url = response.get("next")
-            if next_url:
-                # For subsequent requests, don't use params as they're included in the next URL
-                params = None
-
+                break
         return results
 
     # Inventory Management
-    def list_inventories(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_inventories(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/inventories/", params)
 
     def get_inventory(self, inventory_id: int) -> Dict:
@@ -255,10 +248,8 @@ class Api:
         return {"status": "success", "message": f"Inventory {inventory_id} deleted"}
 
     # Host Management
-    def list_hosts(
-        self, inventory_id: int = None, limit: int = 100, offset: int = 0
-    ) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_hosts(self, inventory_id: int = None, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         if inventory_id:
             endpoint = f"/api/v2/inventories/{inventory_id}/hosts/"
         else:
@@ -309,10 +300,8 @@ class Api:
         return {"status": "success", "message": f"Host {host_id} deleted"}
 
     # Group Management
-    def list_groups(
-        self, inventory_id: int, limit: int = 100, offset: int = 0
-    ) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_groups(self, inventory_id: int, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination(
             f"/api/v2/inventories/{inventory_id}/groups/", params
         )
@@ -373,8 +362,8 @@ class Api:
         }
 
     # Job Template Management
-    def list_job_templates(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_job_templates(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/job_templates/", params)
 
     def get_job_template(self, template_id: int) -> Dict:
@@ -453,10 +442,8 @@ class Api:
         )
 
     # Job Management
-    def list_jobs(
-        self, status: str = None, limit: int = 100, offset: int = 0
-    ) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_jobs(self, status: str = None, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         if status:
             params["status"] = status
         return self.handle_pagination("/api/v2/jobs/", params)
@@ -467,10 +454,9 @@ class Api:
     def cancel_job(self, job_id: int) -> Dict:
         return self.request("POST", f"/api/v2/jobs/{job_id}/cancel/")
 
-    def get_job_events(
-        self, job_id: int, limit: int = 100, offset: int = 0
-    ) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    # Job Management
+    def get_job_events(self, job_id: int, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination(f"/api/v2/jobs/{job_id}/job_events/", params)
 
     def get_job_stdout(self, job_id: int, format: str = "txt") -> Dict:
@@ -487,8 +473,8 @@ class Api:
             return {"status": "success", "stdout": response.text}
 
     # Project Management
-    def list_projects(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_projects(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/projects/", params)
 
     def get_project(self, project_id: int) -> Dict:
@@ -554,15 +540,16 @@ class Api:
         return self.request("POST", f"/api/v2/projects/{project_id}/update/")
 
     # Credential Management
-    def list_credentials(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_credentials(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/credentials/", params)
 
     def get_credential(self, credential_id: int) -> Dict:
         return self.request("GET", f"/api/v2/credentials/{credential_id}/")
 
-    def list_credential_types(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    # Credential Management
+    def list_credential_types(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/credential_types/", params)
 
     def create_credential(
@@ -611,8 +598,8 @@ class Api:
         return {"status": "success", "message": f"Credential {credential_id} deleted"}
 
     # Organization Management
-    def list_organizations(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_organizations(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/organizations/", params)
 
     def get_organization(self, organization_id: int) -> Dict:
@@ -643,17 +630,14 @@ class Api:
 
     # Team Management
     def list_teams(
-        self, organization_id: int = None, limit: int = 100, offset: int = 0
+        self, organization_id: int = None, page_size: int = 100
     ) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+        params = {"page_size": page_size}
         if organization_id:
             endpoint = f"/api/v2/organizations/{organization_id}/teams/"
         else:
             endpoint = "/api/v2/teams/"
         return self.handle_pagination(endpoint, params)
-
-    def get_team(self, team_id: int) -> Dict:
-        return self.request("GET", f"/api/v2/teams/{team_id}/")
 
     def create_team(
         self, name: str, organization_id: int, description: str = ""
@@ -680,8 +664,8 @@ class Api:
         return {"status": "success", "message": f"Team {team_id} deleted"}
 
     # User Management
-    def list_users(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_users(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/users/", params)
 
     def get_user(self, user_id: int) -> Dict:
@@ -787,8 +771,8 @@ class Api:
                 )
 
     # Workflow Templates
-    def list_workflow_templates(self, limit: int = 100, offset: int = 0) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+    def list_workflow_templates(self, page_size: int = 100) -> List[Dict]:
+        params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/workflow_job_templates/", params)
 
     def get_workflow_template(self, template_id: int) -> Dict:
@@ -809,9 +793,9 @@ class Api:
 
     # Workflow Jobs
     def list_workflow_jobs(
-        self, status: str = None, limit: int = 100, offset: int = 0
+        self, status: str = None, page_size: int = 100
     ) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+        params = {"page_size": page_size}
         if status:
             params["status"] = status
         return self.handle_pagination("/api/v2/workflow_jobs/", params)
@@ -824,9 +808,9 @@ class Api:
 
     # Schedule Management
     def list_schedules(
-        self, unified_job_template_id: int = None, limit: int = 100, offset: int = 0
+        self, unified_job_template_id: int = None, page_size: int = 100
     ) -> List[Dict]:
-        params = {"limit": limit, "offset": offset}
+        params = {"page_size": page_size}
         if unified_job_template_id:
             params["unified_job_template"] = unified_job_template_id
         return self.handle_pagination("/api/v2/schedules/", params)
