@@ -58,8 +58,8 @@ environment_verify = to_boolean(os.environ.get("VERIFY", "False"))
     tags={"inventory"},
 )
 def list_inventories(
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -93,7 +93,7 @@ def list_inventories(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_inventories(limit=limit, offset=offset)
+    return client.list_inventories(page_size=page_size)
 
 
 @mcp.tool(
@@ -306,9 +306,6 @@ def delete_inventory(
     return client.delete_inventory(inventory_id=inventory_id)
 
 
-# MCP Tools - Host Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -325,8 +322,8 @@ def list_hosts(
     inventory_id: Optional[int] = Field(
         default=None, description="Optional ID of inventory to filter hosts"
     ),
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -360,7 +357,7 @@ def list_hosts(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_hosts(inventory_id=inventory_id, limit=limit, offset=offset)
+    return client.list_hosts(inventory_id=inventory_id, page_size=page_size)
 
 
 @mcp.tool(
@@ -580,9 +577,6 @@ def delete_host(
     return client.delete_host(host_id=host_id)
 
 
-# MCP Tools - Group Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -597,8 +591,8 @@ def delete_host(
 )
 def list_groups(
     inventory_id: int = Field(description="ID of the inventory"),
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -632,7 +626,7 @@ def list_groups(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_groups(inventory_id=inventory_id, limit=limit, offset=offset)
+    return client.list_groups(inventory_id=inventory_id, page_size=page_size)
 
 
 @mcp.tool(
@@ -954,9 +948,6 @@ def remove_host_from_group(
     return client.remove_host_from_group(group_id=group_id, host_id=host_id)
 
 
-# MCP Tools - Job Template Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -970,8 +961,8 @@ def remove_host_from_group(
     tags={"job_templates"},
 )
 def list_job_templates(
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -1005,7 +996,7 @@ def list_job_templates(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_job_templates(limit=limit, offset=offset)
+    return client.list_job_templates(page_size=page_size)
 
 
 @mcp.tool(
@@ -1294,9 +1285,6 @@ def launch_job(
     return client.launch_job(template_id=template_id, extra_vars=extra_vars)
 
 
-# MCP Tools - Job Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -1314,8 +1302,8 @@ def list_jobs(
         default=None,
         description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
     ),
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -1349,7 +1337,7 @@ def list_jobs(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_jobs(status=status, limit=limit, offset=offset)
+    return client.list_jobs(status=status, page_size=page_size)
 
 
 @mcp.tool(
@@ -1466,8 +1454,8 @@ def cancel_job(
 )
 def get_job_events(
     job_id: int = Field(description="ID of the job"),
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -1501,7 +1489,7 @@ def get_job_events(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.get_job_events(job_id=job_id, limit=limit, offset=offset)
+    return client.get_job_events(job_id=job_id, page_size=page_size)
 
 
 @mcp.tool(
@@ -1557,9 +1545,6 @@ def get_job_stdout(
     return client.get_job_stdout(job_id=job_id, format=format)
 
 
-# MCP Tools - Project Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -1573,8 +1558,8 @@ def get_job_stdout(
     tags={"projects"},
 )
 def list_projects(
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -1608,7 +1593,7 @@ def list_projects(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_projects(limit=limit, offset=offset)
+    return client.list_projects(page_size=page_size)
 
 
 @mcp.tool(
@@ -1897,9 +1882,6 @@ def sync_project(
     return client.sync_project(project_id=project_id)
 
 
-# MCP Tools - Credential Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -1913,8 +1895,8 @@ def sync_project(
     tags={"credentials"},
 )
 def list_credentials(
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -1948,7 +1930,7 @@ def list_credentials(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_credentials(limit=limit, offset=offset)
+    return client.list_credentials(page_size=page_size)
 
 
 @mcp.tool(
@@ -2014,8 +1996,8 @@ def get_credential(
     tags={"credentials"},
 )
 def list_credential_types(
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -2049,7 +2031,7 @@ def list_credential_types(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_credential_types(limit=limit, offset=offset)
+    return client.list_credential_types(page_size=page_size)
 
 
 @mcp.tool(
@@ -2223,9 +2205,6 @@ def delete_credential(
     return client.delete_credential(credential_id=credential_id)
 
 
-# MCP Tools - Organization Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -2239,8 +2218,8 @@ def delete_credential(
     tags={"organizations"},
 )
 def list_organizations(
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -2274,7 +2253,7 @@ def list_organizations(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_organizations(limit=limit, offset=offset)
+    return client.list_organizations(page_size=page_size)
 
 
 @mcp.tool(
@@ -2484,9 +2463,6 @@ def delete_organization(
     return client.delete_organization(organization_id=organization_id)
 
 
-# MCP Tools - Team Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -2503,8 +2479,8 @@ def list_teams(
     organization_id: Optional[int] = Field(
         default=None, description="Optional ID of organization to filter teams"
     ),
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -2538,9 +2514,7 @@ def list_teams(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_teams(
-        organization_id=organization_id, limit=limit, offset=offset
-    )
+    return client.list_teams(organization_id=organization_id, page_size=page_size)
 
 
 @mcp.tool(
@@ -2800,7 +2774,7 @@ def list_users(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_users(limit=limit, offset=offset)
+    return client.list_users(page_size=page_size)
 
 
 @mcp.tool(
@@ -3206,9 +3180,6 @@ def cancel_ad_hoc_command(
     return client.cancel_ad_hoc_command(command_id=command_id)
 
 
-# MCP Tools - Workflow Templates
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -3222,8 +3193,8 @@ def cancel_ad_hoc_command(
     tags={"workflow_templates"},
 )
 def list_workflow_templates(
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -3257,7 +3228,7 @@ def list_workflow_templates(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_workflow_templates(limit=limit, offset=offset)
+    return client.list_workflow_templates(page_size=page_size)
 
 
 @mcp.tool(
@@ -3364,9 +3335,6 @@ def launch_workflow(
     return client.launch_workflow(template_id=template_id, extra_vars=extra_vars)
 
 
-# MCP Tools - Workflow Jobs
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -3384,8 +3352,8 @@ def list_workflow_jobs(
         default=None,
         description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
     ),
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -3419,7 +3387,7 @@ def list_workflow_jobs(
         client_secret=client_secret,
         verify=verify,
     )
-    return client.list_workflow_jobs(status=status, limit=limit, offset=offset)
+    return client.list_workflow_jobs(status=status, page_size=page_size)
 
 
 @mcp.tool(
@@ -3522,9 +3490,6 @@ def cancel_workflow_job(
     return client.cancel_workflow_job(job_id=job_id)
 
 
-# MCP Tools - Schedule Management
-
-
 @mcp.tool(
     exclude_args=[
         "base_url",
@@ -3542,8 +3507,8 @@ def list_schedules(
         default=None,
         description="Optional ID of job or workflow template to filter schedules",
     ),
-    limit: int = Field(100, description="Maximum number of results to return"),
-    offset: int = Field(0, description="Number of results to skip"),
+    page_size: int = Field(100, description="Number of results per page"),
+    page: int = Field(1, description="Page number to retrieve"),
     base_url: str = Field(
         default=environment_base_url,
         description="The base URL of the Ansible Tower instance",
@@ -3578,7 +3543,7 @@ def list_schedules(
         verify=verify,
     )
     return client.list_schedules(
-        unified_job_template_id=unified_job_template_id, limit=limit, offset=offset
+        unified_job_template_id=unified_job_template_id, page_size=page_size
     )
 
 

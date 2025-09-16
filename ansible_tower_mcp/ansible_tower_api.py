@@ -639,6 +639,9 @@ class Api:
             endpoint = "/api/v2/teams/"
         return self.handle_pagination(endpoint, params)
 
+    def get_team(self, team_id: int) -> Dict:
+        return self.request("GET", f"/api/v2/teams/{team_id}/")
+
     def create_team(
         self, name: str, organization_id: int, description: str = ""
     ) -> Dict:
