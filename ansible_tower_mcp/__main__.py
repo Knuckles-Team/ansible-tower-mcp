@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding: utf-8
-from container_manager_mcp.container_manager_mcp import container_manager_mcp
+from ansible_tower_mcp.ansible_tower_mcp import ansible_tower_mcp
 
 if __name__ == "__main__":
-    container_manager_mcp()
+    ansible_tower_mcp()

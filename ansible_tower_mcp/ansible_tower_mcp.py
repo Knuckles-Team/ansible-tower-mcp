@@ -4501,9 +4501,5 @@ def ansible_tower_mcp():
         sys.exit(1)
 
 
-def main():
-    ansible_tower_mcp()
-
-
 if __name__ == "__main__":
     ansible_tower_mcp()
