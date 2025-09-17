@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ansible-tower-mcp"
-version = "1.1.0"
+version = "1.2.0"
 description = "Ansible Tower MCP Server for Agentic AI!"
 readme = "README.md"
 authors = [{ name = "Audel Rouhi", email = "knucklessg1@gmail.com" }]
@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ansible-tower-mcp = "ansible_tower_mcp.ansible_tower_mcp:main"
+ansible-tower-mcp = "ansible_tower_mcp.ansible_tower_mcp:ansible_tower_mcp"
 
 [tool.setuptools.packages.find]
 where = ["."]
