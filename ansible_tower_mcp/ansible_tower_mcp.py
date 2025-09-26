@@ -4471,18 +4471,26 @@ def get_metrics(
 
 def ansible_tower_mcp():
     parser = argparse.ArgumentParser(description="Ansible Tower MCP")
+
     parser.add_argument(
         "-t",
         "--transport",
         default="stdio",
-        choices=["stdio", "http"],
-        help="Transport method (default: stdio)",
+        choices=["stdio", "http", "sse"],
+        help="Transport method: 'stdio', 'http', or 'sse' [legacy] (default: stdio)",
     )
     parser.add_argument(
-        "--host", default="0.0.0.0", help="Host address (default: 0.0.0.0)"
+        "-s",
+        "--host",
+        default="0.0.0.0",
+        help="Host address for HTTP transport (default: 0.0.0.0)",
     )
     parser.add_argument(
-        "-p", "--port", type=int, default=8000, help="Port number (default: 8000)"
+        "-p",
+        "--port",
+        type=int,
+        default=8000,
+        help="Port number for HTTP transport (default: 8000)",
     )
 
     args = parser.parse_args()
@@ -4495,6 +4503,8 @@ def ansible_tower_mcp():
         mcp.run(transport="stdio")
     elif args.transport == "http":
         mcp.run(transport="http", host=args.host, port=args.port)
+    elif args.transport == "sse":
+        mcp.run(transport="sse", host=args.host, port=args.port)
     else:
         logger = logging.getLogger("AnsibleMCP")
         logger.error("Transport not supported")
