@@ -19,20 +19,21 @@ from .ansible_tower_api import Api
 mcp = FastMCP("ansible")
 
 
-def to_boolean(string):
-    # Normalize the string: strip whitespace and convert to lowercase
+def to_boolean(string: Union[str, bool] = None) -> bool:
+    if isinstance(string, bool):
+        return string
+    if not string:
+        return False
     normalized = str(string).strip().lower()
-
-    # Define valid true/false values
     true_values = {"t", "true", "y", "yes", "1"}
     false_values = {"f", "false", "n", "no", "0"}
-
     if normalized in true_values:
         return True
     elif normalized in false_values:
         return False
     else:
         raise ValueError(f"Cannot convert '{string}' to boolean")
+
 
 
 # MCP Tools - Inventory Management
