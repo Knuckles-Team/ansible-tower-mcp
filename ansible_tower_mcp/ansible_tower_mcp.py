@@ -11,7 +11,7 @@ import os
 import sys
 import argparse
 import logging
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
 from pydantic import Field
 from fastmcp import FastMCP
 from .ansible_tower_api import Api
@@ -33,7 +33,6 @@ def to_boolean(string: Union[str, bool] = None) -> bool:
         return False
     else:
         raise ValueError(f"Cannot convert '{string}' to boolean")
-
 
 
 # MCP Tools - Inventory Management
