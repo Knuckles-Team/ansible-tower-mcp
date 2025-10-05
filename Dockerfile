@@ -8,6 +8,6 @@ ENV PORT=${PORT}
 ENV TRANSPORT=${TRANSPORT}
 ENV PATH="/usr/local/bin:${PATH}"
 RUN pip install uv \
-    && uv pip install --system ansible-tower-mcp
+    && uv pip install --system ansible-tower-mcp>=1.2.7
 
 ENTRYPOINT exec ansible-tower-mcp --transport "${TRANSPORT}" --host "${HOST}" --port "${PORT}"
