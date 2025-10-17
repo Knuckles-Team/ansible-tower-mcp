@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/ansible-tower-mcp)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/ansible-tower-mcp)
 
-*Version: 1.2.8*
+*Version: 1.2.9*
 
 The **Ansible Tower MCP Server** provides a Model Context Protocol (MCP) interface to interact with the Ansible Tower (AWX) API, enabling automation and management of Ansible Tower resources such as inventories, hosts, groups, job templates, projects, credentials, organizations, teams, users, ad hoc commands, workflow templates, workflow jobs, schedules, and system information. This server is designed to integrate seamlessly with AI-driven workflows and can be deployed as a standalone service or used programmatically.
 
@@ -48,18 +48,47 @@ Contributions are welcome!
 <details>
   <summary><b>Usage:</b></summary>
 
+### MCP CLI
+
+| Short Flag | Long Flag                          | Description                                                                 |
+|------------|------------------------------------|-----------------------------------------------------------------------------|
+| -h         | --help                             | Display help information                                                    |
+| -t         | --transport                        | Transport method: 'stdio', 'http', or 'sse' [legacy] (default: stdio)       |
+| -s         | --host                             | Host address for HTTP transport (default: 0.0.0.0)                          |
+| -p         | --port                             | Port number for HTTP transport (default: 8000)                              |
+|            | --auth-type                        | Authentication type: 'none', 'static', 'jwt', 'oauth-proxy', 'oidc-proxy', 'remote-oauth' (default: none) |
+|            | --token-jwks-uri                   | JWKS URI for JWT verification                                              |
+|            | --token-issuer                     | Issuer for JWT verification                                                |
+|            | --token-audience                   | Audience for JWT verification                                              |
+|            | --oauth-upstream-auth-endpoint     | Upstream authorization endpoint for OAuth Proxy                             |
+|            | --oauth-upstream-token-endpoint    | Upstream token endpoint for OAuth Proxy                                    |
+|            | --oauth-upstream-client-id         | Upstream client ID for OAuth Proxy                                         |
+|            | --oauth-upstream-client-secret     | Upstream client secret for OAuth Proxy                                     |
+|            | --oauth-base-url                   | Base URL for OAuth Proxy                                                   |
+|            | --oidc-config-url                  | OIDC configuration URL                                                     |
+|            | --oidc-client-id                   | OIDC client ID                                                             |
+|            | --oidc-client-secret               | OIDC client secret                                                         |
+|            | --oidc-base-url                    | Base URL for OIDC Proxy                                                    |
+|            | --remote-auth-servers              | Comma-separated list of authorization servers for Remote OAuth             |
+|            | --remote-base-url                  | Base URL for Remote OAuth                                                  |
+|            | --allowed-client-redirect-uris     | Comma-separated list of allowed client redirect URIs                       |
+|            | --eunomia-type                     | Eunomia authorization type: 'none', 'embedded', 'remote' (default: none)   |
+|            | --eunomia-policy-file              | Policy file for embedded Eunomia (default: mcp_policies.json)              |
+|            | --eunomia-remote-url               | URL for remote Eunomia server                                              |
+
+
 ### Using as an MCP Server
 
-The Ansible Tower MCP Server can be run in two modes: `stdio` (for local testing) or `http` (for networked access). To start the server, use the following commands:
+The MCP Server can be run in two modes: `stdio` (for local testing) or `http` (for networked access). To start the server, use the following commands:
 
 #### Run in stdio mode (default):
 ```bash
-python -m ansible_tower_mcp
+ansible-tower-mcp
 ```
 
 #### Run in HTTP mode:
 ```bash
-python -m ansible_tower_mcp --transport http --host 0.0.0.0 --port 8012
+ansible-tower-mcp --transport http --host 0.0.0.0 --port 8012
 ```
 
 Set environment variables for authentication:
@@ -100,13 +129,113 @@ job = client.launch_job(template_id=123, extra_vars='{"key": "value"}')
 print(job)
 ```
 
-### Use with AI
+### Deploy MCP Server as a Service
 
-To integrate with AI-driven workflows, configure the MCP server in `mcp.json`. This allows AI agents to interact with Ansible Tower via the MCP protocol.
+The ServiceNow MCP server can be deployed using Docker, with configurable authentication, middleware, and Eunomia authorization.
 
-#### Configure `mcp.json`
+#### Using Docker Run
 
-Recommended: Use environment variables for sensitive information.
+```bash
+docker pull knucklessg1/ansible-tower-mcp:latest
+
+docker run -d \
+  --name ansible-tower-mcp \
+  -p 8004:8004 \
+  -e HOST=0.0.0.0 \
+  -e PORT=8004 \
+  -e TRANSPORT=http \
+  -e AUTH_TYPE=none \
+  -e EUNOMIA_TYPE=none \
+  -e ANSIBLE_BASE_URL=https://your-ansible-tower-instance.com \
+  -e ANSIBLE_USERNAME=your-username \
+  -e ANSIBLE_PASSWORD=your-password \
+  -e ANSIBLE_TOKEN=your-api-token \
+  knucklessg1/ansible-tower-mcp:latest
+```
+
+For advanced authentication (e.g., JWT, OAuth Proxy, OIDC Proxy, Remote OAuth) or Eunomia, add the relevant environment variables:
+
+```bash
+docker run -d \
+  --name ansible-tower-mcp \
+  -p 8004:8004 \
+  -e HOST=0.0.0.0 \
+  -e PORT=8004 \
+  -e TRANSPORT=http \
+  -e AUTH_TYPE=oidc-proxy \
+  -e OIDC_CONFIG_URL=https://provider.com/.well-known/openid-configuration \
+  -e OIDC_CLIENT_ID=your-client-id \
+  -e OIDC_CLIENT_SECRET=your-client-secret \
+  -e OIDC_BASE_URL=https://your-server.com \
+  -e ALLOWED_CLIENT_REDIRECT_URIS=http://localhost:*,https://*.example.com/* \
+  -e EUNOMIA_TYPE=embedded \
+  -e EUNOMIA_POLICY_FILE=/app/mcp_policies.json \
+  -e ANSIBLE_BASE_URL=https://your-ansible-tower-instance.com \
+  -e ANSIBLE_USERNAME=your-username \
+  -e ANSIBLE_PASSWORD=your-password \
+  -e ANSIBLE_TOKEN=your-api-token \
+  knucklessg1/ansible-tower-mcp:latest
+```
+
+#### Using Docker Compose
+
+Create a `docker-compose.yml` file:
+
+```yaml
+services:
+  ansible-tower-mcp:
+    image: knucklessg1/ansible-tower-mcp:latest
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8004
+      - TRANSPORT=http
+      - AUTH_TYPE=none
+      - EUNOMIA_TYPE=none
+      - ANSIBLE_BASE_URL=https://your-ansible-tower-instance.com
+      - ANSIBLE_USERNAME=your-username
+      - ANSIBLE_PASSWORD=your-password
+      - ANSIBLE_TOKEN=your-api-token
+      - ANSIBLE_VERIFY=False
+    ports:
+      - 8004:8004
+```
+
+For advanced setups with authentication and Eunomia:
+
+```yaml
+services:
+  ansible-tower-mcp:
+    image: knucklessg1/ansible-tower-mcp:latest
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8004
+      - TRANSPORT=http
+      - AUTH_TYPE=oidc-proxy
+      - OIDC_CONFIG_URL=https://provider.com/.well-known/openid-configuration
+      - OIDC_CLIENT_ID=your-client-id
+      - OIDC_CLIENT_SECRET=your-client-secret
+      - OIDC_BASE_URL=https://your-server.com
+      - ALLOWED_CLIENT_REDIRECT_URIS=http://localhost:*,https://*.example.com/*
+      - EUNOMIA_TYPE=embedded
+      - EUNOMIA_POLICY_FILE=/app/mcp_policies.json
+      - ANSIBLE_BASE_URL=https://your-ansible-tower-instance.com
+      - ANSIBLE_USERNAME=your-username
+      - ANSIBLE_PASSWORD=your-password
+      - ANSIBLE_TOKEN=your-api-token
+      - ANSIBLE_VERIFY=False
+    ports:
+      - 8004:8004
+    volumes:
+      - ./mcp_policies.json:/app/mcp_policies.json
+```
+
+Run the service:
+
+```bash
+docker-compose up -d
+```
+
+#### Configure `mcp.json` for AI Integration
 
 ```json
 {
@@ -174,37 +303,6 @@ For **testing only**, you can store credentials directly in `mcp.json` (not reco
     }
   }
 }
-```
-
-### Use with Docker
-
-Deploy the MCP server as a Docker container for scalable and isolated environments.
-
-#### Pull the Docker image
-```bash
-docker pull knucklessg1/ansible-tower-mcp:latest
-```
-
-#### Create a `compose.yml` file
-```yaml
-services:
-  ansible-tower-mcp:
-    image: knucklessg1/ansible-tower-mcp:latest
-    environment:
-      - ANSIBLE_BASE_URL=https://your-ansible-tower-instance.com
-      - ANSIBLE_USERNAME=your-username
-      - ANSIBLE_PASSWORD=your-password
-      - ANSIBLE_TOKEN=your-api-token
-      - VERIFY=False
-      - HOST=0.0.0.0
-      - PORT=8012
-    ports:
-      - 8012:8012
-```
-
-#### Run the Docker container
-```bash
-docker-compose up -d
 ```
 
 </details>
