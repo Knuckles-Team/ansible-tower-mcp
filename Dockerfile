@@ -48,7 +48,7 @@ ENV EUNOMIA_REMOTE_URL=${EUNOMIA_REMOTE_URL}
 ENV PATH="/usr/local/bin:${PATH}"
 
 RUN pip install uv \
-    && uv pip install --system --upgrade ansible-tower-mcp>=1.2.9
+    && uv pip install --system --upgrade ansible-tower-mcp>=1.2.10
 
 ENTRYPOINT exec ansible-tower-mcp \
     --transport "${TRANSPORT}" \
