@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/ansible-tower-mcp)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/ansible-tower-mcp)
 
-*Version: 1.2.11*
+*Version: 1.2.12*
 
 The **Ansible Tower MCP Server** provides a Model Context Protocol (MCP) interface to interact with the Ansible Tower (AWX) API, enabling automation and management of Ansible Tower resources such as inventories, hosts, groups, job templates, projects, credentials, organizations, teams, users, ad hoc commands, workflow templates, workflow jobs, schedules, and system information. This server is designed to integrate seamlessly with AI-driven workflows and can be deployed as a standalone service or used programmatically.
 
