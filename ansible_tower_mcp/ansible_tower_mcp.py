@@ -10,7 +10,6 @@ import os
 import argparse
 import sys
 import logging
-import threading
 from typing import Optional, List, Dict, Union
 
 import requests
@@ -32,9 +31,8 @@ from ansible_tower_mcp.middlewares import (
     JWTClaimsLoggingMiddleware,
 )
 
-# Thread-local storage for user token
-local = threading.local()
-logger = get_logger(name="AnsibleTower.TokenMiddleware")
+
+logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
 
 config = {
@@ -5053,7 +5051,7 @@ def ansible_tower_mcp():
         JWTClaimsLoggingMiddleware(),
     ]
     if config["enable_delegation"] or args.auth_type == "jwt":
-        middlewares.insert(0, UserTokenMiddleware())  # Must be first
+        middlewares.insert(0, UserTokenMiddleware(config=config))
 
     if args.eunomia_type in ["embedded", "remote"]:
         try:

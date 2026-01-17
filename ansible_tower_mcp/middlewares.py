@@ -1,9 +1,19 @@
+import threading
 from fastmcp.server.middleware import MiddlewareContext, Middleware
+from fastmcp.utilities.logging import get_logger
+
+# Thread-local storage for user token
+local = threading.local()
+logger = get_logger(name="TokenMiddleware")
+
 
 class UserTokenMiddleware(Middleware):
+    def __init__(self, config: dict):
+        self.config = config
+
     async def on_request(self, context: MiddlewareContext, call_next):
-        logger.debug(f"Delegation enabled: {config['enable_delegation']}")
-        if config["enable_delegation"]:
+        logger.debug(f"Delegation enabled: {self.config['enable_delegation']}")
+        if self.config["enable_delegation"]:
             headers = getattr(context.message, "headers", {})
             auth = headers.get("Authorization")
             if auth and auth.startswith("Bearer "):

@@ -4,10 +4,7 @@ import os
 import argparse
 import logging
 import uvicorn
-from typing import Optional, Any, List
-from pathlib import Path
-import json
-import yaml
+from typing import Optional, Any
 
 from fastmcp import Client
 from pydantic_ai import Agent
@@ -19,7 +16,13 @@ from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.models.huggingface import HuggingFaceModel
 from fasta2a import Skill
-from ansible_tower_mcp.utils import to_boolean, to_integer, get_mcp_config_path, get_skills_path, load_skills_from_directory
+from ansible_tower_mcp.utils import (
+    to_boolean,
+    to_integer,
+    get_mcp_config_path,
+    get_skills_path,
+    load_skills_from_directory,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -43,16 +46,14 @@ DEFAULT_OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "ollama")
 DEFAULT_MCP_URL = os.getenv("MCP_URL", None)
 DEFAULT_MCP_CONFIG = os.getenv("MCP_CONFIG", get_mcp_config_path())
 # Calculate default skills directory relative to this file
-DEFAULT_SKILLS_DIRECTORY = os.getenv(
-    "SKILLS_DIRECTORY", 
-    get_skills_path()
-)
+DEFAULT_SKILLS_DIRECTORY = os.getenv("SKILLS_DIRECTORY", get_skills_path())
 
 AGENT_NAME = "Ansible Tower Agent"
 AGENT_DESCRIPTION = (
     "An intelligent agent for managing Ansible Tower resources including "
     "inventories, hosts, groups, jobs, and templates."
 )
+
 
 def create_model(
     provider: str = DEFAULT_PROVIDER,
@@ -202,6 +203,7 @@ def create_a2a_server(
         log_level="debug" if debug else "info",
     )
 
+
 def agent_server():
     parser = argparse.ArgumentParser(description=f"Run the {AGENT_NAME} A2A Server")
     parser.add_argument(
@@ -269,6 +271,7 @@ def agent_server():
         host=args.host,
         port=args.port,
     )
+
 
 if __name__ == "__main__":
     agent_server()
