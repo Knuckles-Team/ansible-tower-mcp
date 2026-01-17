@@ -1,0 +1,50 @@
+---
+services:
+  ansible-tower-mcp:
+    image: docker.io/knucklessg1/ansible-tower-mcp:latest
+    # build: . # Debug
+    container_name: ansible-tower-mcp
+    hostname: ansible-tower-mcp
+    command: ["ansible-tower-mcp"]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+    environment:
+      - "HOST=0.0.0.0"
+      - "PORT=8012"
+      - "TRANSPORT=streamable-http"
+      - "ANSIBLE_BASE_URL=${ANSIBLE_BASE_URL}"
+      - "ANSIBLE_USERNAME=${ANSIBLE_USERNAME}"
+      - "ANSIBLE_PASSWORD=${ANSIBLE_PASSWORD}"
+      - "ANSIBLE_VERIFY=${ANSIBLE_VERIFY:-True}"
+    ports:
+      - "8012:8012"
+
+  ansible-tower-a2a:
+    image: docker.io/knucklessg1/ansible-tower-mcp:latest
+    # build: . # Debug
+    container_name: ansible-tower-a2a
+    hostname: ansible-tower-a2a
+    command: ["ansible-tower-a2a"]
+    depends_on:
+      - ansible-tower-mcp
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+    environment:
+      - "HOST=0.0.0.0"
+      - "PORT=9012"
+      - "MCP_URL=http://ansible-tower-mcp:8012/mcp"
+      - "PROVIDER=openai"
+      - "OPENAI_BASE_URL=http://localhost:1234/v1"
+      - "OPENAI_API_KEY=llama"
+      - "MODEL_ID=qwen/qwen3-8b"
+      - "DEBUG=False"
+    ports:
+      - "9012:9012"
