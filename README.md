@@ -1,4 +1,4 @@
-# Ansible Tower API - A2A & MCP Server
+# Ansible Tower API - A2A | AG-UI | MCP
 
 ![PyPI - Version](https://img.shields.io/pypi/v/ansible-tower-mcp)
 ![MCP Server](https://badge.mcpx.dev?type=server 'MCP Server')
@@ -231,6 +231,26 @@ sequenceDiagram
 |            | --eunomia-policy-file              | Policy file for embedded Eunomia (default: mcp_policies.json)              |
 |            | --eunomia-remote-url               | URL for remote Eunomia server                                              |
 
+
+### A2A CLI
+#### Endpoints
+- **Web UI**: `http://localhost:8000/` (if enabled)
+- **A2A**: `http://localhost:8000/a2a` (Discovery: `/a2a/.well-known/agent.json`)
+- **AG-UI**: `http://localhost:8000/ag-ui` (POST)
+
+| Long Flag        | Description                                      | Default                     |
+|------------------|--------------------------------------------------|-----------------------------|
+| --host           | Host to bind the server to                       | 0.0.0.0                     |
+| --port           | Port to bind the server to                       | 9000                        |
+| --reload         | Enable auto-reload                               | False                       |
+| --provider       | LLM Provider (openai, anthropic, google, etc)    | openai                      |
+| --model-id       | LLM Model ID                                     | qwen/qwen3-8b               |
+| --base-url       | LLM Base URL (for OpenAI compatible providers)   | http://127.0.0.1:1234/v1    |
+| --api-key        | LLM API Key                                      | ollama                      |
+| --mcp-url        | MCP Server URL to connect to                     | None                        |
+| --mcp-config     | MCP Server Config                                | .../mcp_config.json         |
+| --skills-directory| Directory containing agent skills               | ...                         |
+| --web            | Enable Pydantic AI Web UI                        | False (Env: ENABLE_WEB_UI)  |
 
 ### Using as an MCP Server
 

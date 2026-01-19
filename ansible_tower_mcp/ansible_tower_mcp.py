@@ -6,6 +6,7 @@ Ansible MCP Server
 
 This server provides tools for interacting with the Ansible API through the Model Context Protocol.
 """
+
 import os
 import argparse
 import sys
@@ -30,7 +31,6 @@ from ansible_tower_mcp.middlewares import (
     UserTokenMiddleware,
     JWTClaimsLoggingMiddleware,
 )
-
 
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)

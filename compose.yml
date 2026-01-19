@@ -6,6 +6,8 @@ services:
     container_name: ansible-tower-mcp
     hostname: ansible-tower-mcp
     command: ["ansible-tower-mcp"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: json-file
       options:
@@ -23,12 +25,14 @@ services:
     ports:
       - "8012:8012"
 
-  ansible-tower-a2a:
+  ansible-tower-agent:
     image: docker.io/knucklessg1/ansible-tower-mcp:latest
     # build: . # Debug
-    container_name: ansible-tower-a2a
-    hostname: ansible-tower-a2a
-    command: ["ansible-tower-a2a"]
+    container_name: ansible-tower-agent
+    hostname: ansible-tower-agent
+    command: ["ansible-tower-agent"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - ansible-tower-mcp
     logging:
@@ -46,5 +50,6 @@ services:
       - "OPENAI_API_KEY=llama"
       - "MODEL_ID=qwen/qwen3-8b"
       - "DEBUG=False"
+      - "ENABLE_WEB_UI=True"
     ports:
       - "9012:9012"

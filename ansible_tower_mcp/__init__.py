@@ -14,7 +14,7 @@ CORE_MODULES = [
 
 # Optional modules – only import if their dependencies are installed
 OPTIONAL_MODULES = {
-    "ansible_tower_mcp.ansible_tower_a2a": "a2a",
+    "ansible_tower_mcp.ansible_tower_agent": "a2a",
     "ansible_tower_mcp.ansible_tower_mcp": "mcp",
 }
 
@@ -59,7 +59,7 @@ for module_name, extra_name in OPTIONAL_MODULES.items():
 _MCP_AVAILABLE = OPTIONAL_MODULES.get("ansible_tower_mcp.ansible_tower_mcp") in [
     m.__name__ for m in globals().values() if hasattr(m, "__name__")
 ]
-_A2A_AVAILABLE = "ansible_tower_mcp.ansible_tower_a2a" in globals()
+_A2A_AVAILABLE = "ansible_tower_mcp.ansible_tower_agent" in globals()
 
 __all__.extend(["_MCP_AVAILABLE", "_A2A_AVAILABLE"])
 
