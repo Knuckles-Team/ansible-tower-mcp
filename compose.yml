@@ -5,7 +5,7 @@ services:
     # build: . # Debug
     container_name: ansible-tower-mcp
     hostname: ansible-tower-mcp
-    command: ["ansible-tower-mcp"]
+    command: [ "ansible-tower-mcp" ]
     extra_hosts:
       - "host.docker.internal:host-gateway"
     logging:
@@ -24,13 +24,19 @@ services:
       - "ANSIBLE_VERIFY=${ANSIBLE_VERIFY:-True}"
     ports:
       - "8012:8012"
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8012/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   ansible-tower-agent:
     image: docker.io/knucklessg1/ansible-tower-mcp:latest
     # build: . # Debug
     container_name: ansible-tower-agent
     hostname: ansible-tower-agent
-    command: ["ansible-tower-agent"]
+    command: [ "ansible-tower-agent" ]
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -53,3 +59,9 @@ services:
       - "ENABLE_WEB_UI=True"
     ports:
       - "9012:9012"
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9012/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
