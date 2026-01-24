@@ -48,6 +48,6 @@ ENV EUNOMIA_REMOTE_URL=${EUNOMIA_REMOTE_URL}
 ENV UV_HTTP_TIMEOUT=3600
 
 RUN pip install uv \
-    && uv pip install --system ansible-tower-mcp[all]>=1.2.15
+    && uv pip install --system ansible-tower-mcp[all]>=1.2.16
 
 CMD ["ansible-tower-mcp"]
