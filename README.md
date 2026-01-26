@@ -82,6 +82,7 @@ The `ansible-tower-mcp` package exposes the following MCP tools, organized by ca
 ### Job Management
 - `list_jobs(status, limit, offset)`: List jobs, optionally filtered by status.
 - `get_job(job_id)`: Get details of a specific job.
+- `relaunch_job(job_id)`: Relaunch a job using the same template and variables. **Note**: Credentials and password-protected variables are not transferred and must be manually provided if required.
 - `cancel_job(job_id)`: Cancel a running job.
 - `get_job_events(job_id, limit, offset)`: Get events for a job.
 - `get_job_stdout(job_id, format)`: Get the output of a job in specified format (txt, html, json, ansi).

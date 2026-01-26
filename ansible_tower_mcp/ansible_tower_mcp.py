@@ -1610,6 +1610,81 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"jobs"},
     )
+    def relaunch_job(
+        job_id: int = Field(description="ID of the job to relaunch"),
+        base_url: str = Field(
+            default=os.environ.get("ANSIBLE_BASE_URL", None),
+            description="The base URL of the Ansible Tower instance",
+        ),
+        username: Optional[str] = Field(
+            default=os.environ.get("ANSIBLE_USERNAME", None),
+            description="Username for authentication",
+        ),
+        password: Optional[str] = Field(
+            default=os.environ.get("ANSIBLE_PASSWORD", None),
+            description="Password for authentication",
+        ),
+        token: Optional[str] = Field(
+            default=os.environ.get("ANSIBLE_TOKEN", None),
+            description="API token for authentication",
+        ),
+        client_id: Optional[str] = Field(
+            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
+            description="Client ID for OAuth authentication",
+        ),
+        client_secret: Optional[str] = Field(
+            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
+            description="Client secret for OAuth authentication",
+        ),
+        verify: bool = Field(
+            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
+            description="Whether to verify SSL certificates",
+        ),
+    ) -> Dict:
+        """
+        Relaunches a job by getting its details and launching the same job template with the same variables.
+        """
+        client = Api(
+            base_url=base_url,
+            username=username,
+            password=password,
+            token=token,
+            client_id=client_id,
+            client_secret=client_secret,
+            verify=verify,
+        )
+        
+        # Get the original job details
+        job = client.get_job(job_id=job_id)
+        
+        template_id = job.get("job_template")
+        if not template_id:
+            raise ValueError("Job does not have an associated job template")
+        
+        extra_vars = job.get("extra_vars")
+        
+        # Launch new job with same template and variables
+        result = client.launch_job(template_id=template_id, extra_vars=extra_vars)
+        
+        # Add context about the relaunch
+        if "id" in result:
+            result["relaunched_from"] = job_id
+            result["original_job_name"] = job.get("name", "")
+            
+        return result
+
+    @mcp.tool(
+        exclude_args=[
+            "base_url",
+            "username",
+            "password",
+            "token",
+            "verify",
+            "client_id",
+            "client_secret",
+        ],
+        tags={"jobs"},
+    )
     def cancel_job(
         job_id: int = Field(description="ID of the job"),
         base_url: str = Field(
