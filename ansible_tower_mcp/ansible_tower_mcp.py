@@ -18,7 +18,7 @@ from pydantic import Field
 from eunomia_mcp.middleware import EunomiaMcpMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from fastmcp import FastMCP
+from fastmcp import FastMCP, Context
 from fastmcp.server.auth.oidc_proxy import OIDCProxy
 from fastmcp.server.auth import OAuthProxy, RemoteAuthProvider
 from fastmcp.server.auth.providers.jwt import JWTVerifier, StaticTokenVerifier
@@ -76,7 +76,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"inventory"},
     )
-    def list_inventories(
+    async def list_inventories(
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -133,7 +133,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"inventory"},
     )
-    def get_inventory(
+    async def get_inventory(
         inventory_id: int = Field(description="ID of the inventory"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -190,7 +190,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"inventory"},
     )
-    def create_inventory(
+    async def create_inventory(
         name: str = Field(description="Name of the inventory"),
         organization_id: int = Field(description="ID of the organization"),
         description: str = Field(
@@ -253,7 +253,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"inventory"},
     )
-    def update_inventory(
+    async def update_inventory(
         inventory_id: int = Field(description="ID of the inventory"),
         name: Optional[str] = Field(
             default=None, description="New name for the inventory"
@@ -289,10 +289,20 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Updates an existing inventory in Ansible Tower. Returns a dictionary with the updated inventory's details.
         """
+        if ctx:
+            message = f"Are you sure you want to UPDATE inventory {inventory_id}?"
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -318,7 +328,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"inventory"},
     )
-    def delete_inventory(
+    async def delete_inventory(
         inventory_id: int = Field(description="ID of the inventory"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -348,10 +358,20 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Deletes a specific inventory by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if ctx:
+            message = f"Are you sure you want to DELETE inventory {inventory_id}?"
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -375,7 +395,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"hosts"},
     )
-    def list_hosts(
+    async def list_hosts(
         inventory_id: Optional[int] = Field(
             default=None, description="Optional ID of inventory to filter hosts"
         ),
@@ -435,7 +455,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"hosts"},
     )
-    def get_host(
+    async def get_host(
         host_id: int = Field(description="ID of the host"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -492,7 +512,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"hosts"},
     )
-    def create_host(
+    async def create_host(
         name: str = Field(description="Name or IP address of the host"),
         inventory_id: int = Field(description="ID of the inventory to add the host to"),
         variables: str = Field(
@@ -559,7 +579,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"hosts"},
     )
-    def update_host(
+    async def update_host(
         host_id: int = Field(description="ID of the host"),
         name: Optional[str] = Field(default=None, description="New name for the host"),
         variables: Optional[str] = Field(
@@ -596,10 +616,20 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Updates an existing host in Ansible Tower. Returns a dictionary with the updated host's details.
         """
+        if ctx:
+            message = f"Are you sure you want to UPDATE host {host_id}?"
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -625,7 +655,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"hosts"},
     )
-    def delete_host(
+    async def delete_host(
         host_id: int = Field(description="ID of the host"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -655,10 +685,20 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Deletes a specific host by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if ctx:
+            message = f"Are you sure you want to DELETE host {host_id}?"
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -682,7 +722,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"groups"},
     )
-    def list_groups(
+    async def list_groups(
         inventory_id: int = Field(description="ID of the inventory"),
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
@@ -740,7 +780,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"groups"},
     )
-    def get_group(
+    async def get_group(
         group_id: int = Field(description="ID of the group"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -797,7 +837,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"groups"},
     )
-    def create_group(
+    async def create_group(
         name: str = Field(description="Name of the group"),
         inventory_id: int = Field(
             description="ID of the inventory to add the group to"
@@ -866,7 +906,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"groups"},
     )
-    def update_group(
+    async def update_group(
         group_id: int = Field(description="ID of the group"),
         name: Optional[str] = Field(default=None, description="New name for the group"),
         variables: Optional[str] = Field(
@@ -932,7 +972,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"groups"},
     )
-    def delete_group(
+    async def delete_group(
         group_id: int = Field(description="ID of the group"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -989,7 +1029,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"groups"},
     )
-    def add_host_to_group(
+    async def add_host_to_group(
         group_id: int = Field(description="ID of the group"),
         host_id: int = Field(description="ID of the host"),
         base_url: str = Field(
@@ -1047,7 +1087,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"groups"},
     )
-    def remove_host_from_group(
+    async def remove_host_from_group(
         group_id: int = Field(description="ID of the group"),
         host_id: int = Field(description="ID of the host"),
         base_url: str = Field(
@@ -1105,7 +1145,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"job_templates"},
     )
-    def list_job_templates(
+    async def list_job_templates(
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -1162,7 +1202,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"job_templates"},
     )
-    def get_job_template(
+    async def get_job_template(
         template_id: int = Field(description="ID of the job template"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -1219,7 +1259,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"job_templates"},
     )
-    def create_job_template(
+    async def create_job_template(
         name: str = Field(description="Name of the job template"),
         inventory_id: int = Field(description="ID of the inventory"),
         project_id: int = Field(description="ID of the project"),
@@ -1298,7 +1338,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"job_templates"},
     )
-    def update_job_template(
+    async def update_job_template(
         template_id: int = Field(description="ID of the job template"),
         name: Optional[str] = Field(
             default=None, description="New name for the job template"
@@ -1339,10 +1379,20 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Updates an existing job template in Ansible Tower. Returns a dictionary with the updated template's details.
         """
+        if ctx:
+            message = f"Are you sure you want to UPDATE job template {template_id}?"
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -1373,7 +1423,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"job_templates"},
     )
-    def delete_job_template(
+    async def delete_job_template(
         template_id: int = Field(description="ID of the job template"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -1403,10 +1453,20 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Deletes a specific job template by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if ctx:
+            message = f"Are you sure you want to DELETE job template {template_id}?"
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -1430,7 +1490,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"job_templates"},
     )
-    def launch_job(
+    async def launch_job(
         template_id: int = Field(description="ID of the job template"),
         extra_vars: Optional[str] = Field(
             default=None,
@@ -1464,10 +1524,22 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Launches a job from a template in Ansible Tower, optionally with extra variables. Returns a dictionary with the launched job's details, including its ID.
         """
+        if ctx:
+            message = (
+                f"Are you sure you want to LAUNCH job from template {template_id}?"
+            )
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -1491,7 +1563,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"jobs"},
     )
-    def list_jobs(
+    async def list_jobs(
         status: Optional[str] = Field(
             default=None,
             description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
@@ -1553,7 +1625,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"jobs"},
     )
-    def get_job(
+    async def get_job(
         job_id: int = Field(description="ID of the job"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -1715,10 +1787,20 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = None,
     ) -> Dict:
         """
         Cancels a running job in Ansible Tower. Returns a dictionary confirming the cancellation status.
         """
+        if ctx:
+            message = f"Are you sure you want to CANCEL job {job_id}?"
+            result = await ctx.elicit(message, response_type=bool)
+            if result.action != "accept" or not result.data:
+                return {
+                    "status": "cancelled",
+                    "message": "Operation cancelled by user.",
+                }
+
         client = Api(
             base_url=base_url,
             username=username,
@@ -1742,7 +1824,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"jobs"},
     )
-    def get_job_events(
+    async def get_job_events(
         job_id: int = Field(description="ID of the job"),
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
@@ -1800,7 +1882,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"jobs"},
     )
-    def get_job_stdout(
+    async def get_job_stdout(
         job_id: int = Field(description="ID of the job"),
         format: str = Field(
             default="txt", description="Format of the output (txt, html, json, ansi)"
@@ -1860,7 +1942,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"projects"},
     )
-    def list_projects(
+    async def list_projects(
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -1917,7 +1999,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"projects"},
     )
-    def get_project(
+    async def get_project(
         project_id: int = Field(description="ID of the project"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -1974,7 +2056,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"projects"},
     )
-    def create_project(
+    async def create_project(
         name: str = Field(description="Name of the project"),
         organization_id: int = Field(description="ID of the organization"),
         scm_type: str = Field(description="SCM type (git, hg, svn, manual)"),
@@ -2051,7 +2133,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"projects"},
     )
-    def update_project(
+    async def update_project(
         project_id: int = Field(description="ID of the project"),
         name: Optional[str] = Field(
             default=None, description="New name for the project"
@@ -2128,7 +2210,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"projects"},
     )
-    def delete_project(
+    async def delete_project(
         project_id: int = Field(description="ID of the project"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2185,7 +2267,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"projects"},
     )
-    def sync_project(
+    async def sync_project(
         project_id: int = Field(description="ID of the project"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2242,7 +2324,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"credentials"},
     )
-    def list_credentials(
+    async def list_credentials(
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2299,7 +2381,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"credentials"},
     )
-    def get_credential(
+    async def get_credential(
         credential_id: int = Field(description="ID of the credential"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2356,7 +2438,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"credentials"},
     )
-    def list_credential_types(
+    async def list_credential_types(
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2413,7 +2495,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"credentials"},
     )
-    def create_credential(
+    async def create_credential(
         name: str = Field(description="Name of the credential"),
         credential_type_id: int = Field(description="ID of the credential type"),
         organization_id: int = Field(description="ID of the organization"),
@@ -2484,7 +2566,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"credentials"},
     )
-    def update_credential(
+    async def update_credential(
         credential_id: int = Field(description="ID of the credential"),
         name: Optional[str] = Field(
             default=None, description="New name for the credential"
@@ -2553,7 +2635,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"credentials"},
     )
-    def delete_credential(
+    async def delete_credential(
         credential_id: int = Field(description="ID of the credential"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2610,7 +2692,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"organizations"},
     )
-    def list_organizations(
+    async def list_organizations(
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2667,7 +2749,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"organizations"},
     )
-    def get_organization(
+    async def get_organization(
         organization_id: int = Field(description="ID of the organization"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2724,7 +2806,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"organizations"},
     )
-    def create_organization(
+    async def create_organization(
         name: str = Field(description="Name of the organization"),
         description: str = Field(
             default="", description="Description of the organization"
@@ -2784,7 +2866,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"organizations"},
     )
-    def update_organization(
+    async def update_organization(
         organization_id: int = Field(description="ID of the organization"),
         name: Optional[str] = Field(
             default=None, description="New name for the organization"
@@ -2847,7 +2929,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"organizations"},
     )
-    def delete_organization(
+    async def delete_organization(
         organization_id: int = Field(description="ID of the organization"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -2904,7 +2986,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"teams"},
     )
-    def list_teams(
+    async def list_teams(
         organization_id: Optional[int] = Field(
             default=None, description="Optional ID of organization to filter teams"
         ),
@@ -2965,7 +3047,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"teams"},
     )
-    def get_team(
+    async def get_team(
         team_id: int = Field(description="ID of the team"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3022,7 +3104,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"teams"},
     )
-    def create_team(
+    async def create_team(
         name: str = Field(description="Name of the team"),
         organization_id: int = Field(description="ID of the organization"),
         description: str = Field(default="", description="Description of the team"),
@@ -3083,7 +3165,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"teams"},
     )
-    def update_team(
+    async def update_team(
         team_id: int = Field(description="ID of the team"),
         name: Optional[str] = Field(default=None, description="New name for the team"),
         description: Optional[str] = Field(default=None, description="New description"),
@@ -3142,7 +3224,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"teams"},
     )
-    def delete_team(
+    async def delete_team(
         team_id: int = Field(description="ID of the team"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3199,7 +3281,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"users"},
     )
-    def list_users(
+    async def list_users(
         page_size: int = Field(10, description="Page number to retrieve"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3256,7 +3338,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"users"},
     )
-    def get_user(
+    async def get_user(
         user_id: int = Field(description="ID of the user"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3313,7 +3395,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"users"},
     )
-    def create_user(
+    async def create_user(
         new_username: str = Field(description="Username for the new user"),
         new_password: str = Field(description="Password for the new user"),
         first_name: str = Field(default="", description="First name of the user"),
@@ -3388,7 +3470,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"users"},
     )
-    def update_user(
+    async def update_user(
         user_id: int = Field(description="ID of the user"),
         new_username: Optional[str] = Field(default=None, description="New username"),
         new_password: Optional[str] = Field(default=None, description="New password"),
@@ -3465,7 +3547,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"users"},
     )
-    def delete_user(
+    async def delete_user(
         user_id: int = Field(description="ID of the user"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3523,7 +3605,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"ad_hoc_commands"},
     )
-    def run_ad_hoc_command(
+    async def run_ad_hoc_command(
         inventory_id: int = Field(description="ID of the inventory"),
         credential_id: int = Field(description="ID of the credential"),
         module_name: str = Field(
@@ -3594,7 +3676,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"ad_hoc_commands"},
     )
-    def get_ad_hoc_command(
+    async def get_ad_hoc_command(
         command_id: int = Field(description="ID of the ad hoc command"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3651,7 +3733,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"ad_hoc_commands"},
     )
-    def cancel_ad_hoc_command(
+    async def cancel_ad_hoc_command(
         command_id: int = Field(description="ID of the ad hoc command"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3708,7 +3790,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"workflow_templates"},
     )
-    def list_workflow_templates(
+    async def list_workflow_templates(
         page_size: int = Field(10, description="Number of results per page"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3765,7 +3847,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"workflow_templates"},
     )
-    def get_workflow_template(
+    async def get_workflow_template(
         template_id: int = Field(description="ID of the workflow template"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -3822,7 +3904,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"workflow_templates"},
     )
-    def launch_workflow(
+    async def launch_workflow(
         template_id: int = Field(description="ID of the workflow template"),
         extra_vars: Optional[str] = Field(
             default=None,
@@ -3883,7 +3965,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"workflow_jobs"},
     )
-    def list_workflow_jobs(
+    async def list_workflow_jobs(
         status: Optional[str] = Field(
             default=None,
             description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
@@ -3944,7 +4026,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"workflow_jobs"},
     )
-    def get_workflow_job(
+    async def get_workflow_job(
         job_id: int = Field(description="ID of the workflow job"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -4001,7 +4083,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"workflow_jobs"},
     )
-    def cancel_workflow_job(
+    async def cancel_workflow_job(
         job_id: int = Field(description="ID of the workflow job"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -4058,7 +4140,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"schedules"},
     )
-    def list_schedules(
+    async def list_schedules(
         unified_job_template_id: Optional[int] = Field(
             default=None,
             description="Optional ID of job or workflow template to filter schedules",
@@ -4121,7 +4203,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"schedules"},
     )
-    def get_schedule(
+    async def get_schedule(
         schedule_id: int = Field(description="ID of the schedule"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -4178,7 +4260,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"schedules"},
     )
-    def create_schedule(
+    async def create_schedule(
         name: str = Field(description="Name of the schedule"),
         unified_job_template_id: int = Field(
             description="ID of the job or workflow template"
@@ -4251,7 +4333,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"schedules"},
     )
-    def update_schedule(
+    async def update_schedule(
         schedule_id: int = Field(description="ID of the schedule"),
         name: Optional[str] = Field(
             default=None, description="New name for the schedule"
@@ -4324,7 +4406,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"schedules"},
     )
-    def delete_schedule(
+    async def delete_schedule(
         schedule_id: int = Field(description="ID of the schedule"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
@@ -4381,7 +4463,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"system"},
     )
-    def get_ansible_version(
+    async def get_ansible_version(
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
@@ -4437,7 +4519,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"system"},
     )
-    def get_dashboard_stats(
+    async def get_dashboard_stats(
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
@@ -4493,7 +4575,7 @@ def register_tools(mcp: FastMCP):
         ],
         tags={"system"},
     )
-    def get_metrics(
+    async def get_metrics(
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
