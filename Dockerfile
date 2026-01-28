@@ -50,7 +50,9 @@ ENV HOST=${HOST} \
     UV_SYSTEM_PYTHON=1 \
     UV_COMPILE_BYTECODE=1
 
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && uv pip install --system --upgrade --verbose --no-cache --break-system-packages ansible-tower-mcp[all]>=1.2.19
+RUN apt-get update \
+   && apt-get install -y curl nano \
+   && curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && uv pip install --system --upgrade --verbose --no-cache --break-system-packages ansible-tower-mcp[all]>=1.2.20
 
 CMD ["ansible-tower-mcp"]
