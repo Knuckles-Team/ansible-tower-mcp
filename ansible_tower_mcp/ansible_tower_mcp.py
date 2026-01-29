@@ -34,6 +34,8 @@ from ansible_tower_mcp.middlewares import (
     JWTClaimsLoggingMiddleware,
 )
 
+__version__ = "1.2.22"
+
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
 
@@ -4669,6 +4671,7 @@ def register_prompts(mcp: FastMCP):
 
 
 def ansible_tower_mcp():
+    print(f"ansible_tower_mcp v{__version__}")
     parser = argparse.ArgumentParser(description="Ansible Tower MCP")
 
     parser.add_argument(
@@ -5166,6 +5169,7 @@ def ansible_tower_mcp():
     for mw in middlewares:
         mcp.add_middleware(mw)
 
+    print(f"Ansible Tower MCP v{__version__}")
     print("\nStarting Ansible Tower MCP Server")
     print(f"  Transport: {args.transport.upper()}")
     print(f"  Auth: {args.auth_type}")
