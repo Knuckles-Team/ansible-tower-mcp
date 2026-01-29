@@ -12,6 +12,7 @@ repos:
     hooks:
     - id: check-added-large-files
     - id: check-ast
+      exclude: ^(tests/|test/|scripts/|script/)
     - id: check-yaml
     - id: check-toml
     - id: check-json
@@ -25,28 +26,21 @@ repos:
   - repo: https://github.com/psf/black
     rev: 26.1.0
     hooks:
-    - id: black
+      - id: black
+        exclude: ^(tests/|test/|scripts/|script/)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.14
     hooks:
       - id: ruff
         types_or: [ python, pyi, jupyter ]
         args: ["--fix", "--ignore=E402"]
+        exclude: ^(tests/|test/|scripts/|script/)
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
     hooks:
       - id: codespell
         args: ["-L", "ans,linar,nam,tread,ot,"]
-        exclude: |
-            (?x)^(
-              pyproject.toml |
-              website/static/img/ag.svg |
-              website/yarn.lock |
-              website/docs/tutorial/code-executors.ipynb |
-              website/docs/topics/code-execution/custom-executor.ipynb |
-              website/docs/topics/non-openai-models/cloud-gemini.ipynb |
-              notebook/.*
-            )$
+        exclude: ^(tests/|test/|scripts/|script/)
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.9.1
     hooks:

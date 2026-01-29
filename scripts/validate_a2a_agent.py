@@ -7,6 +7,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ansible_tower_mcp.ansible_tower_agent import (
+
+__version__ = "0.1.0"
     create_agent,
     chat,
 )
