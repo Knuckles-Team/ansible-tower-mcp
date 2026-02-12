@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 import re
 import urllib3
 
-__version__ = "1.3.4"
+__version__ = "1.3.5"
 
 
 class Api:
@@ -50,7 +50,6 @@ class Api:
                 "Must provide either a token, or (username and password), or (client_id and client_secret) for authentication."
             )
 
-        # Validate authentication
         try:
             self.request("GET", "/api/v2/ping/")
         except Exception as e:
@@ -90,15 +89,12 @@ class Api:
 
     def get_token(self) -> str:
         """Authenticate and get token using web session approach."""
-        # Step 1: Get the CSRF token
         login_page = self._session.get(f"{self.base_url}/api/login/")
 
-        # Get CSRF token from cookies
         csrf_token = None
         if "csrftoken" in login_page.cookies:
             csrf_token = login_page.cookies["csrftoken"]
         else:
-            # Try to find it in the content
             match = re.search(
                 r'name="csrfmiddlewaretoken" value="([^"]+)"', login_page.text
             )
@@ -108,7 +104,6 @@ class Api:
         if not csrf_token:
             raise Exception("Could not obtain CSRF token")
 
-        # Step 2: Perform login
         headers = {"Referer": f"{self.base_url}/api/login/", "X-CSRFToken": csrf_token}
 
         login_data = {
@@ -126,20 +121,18 @@ class Api:
                 f"Login failed: {login_response.status_code} - {login_response.text}"
             )
 
-        # Step 3: Generate API token
         token_headers = {
             "Content-Type": "application/json",
             "Referer": f"{self.base_url}/api/v2/",
         }
 
-        # Use the updated CSRF token
         if "csrftoken" in self._session.cookies:
             token_headers["X-CSRFToken"] = self._session.cookies["csrftoken"]
 
         token_data = {
             "description": "MCP Server Token",
             "application": None,
-            "scope": "write",  # Using write scope for full access
+            "scope": "write",
         }
 
         token_response = self._session.post(
@@ -217,7 +210,6 @@ class Api:
                 break
         return results
 
-    # Inventory Management
     def list_inventories(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/inventories/", params)
@@ -249,7 +241,6 @@ class Api:
         self.request("DELETE", f"/api/v2/inventories/{inventory_id}/")
         return {"status": "success", "message": f"Inventory {inventory_id} deleted"}
 
-    # Host Management
     def list_hosts(self, inventory_id: int = None, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         if inventory_id:
@@ -301,7 +292,6 @@ class Api:
         self.request("DELETE", f"/api/v2/hosts/{host_id}/")
         return {"status": "success", "message": f"Host {host_id} deleted"}
 
-    # Group Management
     def list_groups(self, inventory_id: int, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination(
@@ -363,7 +353,6 @@ class Api:
             "message": f"Host {host_id} removed from group {group_id}",
         }
 
-    # Job Template Management
     def list_job_templates(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/job_templates/", params)
@@ -443,7 +432,6 @@ class Api:
             "POST", f"/api/v2/job_templates/{template_id}/launch/", data=data
         )
 
-    # Job Management
     def list_jobs(self, status: str = None, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         if status:
@@ -456,7 +444,6 @@ class Api:
     def cancel_job(self, job_id: int) -> Dict:
         return self.request("POST", f"/api/v2/jobs/{job_id}/cancel/")
 
-    # Job Management
     def get_job_events(self, job_id: int, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination(f"/api/v2/jobs/{job_id}/job_events/", params)
@@ -474,7 +461,6 @@ class Api:
             response.raise_for_status()
             return {"status": "success", "stdout": response.text}
 
-    # Project Management
     def list_projects(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/projects/", params)
@@ -541,7 +527,6 @@ class Api:
     def sync_project(self, project_id: int) -> Dict:
         return self.request("POST", f"/api/v2/projects/{project_id}/update/")
 
-    # Credential Management
     def list_credentials(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/credentials/", params)
@@ -549,7 +534,6 @@ class Api:
     def get_credential(self, credential_id: int) -> Dict:
         return self.request("GET", f"/api/v2/credentials/{credential_id}/")
 
-    # Credential Management
     def list_credential_types(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/credential_types/", params)
@@ -599,7 +583,6 @@ class Api:
         self.request("DELETE", f"/api/v2/credentials/{credential_id}/")
         return {"status": "success", "message": f"Credential {credential_id} deleted"}
 
-    # Organization Management
     def list_organizations(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/organizations/", params)
@@ -630,7 +613,6 @@ class Api:
             "message": f"Organization {organization_id} deleted",
         }
 
-    # Team Management
     def list_teams(
         self, organization_id: int = None, page_size: int = 100
     ) -> List[Dict]:
@@ -668,7 +650,6 @@ class Api:
         self.request("DELETE", f"/api/v2/teams/{team_id}/")
         return {"status": "success", "message": f"Team {team_id} deleted"}
 
-    # User Management
     def list_users(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/users/", params)
@@ -729,7 +710,6 @@ class Api:
         self.request("DELETE", f"/api/v2/users/{user_id}/")
         return {"status": "success", "message": f"User {user_id} deleted"}
 
-    # Ad Hoc Commands
     def run_ad_hoc_command(
         self,
         inventory_id: int,
@@ -775,7 +755,6 @@ class Api:
                     f"Failed both cancel methods: {str(e)}, then: {str(inner_e)}"
                 )
 
-    # Workflow Templates
     def list_workflow_templates(self, page_size: int = 100) -> List[Dict]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/workflow_job_templates/", params)
@@ -796,7 +775,6 @@ class Api:
             "POST", f"/api/v2/workflow_job_templates/{template_id}/launch/", data=data
         )
 
-    # Workflow Jobs
     def list_workflow_jobs(
         self, status: str = None, page_size: int = 100
     ) -> List[Dict]:
@@ -811,7 +789,6 @@ class Api:
     def cancel_workflow_job(self, job_id: int) -> Dict:
         return self.request("POST", f"/api/v2/workflow_jobs/{job_id}/cancel/")
 
-    # Schedule Management
     def list_schedules(
         self, unified_job_template_id: int = None, page_size: int = 100
     ) -> List[Dict]:
@@ -871,7 +848,6 @@ class Api:
         self.request("DELETE", f"/api/v2/schedules/{schedule_id}/")
         return {"status": "success", "message": f"Schedule {schedule_id} deleted"}
 
-    # System Information
     def get_ansible_version(self) -> Dict:
         return self.request("GET", "/api/v2/ping/")
 
