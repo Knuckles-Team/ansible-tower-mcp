@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 
-# Add parent directory to path to allow importing the package
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ansible_tower_mcp.ansible_tower_agent import (
@@ -13,7 +12,6 @@ __version__ = "0.1.0"
     chat,
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -46,7 +44,6 @@ async def main():
     for q in questions:
         print(f"\n\nUser: {q}\n")
         try:
-            # We use chat() which prints the result
             await chat(agent, q)
         except Exception as e:
             print(f"\nError processing question '{q}': {e}")
