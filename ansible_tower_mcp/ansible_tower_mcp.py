@@ -34,7 +34,7 @@ from ansible_tower_mcp.middlewares import (
     JWTClaimsLoggingMiddleware,
 )
 
-__version__ = "1.3.6"
+__version__ = "1.3.7"
 
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
