@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-inventory
 description: Ansible Tower Mcp Inventory capabilities for A2A Agent.
+tags: [inventory]
 ---
 ### Overview
 This skill provides access to inventory operations.

@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-organizations
 description: Ansible Tower Mcp Organizations capabilities for A2A Agent.
+tags: [organizations]
 ---
 ### Overview
 This skill provides access to organizations operations.

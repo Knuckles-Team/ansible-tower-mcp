@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-workflow-jobs
 description: Ansible Tower Mcp Workflow Jobs capabilities for A2A Agent.
+tags: [workflow-jobs]
 ---
 ### Overview
 This skill provides access to workflow_jobs operations.

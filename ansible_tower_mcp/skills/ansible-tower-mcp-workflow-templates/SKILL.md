@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-workflow-templates
 description: Ansible Tower Mcp Workflow Templates capabilities for A2A Agent.
+tags: [workflow-templates]
 ---
 ### Overview
 This skill provides access to workflow_templates operations.

@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-job-templates
 description: Ansible Tower Mcp Job Templates capabilities for A2A Agent.
+tags: [job-templates]
 ---
 ### Overview
 This skill provides access to job_templates operations.

@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-ad-hoc-commands
 description: Ansible Tower Mcp Ad Hoc Commands capabilities for A2A Agent.
+tags: [ad-hoc-commands]
 ---
 ### Overview
 This skill provides access to ad_hoc_commands operations.

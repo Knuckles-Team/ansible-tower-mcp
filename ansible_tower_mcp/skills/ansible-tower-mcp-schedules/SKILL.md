@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-schedules
 description: Ansible Tower Mcp Schedules capabilities for A2A Agent.
+tags: [schedules]
 ---
 ### Overview
 This skill provides access to schedules operations.

@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-hosts
 description: Ansible Tower Mcp Hosts capabilities for A2A Agent.
+tags: [hosts]
 ---
 ### Overview
 This skill provides access to hosts operations.

@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-credentials
 description: Ansible Tower Mcp Credentials capabilities for A2A Agent.
+tags: [credentials]
 ---
 ### Overview
 This skill provides access to credentials operations.

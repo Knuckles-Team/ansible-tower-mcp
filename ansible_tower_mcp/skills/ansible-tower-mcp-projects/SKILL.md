@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-projects
 description: Ansible Tower Mcp Projects capabilities for A2A Agent.
+tags: [projects]
 ---
 ### Overview
 This skill provides access to projects operations.

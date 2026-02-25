@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-teams
 description: Ansible Tower Mcp Teams capabilities for A2A Agent.
+tags: [teams]
 ---
 ### Overview
 This skill provides access to teams operations.

@@ -12,8 +12,8 @@ CORE_MODULES = [
 ]
 
 OPTIONAL_MODULES = {
-    "ansible_tower_mcp.ansible_tower_agent": "a2a",
-    "ansible_tower_mcp.ansible_tower_mcp": "mcp",
+    "ansible_tower_mcp.agent": "agent",
+    "ansible_tower_mcp.mcp": "mcp",
 }
 
 
@@ -47,12 +47,12 @@ for module_name, extra_name in OPTIONAL_MODULES.items():
     else:
         globals()[f"_{extra_name.upper()}_AVAILABLE"] = False
 
-_MCP_AVAILABLE = OPTIONAL_MODULES.get("ansible_tower_mcp.ansible_tower_mcp") in [
+_MCP_AVAILABLE = OPTIONAL_MODULES.get("ansible_tower_mcp.mcp") in [
     m.__name__ for m in globals().values() if hasattr(m, "__name__")
 ]
-_A2A_AVAILABLE = "ansible_tower_mcp.ansible_tower_agent" in globals()
+_AGENT_AVAILABLE = "ansible_tower_mcp.agent" in globals()
 
-__all__.extend(["_MCP_AVAILABLE", "_A2A_AVAILABLE"])
+__all__.extend(["_MCP_AVAILABLE", "_AGENT_AVAILABLE"])
 
 
 """

@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-users
 description: Ansible Tower Mcp Users capabilities for A2A Agent.
+tags: [users]
 ---
 ### Overview
 This skill provides access to users operations.

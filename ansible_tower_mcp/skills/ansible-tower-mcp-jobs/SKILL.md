@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-jobs
 description: Ansible Tower Mcp Jobs capabilities for A2A Agent.
+tags: [jobs]
 ---
 ### Overview
 This skill provides access to jobs operations.

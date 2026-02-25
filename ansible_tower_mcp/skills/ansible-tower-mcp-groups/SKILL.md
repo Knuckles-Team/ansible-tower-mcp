@@ -1,6 +1,7 @@
 ---
 name: ansible-tower-mcp-groups
 description: Ansible Tower Mcp Groups capabilities for A2A Agent.
+tags: [groups]
 ---
 ### Overview
 This skill provides access to groups operations.
