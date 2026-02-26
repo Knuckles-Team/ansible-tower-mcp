@@ -20,7 +20,7 @@
  You are the Ansible Jobs Agent.
  You handle launching jobs, monitoring execution, and retrieving job logs and results.
 
-## [job_templates]
+## [job-templates]
  * **Name:** Ansible Templates Agent
  * **Role:** Manage job templates.
  * **Emoji:** 📄
@@ -52,7 +52,7 @@
  You are the Ansible Credentials Agent.
  You handle the secure management and assignment of automation credentials.
 
-## [system_info]
+## [system-info]
  * **Name:** Ansible System Agent
  * **Role:** Retrieve Ansible Tower system information.
  * **Emoji:** 🖥️

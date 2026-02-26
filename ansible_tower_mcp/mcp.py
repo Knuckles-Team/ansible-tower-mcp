@@ -37,7 +37,7 @@ from agent_utilities.middlewares import (
     JWTClaimsLoggingMiddleware,
 )
 
-__version__ = "1.3.15"
+__version__ = "1.3.16"
 
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
@@ -1127,7 +1127,7 @@ def register_tools(mcp: FastMCP):
             "client_id",
             "client_secret",
         ],
-        tags={"job_templates"},
+        tags={"job-templates"},
     )
     async def list_job_templates(
         page_size: int = Field(10, description="Number of results per page"),
@@ -1184,7 +1184,7 @@ def register_tools(mcp: FastMCP):
             "client_id",
             "client_secret",
         ],
-        tags={"job_templates"},
+        tags={"job-templates"},
     )
     async def get_job_template(
         template_id: int = Field(description="ID of the job template"),
@@ -1241,7 +1241,7 @@ def register_tools(mcp: FastMCP):
             "client_id",
             "client_secret",
         ],
-        tags={"job_templates"},
+        tags={"job-templates"},
     )
     async def create_job_template(
         name: str = Field(description="Name of the job template"),
@@ -1320,7 +1320,7 @@ def register_tools(mcp: FastMCP):
             "client_id",
             "client_secret",
         ],
-        tags={"job_templates"},
+        tags={"job-templates"},
     )
     async def update_job_template(
         template_id: int = Field(description="ID of the job template"),
@@ -1405,7 +1405,7 @@ def register_tools(mcp: FastMCP):
             "client_id",
             "client_secret",
         ],
-        tags={"job_templates"},
+        tags={"job-templates"},
     )
     async def delete_job_template(
         template_id: int = Field(description="ID of the job template"),
@@ -1472,7 +1472,7 @@ def register_tools(mcp: FastMCP):
             "client_id",
             "client_secret",
         ],
-        tags={"job_templates"},
+        tags={"job-templates"},
     )
     async def launch_job(
         template_id: int = Field(description="ID of the job template"),
