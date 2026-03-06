@@ -7,6 +7,7 @@ Ansible MCP Server
 This server provides tools for interacting with the Ansible API through the Model Context Protocol.
 """
 
+from dotenv import load_dotenv, find_dotenv
 import os
 import sys
 import logging
