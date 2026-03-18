@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 import re
 import urllib3
 
-__version__ = "1.3.43"
+__version__ = "1.3.44"
 
 
 class Api:
