@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 import re
 import urllib3
 
-__version__ = "1.3.45"
+__version__ = "1.3.46"
 
 
 class Api:
@@ -39,21 +39,16 @@ class Api:
         if not verify:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        if token:
-            self.token = token
-        elif client_id and client_secret:
-            self._authenticate_oauth()
-        elif username and password:
-            self.get_token()
-        else:
+        if (
+            not token
+            and not (client_id and client_secret)
+            and not (username and password)
+        ):
             raise ValueError(
                 "Must provide either a token, or (username and password), or (client_id and client_secret) for authentication."
             )
 
-        try:
-            self.request("GET", "/api/v2/ping/")
-        except Exception as e:
-            raise Exception(f"Authentication validation failed: {str(e)}")
+        # Authentication and validation is lazy, performed in methods
 
     def _authenticate_oauth(self):
         """Authenticate using OAuth 2.0."""
@@ -150,6 +145,12 @@ class Api:
 
     def get_headers(self) -> Dict[str, str]:
         """Get request headers with authorization."""
+        if not self.token:
+            if self.client_id and self.client_secret:
+                self._authenticate_oauth()
+            elif self.username and self.password:
+                self.get_token()
+
         headers = {"Content-Type": "application/json"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"

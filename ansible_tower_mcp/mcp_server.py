@@ -11,7 +11,7 @@ from dotenv import load_dotenv, find_dotenv
 import os
 import sys
 import logging
-from typing import Optional, List, Dict
+from typing import Any, Optional, List, Dict
 
 from pydantic import Field
 from starlette.requests import Request
@@ -22,10 +22,9 @@ from ansible_tower_mcp.ansible_tower_api import Api
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
-    config,
 )
 
-__version__ = "1.3.45"
+__version__ = "1.3.46"
 
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
@@ -4723,7 +4722,8 @@ def register_prompts(mcp: FastMCP):
         return f"Sync project with ID {project_id}. Use the `sync_project` tool."
 
 
-def mcp_server():
+def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
+    """Initialize and return the MCP instance, args, and middlewares."""
     load_dotenv(find_dotenv())
 
     args, mcp, middlewares = create_mcp_server(
@@ -4737,13 +4737,17 @@ def mcp_server():
 
     for mw in middlewares:
         mcp.add_middleware(mw)
+    registered_tags = []
+    return mcp, args, middlewares, registered_tags
 
-    print(f"Ansible Tower MCP v{__version__}")
-    print("\nStarting Ansible Tower MCP Server")
-    print(f"  Transport: {args.transport.upper()}")
-    print(f"  Auth: {args.auth_type}")
-    print(f"  Delegation: {'ON' if config['enable_delegation'] else 'OFF'}")
-    print(f"  Eunomia: {args.eunomia_type}")
+
+def mcp_server() -> None:
+    mcp, args, middlewares, registered_tags = get_mcp_instance()
+    print(f"{args.name or 'ansible-tower-mcp'} MCP v{__version__}", file=sys.stderr)
+    print("\nStarting MCP Server", file=sys.stderr)
+    print(f"  Transport: {args.transport.upper()}", file=sys.stderr)
+    print(f"  Auth: {args.auth_type}", file=sys.stderr)
+    print(f"  Dynamic Tags Loaded: {len(set(registered_tags))}", file=sys.stderr)
 
     if args.transport == "stdio":
         mcp.run(transport="stdio")
