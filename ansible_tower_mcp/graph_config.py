@@ -4,7 +4,7 @@ This is the only file needed to enable graph mode for this agent.
 Provides TAG_PROMPTS and TAG_ENV_VARS for create_graph_agent_server().
 """
 
-# ── Tag → System Prompt Mapping ──────────────────────────────────────
+                                                                       
 TAG_PROMPTS: dict[str, str] = {
     "ad_hoc_commands": (
         "You are a Ansible Tower Ad Hoc Commands specialist. Help users manage and interact with Ad Hoc Commands functionality using the available tools."
@@ -54,7 +54,7 @@ TAG_PROMPTS: dict[str, str] = {
 }
 
 
-# ── Tag → Environment Variable Mapping ────────────────────────────────
+                                                                        
 TAG_ENV_VARS: dict[str, str] = {
     "ad_hoc_commands": "AD_HOC_COMMANDSTOOL",
     "credentials": "CREDENTIALSTOOL",

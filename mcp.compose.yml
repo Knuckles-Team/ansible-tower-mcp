@@ -24,7 +24,7 @@ services:
       - "ANSIBLE_BASE_URL=${ANSIBLE_BASE_URL}"
       - "ANSIBLE_USERNAME=${ANSIBLE_USERNAME}"
       - "ANSIBLE_PASSWORD=${ANSIBLE_PASSWORD}"
-      - "ANSIBLE_VERIFY=${ANSIBLE_VERIFY:-True}"
+      - "ANSIBLE_SSL_VERIFY=${ANSIBLE_SSL_VERIFY:-True}"
     ports:
       - "8012:8012"
     healthcheck:

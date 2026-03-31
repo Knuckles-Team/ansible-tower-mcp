@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: utf-8
+
 
 """
 Ansible MCP Server
@@ -24,7 +24,7 @@ from agent_utilities.mcp_utilities import (
     create_mcp_server,
 )
 
-__version__ = "1.3.47"
+__version__ = "1.3.48"
 
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
@@ -1774,7 +1774,6 @@ def register_tools(mcp: FastMCP):
             verify=verify,
         )
 
-        # Get the original job details
         job = client.get_job(job_id=job_id)
 
         template_id = job.get("job_template")
@@ -1783,10 +1782,8 @@ def register_tools(mcp: FastMCP):
 
         extra_vars = job.get("extra_vars")
 
-        # Launch new job with same template and variables
         result = client.launch_job(template_id=template_id, extra_vars=extra_vars)
 
-        # Add context about the relaunch
         if "id" in result:
             result["relaunched_from"] = job_id
             result["original_job_name"] = job.get("name", "")

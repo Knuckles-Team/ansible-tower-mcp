@@ -28,7 +28,7 @@ services:
       - "ANSIBLE_BASE_URL=${ANSIBLE_BASE_URL}"
       - "ANSIBLE_USERNAME=${ANSIBLE_USERNAME}"
       - "ANSIBLE_PASSWORD=${ANSIBLE_PASSWORD}"
-      - "ANSIBLE_VERIFY=${ANSIBLE_VERIFY:-True}"
+      - "ANSIBLE_SSL_VERIFY=${ANSIBLE_SSL_VERIFY:-True}"
       - "PROVIDER=openai"
       - "LLM_BASE_URL=${LLM_BASE_URL:-http://host.docker.internal:1234/v1}"
       - "LLM_API_KEY=${LLM_API_KEY:-llama}"

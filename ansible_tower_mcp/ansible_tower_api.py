@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: utf-8
+
 
 import json
 import requests
@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 import re
 import urllib3
 
-__version__ = "1.3.47"
+__version__ = "1.3.48"
 
 
 class Api:
@@ -47,8 +47,6 @@ class Api:
             raise ValueError(
                 "Must provide either a token, or (username and password), or (client_id and client_secret) for authentication."
             )
-
-        # Authentication and validation is lazy, performed in methods
 
     def _authenticate_oauth(self):
         """Authenticate using OAuth 2.0."""
