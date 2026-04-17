@@ -6,6 +6,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
         from requests.exceptions import RequestsDependencyWarning
+
         warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
     except ImportError:
         pass
@@ -37,7 +38,7 @@ from agent_utilities.mcp_utilities import (
     create_mcp_server,
 )
 
-__version__ = "1.3.53"
+__version__ = "1.3.54"
 
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
@@ -1553,7 +1554,7 @@ def register_tools(mcp: FastMCP):
             description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
         ),
         page_size: int = Field(10, description="Number of results per page"),
-        page: int = Field(1, description="Page number to retrieve"),
+        _page: int = Field(1, description="Page number to retrieve"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
@@ -2982,7 +2983,7 @@ def register_tools(mcp: FastMCP):
             default=None, description="Optional ID of organization to filter teams"
         ),
         page_size: int = Field(10, description="Number of results per page"),
-        page: int = Field(1, description="Page number to retrieve"),
+        _page: int = Field(1, description="Page number to retrieve"),
         base_url: str = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
