@@ -2,10 +2,11 @@
 
 
 import json
-import requests
-from typing import Dict, List, Optional
-from urllib.parse import urljoin
 import re
+from typing import Any
+from urllib.parse import urljoin
+
+import requests
 import urllib3
 
 __version__ = "1.3.54"
@@ -14,15 +15,17 @@ __version__ = "1.3.54"
 class Api:
     def __init__(
         self,
-        base_url: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        token: Optional[str] = None,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
+        base_url: str | None,
+        username: str | None = None,
+        password: str | None = None,
+        token: str | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
         verify: bool = False,
-        proxies: Optional[Dict[str, str]] = None,
+        proxies: dict[str, str] | None = None,
     ):
+        if not base_url:
+            raise ValueError("base_url is required")
         self.base_url = base_url
         self.username = username
         self.password = password
@@ -45,10 +48,11 @@ class Api:
             and not (username and password)
         ):
             raise ValueError(
-                "Must provide either a token, or (username and password), or (client_id and client_secret) for authentication."
+                "Must provide either a token, or (username and password), "
+                "or (client_id and client_secret) for authentication."
             )
 
-    def _authenticate_oauth(self):
+    def _authenticate_oauth(self) -> None:
         """Authenticate using OAuth 2.0."""
         auth_url = urljoin(self.base_url, "/api/o/token/")
         grant_type = (
@@ -67,7 +71,7 @@ class Api:
             url=auth_url,
             data=payload,
             headers=headers,
-            auth=(self.client_id, self.client_secret),
+            auth=(str(self.client_id), str(self.client_secret)),
         )
 
         if response.status_code != 200:
@@ -135,13 +139,14 @@ class Api:
         if token_response.status_code == 201:
             token_data = token_response.json()
             self.token = token_data.get("token")
-            return self.token
+            return str(self.token)
         else:
             raise Exception(
-                f"Token creation failed: {token_response.status_code} - {token_response.text}"
+                f"Token creation failed: {token_response.status_code} - "
+                f"{token_response.text}"
             )
 
-    def get_headers(self) -> Dict[str, str]:
+    def get_headers(self) -> dict[str, str]:
         """Get request headers with authorization."""
         if not self.token:
             if self.client_id and self.client_secret:
@@ -155,8 +160,12 @@ class Api:
         return headers
 
     def request(
-        self, method: str, endpoint: str, params: Dict = None, data: Dict = None
-    ) -> Dict:
+        self,
+        method: str,
+        endpoint: str,
+        params: dict[str, Any] | None = None,
+        data: Any | None = None,
+    ) -> dict[str, Any]:
         """Make a request to the Ansible API."""
         if endpoint.startswith("http"):
             url = endpoint
@@ -190,18 +199,20 @@ class Api:
                 "text": response.text[:1000],
             }
 
-    def handle_pagination(self, endpoint: str, params: Dict = None) -> List[Dict]:
+    def handle_pagination(
+        self, endpoint: str, params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """Handle paginated results from Ansible API."""
         results = []
-        next_url = urljoin(self.base_url, endpoint)
+        next_url: str | None = urljoin(self.base_url, endpoint)
         first_request = True
 
         while next_url:
             if first_request:
-                response = self.request("GET", next_url, params=params)
+                response = self.request("GET", str(next_url), params=params)
                 first_request = False
             else:
-                response = self.request("GET", next_url)
+                response = self.request("GET", str(next_url))
             if "results" in response:
                 results.extend(response["results"])
                 next_url = response.get("next")
@@ -209,16 +220,16 @@ class Api:
                 break
         return results
 
-    def list_inventories(self, page_size: int = 100) -> List[Dict]:
+    def list_inventories(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/inventories/", params)
 
-    def get_inventory(self, inventory_id: int) -> Dict:
+    def get_inventory(self, inventory_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/inventories/{inventory_id}/")
 
     def create_inventory(
         self, name: str, organization_id: int, description: str = ""
-    ) -> Dict:
+    ) -> dict[str, Any]:
         data = {
             "name": name,
             "description": description,
@@ -227,20 +238,25 @@ class Api:
         return self.request("POST", "/api/v2/inventories/", data=data)
 
     def update_inventory(
-        self, inventory_id: int, name: str = None, description: str = None
-    ) -> Dict:
-        data = {}
+        self,
+        inventory_id: int,
+        name: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if description:
             data["description"] = description
         return self.request("PATCH", f"/api/v2/inventories/{inventory_id}/", data=data)
 
-    def delete_inventory(self, inventory_id: int) -> Dict:
+    def delete_inventory(self, inventory_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/inventories/{inventory_id}/")
         return {"status": "success", "message": f"Inventory {inventory_id} deleted"}
 
-    def list_hosts(self, inventory_id: int = None, page_size: int = 100) -> List[Dict]:
+    def list_hosts(
+        self, inventory_id: int | None = None, page_size: int = 100
+    ) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         if inventory_id:
             endpoint = f"/api/v2/inventories/{inventory_id}/hosts/"
@@ -248,16 +264,20 @@ class Api:
             endpoint = "/api/v2/hosts/"
         return self.handle_pagination(endpoint, params)
 
-    def get_host(self, host_id: int) -> Dict:
+    def get_host(self, host_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/hosts/{host_id}/")
 
     def create_host(
-        self, name: str, inventory_id: int, variables: str = "{}", description: str = ""
-    ) -> Dict:
+        self,
+        name: str,
+        inventory_id: int,
+        variables: str = "{}",
+        description: str = "",
+    ) -> dict[str, Any]:
         try:
             json.loads(variables)
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON in variables")
+            raise ValueError("Invalid JSON") from None
         data = {
             "name": name,
             "inventory": inventory_id,
@@ -269,16 +289,16 @@ class Api:
     def update_host(
         self,
         host_id: int,
-        name: str = None,
-        variables: str = None,
-        description: str = None,
-    ) -> Dict:
+        name: str | None = None,
+        variables: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
         if variables:
             try:
                 json.loads(variables)
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON in variables")
-        data = {}
+                raise ValueError("Invalid JSON") from None
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if variables:
@@ -287,26 +307,32 @@ class Api:
             data["description"] = description
         return self.request("PATCH", f"/api/v2/hosts/{host_id}/", data=data)
 
-    def delete_host(self, host_id: int) -> Dict:
+    def delete_host(self, host_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/hosts/{host_id}/")
         return {"status": "success", "message": f"Host {host_id} deleted"}
 
-    def list_groups(self, inventory_id: int, page_size: int = 100) -> List[Dict]:
+    def list_groups(
+        self, inventory_id: int, page_size: int = 100
+    ) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination(
             f"/api/v2/inventories/{inventory_id}/groups/", params
         )
 
-    def get_group(self, group_id: int) -> Dict:
+    def get_group(self, group_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/groups/{group_id}/")
 
     def create_group(
-        self, name: str, inventory_id: int, variables: str = "{}", description: str = ""
-    ) -> Dict:
+        self,
+        name: str,
+        inventory_id: int,
+        variables: str = "{}",
+        description: str = "",
+    ) -> dict[str, Any]:
         try:
             json.loads(variables)
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON in variables")
+            raise ValueError("Invalid JSON") from None
         data = {
             "name": name,
             "inventory": inventory_id,
@@ -318,16 +344,16 @@ class Api:
     def update_group(
         self,
         group_id: int,
-        name: str = None,
-        variables: str = None,
-        description: str = None,
-    ) -> Dict:
+        name: str | None = None,
+        variables: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
         if variables:
             try:
                 json.loads(variables)
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON in variables")
-        data = {}
+                raise ValueError("Invalid JSON") from None
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if variables:
@@ -336,15 +362,15 @@ class Api:
             data["description"] = description
         return self.request("PATCH", f"/api/v2/groups/{group_id}/", data=data)
 
-    def delete_group(self, group_id: int) -> Dict:
+    def delete_group(self, group_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/groups/{group_id}/")
         return {"status": "success", "message": f"Group {group_id} deleted"}
 
-    def add_host_to_group(self, group_id: int, host_id: int) -> Dict:
+    def add_host_to_group(self, group_id: int, host_id: int) -> dict[str, Any]:
         data = {"id": host_id}
         return self.request("POST", f"/api/v2/groups/{group_id}/hosts/", data=data)
 
-    def remove_host_from_group(self, group_id: int, host_id: int) -> Dict:
+    def remove_host_from_group(self, group_id: int, host_id: int) -> dict[str, Any]:
         data = {"id": host_id, "disassociate": True}
         self.request("POST", f"/api/v2/groups/{group_id}/hosts/", data=data)
         return {
@@ -352,11 +378,11 @@ class Api:
             "message": f"Host {host_id} removed from group {group_id}",
         }
 
-    def list_job_templates(self, page_size: int = 100) -> List[Dict]:
+    def list_job_templates(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/job_templates/", params)
 
-    def get_job_template(self, template_id: int) -> Dict:
+    def get_job_template(self, template_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/job_templates/{template_id}/")
 
     def create_job_template(
@@ -365,15 +391,15 @@ class Api:
         inventory_id: int,
         project_id: int,
         playbook: str,
-        credential_id: int = None,
+        credential_id: int | None = None,
         description: str = "",
         extra_vars: str = "{}",
-    ) -> Dict:
+    ) -> dict[str, Any]:
         try:
             json.loads(extra_vars)
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON in extra_vars")
-        data = {
+            raise ValueError("Invalid JSON") from None
+        data: dict[str, Any] = {
             "name": name,
             "inventory": inventory_id,
             "project": project_id,
@@ -390,18 +416,18 @@ class Api:
     def update_job_template(
         self,
         template_id: int,
-        name: str = None,
-        inventory_id: int = None,
-        playbook: str = None,
-        description: str = None,
-        extra_vars: str = None,
-    ) -> Dict:
+        name: str | None = None,
+        inventory_id: int | None = None,
+        playbook: str | None = None,
+        description: str | None = None,
+        extra_vars: str | None = None,
+    ) -> dict[str, Any]:
         if extra_vars:
             try:
                 json.loads(extra_vars)
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON in extra_vars")
-        data = {}
+                raise ValueError("Invalid JSON") from None
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if inventory_id:
@@ -414,40 +440,44 @@ class Api:
             data["extra_vars"] = extra_vars
         return self.request("PATCH", f"/api/v2/job_templates/{template_id}/", data=data)
 
-    def delete_job_template(self, template_id: int) -> Dict:
+    def delete_job_template(self, template_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/job_templates/{template_id}/")
         return {"status": "success", "message": f"Job template {template_id} deleted"}
 
-    def launch_job(self, template_id: int, extra_vars: str = None) -> Dict:
+    def launch_job(
+        self, template_id: int, extra_vars: str | None = None
+    ) -> dict[str, Any]:
         if extra_vars:
             try:
                 json.loads(extra_vars)
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON in extra_vars")
-        data = {}
+                raise ValueError("Invalid JSON") from None
+        data: dict[str, Any] = {}
         if extra_vars:
             data["extra_vars"] = extra_vars
         return self.request(
             "POST", f"/api/v2/job_templates/{template_id}/launch/", data=data
         )
 
-    def list_jobs(self, status: str = None, page_size: int = 100) -> List[Dict]:
-        params = {"page_size": page_size}
+    def list_jobs(
+        self, status: str | None = None, page_size: int = 100
+    ) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {"page_size": page_size}
         if status:
             params["status"] = status
         return self.handle_pagination("/api/v2/jobs/", params)
 
-    def get_job(self, job_id: int) -> Dict:
+    def get_job(self, job_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/jobs/{job_id}/")
 
-    def cancel_job(self, job_id: int) -> Dict:
+    def cancel_job(self, job_id: int) -> dict[str, Any]:
         return self.request("POST", f"/api/v2/jobs/{job_id}/cancel/")
 
-    def get_job_events(self, job_id: int, page_size: int = 100) -> List[Dict]:
+    def get_job_events(self, job_id: int, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination(f"/api/v2/jobs/{job_id}/job_events/", params)
 
-    def get_job_stdout(self, job_id: int, format: str = "txt") -> Dict:
+    def get_job_stdout(self, job_id: int, format: str = "txt") -> dict[str, Any]:
         if format not in ["txt", "html", "json", "ansi"]:
             raise ValueError("Invalid format")
         url = f"/api/v2/jobs/{job_id}/stdout/?format={format}"
@@ -460,11 +490,11 @@ class Api:
             response.raise_for_status()
             return {"status": "success", "stdout": response.text}
 
-    def list_projects(self, page_size: int = 100) -> List[Dict]:
+    def list_projects(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/projects/", params)
 
-    def get_project(self, project_id: int) -> Dict:
+    def get_project(self, project_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/projects/{project_id}/")
 
     def create_project(
@@ -472,16 +502,16 @@ class Api:
         name: str,
         organization_id: int,
         scm_type: str,
-        scm_url: str = None,
-        scm_branch: str = None,
-        credential_id: int = None,
+        scm_url: str | None = None,
+        scm_branch: str | None = None,
+        credential_id: int | None = None,
         description: str = "",
-    ) -> Dict:
+    ) -> dict[str, Any]:
         if scm_type not in ["", "git", "hg", "svn", "manual"]:
             raise ValueError("Invalid SCM type. Must be one of: git, hg, svn, manual")
         if scm_type != "manual" and not scm_url:
             raise ValueError("SCM URL is required for non-manual SCM types")
-        data = {
+        data: dict[str, Any] = {
             "name": name,
             "organization": organization_id,
             "scm_type": scm_type,
@@ -498,15 +528,15 @@ class Api:
     def update_project(
         self,
         project_id: int,
-        name: str = None,
-        scm_type: str = None,
-        scm_url: str = None,
-        scm_branch: str = None,
-        description: str = None,
-    ) -> Dict:
+        name: str | None = None,
+        scm_type: str | None = None,
+        scm_url: str | None = None,
+        scm_branch: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
         if scm_type and scm_type not in ["", "git", "hg", "svn", "manual"]:
             raise ValueError("Invalid SCM type. Must be one of: git, hg, svn, manual")
-        data = {}
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if scm_type:
@@ -519,21 +549,21 @@ class Api:
             data["description"] = description
         return self.request("PATCH", f"/api/v2/projects/{project_id}/", data=data)
 
-    def delete_project(self, project_id: int) -> Dict:
+    def delete_project(self, project_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/projects/{project_id}/")
         return {"status": "success", "message": f"Project {project_id} deleted"}
 
-    def sync_project(self, project_id: int) -> Dict:
+    def sync_project(self, project_id: int) -> dict[str, Any]:
         return self.request("POST", f"/api/v2/projects/{project_id}/update/")
 
-    def list_credentials(self, page_size: int = 100) -> List[Dict]:
+    def list_credentials(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/credentials/", params)
 
-    def get_credential(self, credential_id: int) -> Dict:
+    def get_credential(self, credential_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/credentials/{credential_id}/")
 
-    def list_credential_types(self, page_size: int = 100) -> List[Dict]:
+    def list_credential_types(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/credential_types/", params)
 
@@ -544,11 +574,11 @@ class Api:
         organization_id: int,
         inputs: str,
         description: str = "",
-    ) -> Dict:
+    ) -> dict[str, Any]:
         try:
             inputs_dict = json.loads(inputs)
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON in inputs")
+            raise ValueError("Invalid JSON") from None
         data = {
             "name": name,
             "credential_type": credential_type_id,
@@ -561,42 +591,45 @@ class Api:
     def update_credential(
         self,
         credential_id: int,
-        name: str = None,
-        inputs: str = None,
-        description: str = None,
-    ) -> Dict:
-        data = {}
+        name: str | None = None,
+        inputs: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if inputs:
             try:
                 inputs_dict = json.loads(inputs)
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON in inputs")
+                raise ValueError("Invalid JSON") from None
             data["inputs"] = inputs_dict
         if description:
             data["description"] = description
         return self.request("PATCH", f"/api/v2/credentials/{credential_id}/", data=data)
 
-    def delete_credential(self, credential_id: int) -> Dict:
+    def delete_credential(self, credential_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/credentials/{credential_id}/")
         return {"status": "success", "message": f"Credential {credential_id} deleted"}
 
-    def list_organizations(self, page_size: int = 100) -> List[Dict]:
+    def list_organizations(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/organizations/", params)
 
-    def get_organization(self, organization_id: int) -> Dict:
+    def get_organization(self, organization_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/organizations/{organization_id}/")
 
-    def create_organization(self, name: str, description: str = "") -> Dict:
+    def create_organization(self, name: str, description: str = "") -> dict[str, Any]:
         data = {"name": name, "description": description}
         return self.request("POST", "/api/v2/organizations/", data=data)
 
     def update_organization(
-        self, organization_id: int, name: str = None, description: str = None
-    ) -> Dict:
-        data = {}
+        self,
+        organization_id: int,
+        name: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if description:
@@ -605,7 +638,7 @@ class Api:
             "PATCH", f"/api/v2/organizations/{organization_id}/", data=data
         )
 
-    def delete_organization(self, organization_id: int) -> Dict:
+    def delete_organization(self, organization_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/organizations/{organization_id}/")
         return {
             "status": "success",
@@ -613,8 +646,8 @@ class Api:
         }
 
     def list_teams(
-        self, organization_id: int = None, page_size: int = 100
-    ) -> List[Dict]:
+        self, organization_id: int | None = None, page_size: int = 100
+    ) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         if organization_id:
             endpoint = f"/api/v2/organizations/{organization_id}/teams/"
@@ -622,12 +655,12 @@ class Api:
             endpoint = "/api/v2/teams/"
         return self.handle_pagination(endpoint, params)
 
-    def get_team(self, team_id: int) -> Dict:
+    def get_team(self, team_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/teams/{team_id}/")
 
     def create_team(
         self, name: str, organization_id: int, description: str = ""
-    ) -> Dict:
+    ) -> dict[str, Any]:
         data = {
             "name": name,
             "organization": organization_id,
@@ -636,24 +669,24 @@ class Api:
         return self.request("POST", "/api/v2/teams/", data=data)
 
     def update_team(
-        self, team_id: int, name: str = None, description: str = None
-    ) -> Dict:
-        data = {}
+        self, team_id: int, name: str | None = None, description: str | None = None
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if description:
             data["description"] = description
         return self.request("PATCH", f"/api/v2/teams/{team_id}/", data=data)
 
-    def delete_team(self, team_id: int) -> Dict:
+    def delete_team(self, team_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/teams/{team_id}/")
         return {"status": "success", "message": f"Team {team_id} deleted"}
 
-    def list_users(self, page_size: int = 100) -> List[Dict]:
+    def list_users(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/users/", params)
 
-    def get_user(self, user_id: int) -> Dict:
+    def get_user(self, user_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/users/{user_id}/")
 
     def create_user(
@@ -665,7 +698,7 @@ class Api:
         email: str = "",
         is_superuser: bool = False,
         is_system_auditor: bool = False,
-    ) -> Dict:
+    ) -> dict[str, Any]:
         data = {
             "username": username,
             "password": password,
@@ -680,15 +713,15 @@ class Api:
     def update_user(
         self,
         user_id: int,
-        username: str = None,
-        password: str = None,
-        first_name: str = None,
-        last_name: str = None,
-        email: str = None,
-        is_superuser: bool = None,
-        is_system_auditor: bool = None,
-    ) -> Dict:
-        data = {}
+        username: str | None = None,
+        password: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        email: str | None = None,
+        is_superuser: bool | None = None,
+        is_system_auditor: bool | None = None,
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = {}
         if username:
             data["username"] = username
         if password:
@@ -705,7 +738,7 @@ class Api:
             data["is_system_auditor"] = is_system_auditor
         return self.request("PATCH", f"/api/v2/users/{user_id}/", data=data)
 
-    def delete_user(self, user_id: int) -> Dict:
+    def delete_user(self, user_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/users/{user_id}/")
         return {"status": "success", "message": f"User {user_id} deleted"}
 
@@ -717,7 +750,7 @@ class Api:
         module_args: str,
         limit: str = "",
         verbosity: int = 0,
-    ) -> Dict:
+    ) -> dict[str, Any]:
         if verbosity not in range(5):
             raise ValueError("Verbosity must be between 0 and 4")
         data = {
@@ -731,10 +764,10 @@ class Api:
             data["limit"] = limit
         return self.request("POST", "/api/v2/ad_hoc_commands/", data=data)
 
-    def get_ad_hoc_command(self, command_id: int) -> Dict:
+    def get_ad_hoc_command(self, command_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/ad_hoc_commands/{command_id}/")
 
-    def cancel_ad_hoc_command(self, command_id: int) -> Dict:
+    def cancel_ad_hoc_command(self, command_id: int) -> dict[str, Any]:
         try:
             return self.request("POST", f"/api/v2/ad_hoc_commands/{command_id}/cancel/")
         except Exception as e:
@@ -751,23 +784,25 @@ class Api:
                     raise ValueError(f"Cannot cancel command in status: {status}")
             except Exception as inner_e:
                 raise Exception(
-                    f"Failed both cancel methods: {str(e)}, then: {str(inner_e)}"
-                )
+                    f"Failed both cancel methods: {e}, then: {inner_e}"
+                ) from None
 
-    def list_workflow_templates(self, page_size: int = 100) -> List[Dict]:
+    def list_workflow_templates(self, page_size: int = 100) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         return self.handle_pagination("/api/v2/workflow_job_templates/", params)
 
-    def get_workflow_template(self, template_id: int) -> Dict:
+    def get_workflow_template(self, template_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/workflow_job_templates/{template_id}/")
 
-    def launch_workflow(self, template_id: int, extra_vars: str = None) -> Dict:
+    def launch_workflow(
+        self, template_id: int, extra_vars: str | None = None
+    ) -> dict[str, Any]:
         if extra_vars:
             try:
                 json.loads(extra_vars)
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON in extra_vars")
-        data = {}
+                raise ValueError("Invalid JSON") from None
+        data: dict[str, Any] = {}
         if extra_vars:
             data["extra_vars"] = extra_vars
         return self.request(
@@ -775,60 +810,65 @@ class Api:
         )
 
     def list_workflow_jobs(
-        self, status: str = None, page_size: int = 100
-    ) -> List[Dict]:
-        params = {"page_size": page_size}
+        self, status: str | None = None, page_size: int = 100
+    ) -> list[dict[str, Any]]:
+        params: dict[str, Any] = {"page_size": page_size}
         if status:
             params["status"] = status
         return self.handle_pagination("/api/v2/workflow_jobs/", params)
 
-    def get_workflow_job(self, job_id: int) -> Dict:
+    def get_workflow_job(self, job_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/workflow_jobs/{job_id}/")
 
-    def cancel_workflow_job(self, job_id: int) -> Dict:
+    def cancel_workflow_job(self, job_id: int) -> dict[str, Any]:
         return self.request("POST", f"/api/v2/workflow_jobs/{job_id}/cancel/")
 
     def list_schedules(
-        self, unified_job_template_id: int = None, page_size: int = 100
-    ) -> List[Dict]:
+        self, unified_job_template_id: int | None = None, page_size: int = 100
+    ) -> list[dict[str, Any]]:
         params = {"page_size": page_size}
         if unified_job_template_id:
             params["unified_job_template"] = unified_job_template_id
         return self.handle_pagination("/api/v2/schedules/", params)
 
-    def get_schedule(self, schedule_id: int) -> Dict:
+    def get_schedule(self, schedule_id: int) -> dict[str, Any]:
         return self.request("GET", f"/api/v2/schedules/{schedule_id}/")
 
     def create_schedule(
         self,
         name: str,
-        unified_job_template_id: int,
         rrule: str,
+        unified_job_template_id: int,
         description: str = "",
         extra_data: str = "{}",
-    ) -> Dict:
+    ) -> dict[str, Any]:
         try:
-            extra_data_dict = json.loads(extra_data)
+            json.loads(extra_data)
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON in extra_data")
+            raise ValueError("Invalid JSON") from None
         data = {
             "name": name,
-            "unified_job_template": unified_job_template_id,
             "rrule": rrule,
+            "unified_job_template": unified_job_template_id,
             "description": description,
-            "extra_data": extra_data_dict,
+            "extra_data": extra_data,
         }
         return self.request("POST", "/api/v2/schedules/", data=data)
 
     def update_schedule(
         self,
         schedule_id: int,
-        name: str = None,
-        rrule: str = None,
-        description: str = None,
-        extra_data: str = None,
-    ) -> Dict:
-        data = {}
+        name: str | None = None,
+        rrule: str | None = None,
+        description: str | None = None,
+        extra_data: str | None = None,
+    ) -> dict[str, Any]:
+        if extra_data:
+            try:
+                json.loads(extra_data)
+            except json.JSONDecodeError:
+                raise ValueError("Invalid JSON") from None
+        data: dict[str, Any] = {}
         if name:
             data["name"] = name
         if rrule:
@@ -836,28 +876,18 @@ class Api:
         if description:
             data["description"] = description
         if extra_data:
-            try:
-                extra_data_dict = json.loads(extra_data)
-            except json.JSONDecodeError:
-                raise ValueError("Invalid JSON in extra_data")
-            data["extra_data"] = extra_data_dict
+            data["extra_data"] = extra_data
         return self.request("PATCH", f"/api/v2/schedules/{schedule_id}/", data=data)
 
-    def delete_schedule(self, schedule_id: int) -> Dict:
+    def delete_schedule(self, schedule_id: int) -> dict[str, Any]:
         self.request("DELETE", f"/api/v2/schedules/{schedule_id}/")
         return {"status": "success", "message": f"Schedule {schedule_id} deleted"}
 
-    def get_ansible_version(self) -> Dict:
-        return self.request("GET", "/api/v2/ping/")
+    def get_ansible_version(self) -> dict[str, Any]:
+        return self.request("GET", "/api/v2/config/")
 
-    def get_dashboard_stats(self) -> Dict:
+    def get_dashboard_stats(self) -> dict[str, Any]:
         return self.request("GET", "/api/v2/dashboard/")
 
-    def get_metrics(self) -> Dict:
-        try:
-            return self.request("GET", "/api/v2/metrics/")
-        except Exception:
-            url = urljoin(self.base_url, "/api/v2/metrics/")
-            response = self._session.get(url, headers=self.get_headers())
-            response.raise_for_status()
-            return {"status": "success", "raw_data": response.text[:1000]}
+    def get_metrics(self) -> dict[str, Any]:
+        return self.request("GET", "/api/metrics/")

@@ -21,22 +21,23 @@ Ansible MCP Server
 This server provides tools for interacting with the Ansible API through the Model Context Protocol.
 """
 
-from dotenv import load_dotenv, find_dotenv
+import logging
 import os
 import sys
-import logging
-from typing import Any, Optional, List, Dict
+from typing import Any
 
-from pydantic import Field
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-from fastmcp import FastMCP, Context
-from fastmcp.utilities.logging import get_logger
-from ansible_tower_mcp.ansible_tower_api import Api
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
 )
+from dotenv import find_dotenv, load_dotenv
+from fastmcp import Context, FastMCP
+from fastmcp.utilities.logging import get_logger
+from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+from ansible_tower_mcp.ansible_tower_api import Api
 
 __version__ = "1.3.54"
 
@@ -63,27 +64,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_inventories(
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -91,9 +92,11 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
-        Retrieves a paginated list of inventories from Ansible Tower. Returns a list of dictionaries, each containing inventory details like id, name, and description. Display results in a markdown table for clarity.
+        Retrieves a paginated list of inventories from Ansible Tower. Returns a list
+        of dictionaries, each containing inventory details like id, name, and
+        description. Display results in a markdown table for clarity.
         """
         client = Api(
             base_url=base_url,
@@ -120,27 +123,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_inventory(
         inventory_id: int = Field(description="ID of the inventory"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -148,9 +151,11 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
-        Fetches details of a specific inventory by ID from Ansible Tower. Returns a dictionary with inventory information such as name, description, and hosts count.
+        Fetches details of a specific inventory by ID from Ansible Tower. Returns
+        a dictionary with inventory information such as name, description, and
+        hosts count.
         """
         client = Api(
             base_url=base_url,
@@ -181,27 +186,27 @@ def register_tools(mcp: FastMCP):
         description: str = Field(
             default="", description="Description of the inventory"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -209,7 +214,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new inventory in Ansible Tower. Returns a dictionary with the created inventory's details, including its ID.
         """
@@ -240,33 +245,33 @@ def register_tools(mcp: FastMCP):
     )
     async def update_inventory(
         inventory_id: int = Field(description="ID of the inventory"),
-        name: Optional[str] = Field(
+        name: str | None = Field(
             default=None, description="New name for the inventory"
         ),
-        description: Optional[str] = Field(
+        description: str | None = Field(
             default=None, description="New description for the inventory"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -274,8 +279,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Updates an existing inventory in Ansible Tower. Returns a dictionary with the updated inventory's details.
         """
@@ -315,27 +320,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_inventory(
         inventory_id: int = Field(description="ID of the inventory"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -343,8 +348,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Deletes a specific inventory by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -381,31 +386,31 @@ def register_tools(mcp: FastMCP):
         tags={"hosts"},
     )
     async def list_hosts(
-        inventory_id: Optional[int] = Field(
+        inventory_id: int | None = Field(
             default=None, description="Optional ID of inventory to filter hosts"
         ),
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -413,9 +418,11 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
-        Retrieves a paginated list of hosts from Ansible Tower, optionally filtered by inventory. Returns a list of dictionaries, each with host details like id, name, and variables. Display in a markdown table.
+        Retrieves a paginated list of hosts from Ansible Tower, optionally filtered
+        by inventory. Returns a list of dictionaries, each with host details like
+        id, name, and variables. Display in a markdown table.
         """
         client = Api(
             base_url=base_url,
@@ -442,27 +449,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_host(
         host_id: int = Field(description="ID of the host"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -470,9 +477,10 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
-        Fetches details of a specific host by ID from Ansible Tower. Returns a dictionary with host information such as name, variables, and inventory.
+        Fetches details of a specific host by ID from Ansible Tower. Returns a
+        dictionary with host information such as name, variables, and inventory.
         """
         client = Api(
             base_url=base_url,
@@ -504,27 +512,27 @@ def register_tools(mcp: FastMCP):
             default="{}", description="JSON string of host variables"
         ),
         description: str = Field(default="", description="Description of the host"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -532,9 +540,10 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
-        Creates a new host in a specified inventory in Ansible Tower. Returns a dictionary with the created host's details, including its ID.
+        Creates a new host in a specified inventory in Ansible Tower. Returns a
+        dictionary with the created host's details, including its ID.
         """
         client = Api(
             base_url=base_url,
@@ -566,34 +575,34 @@ def register_tools(mcp: FastMCP):
     )
     async def update_host(
         host_id: int = Field(description="ID of the host"),
-        name: Optional[str] = Field(default=None, description="New name for the host"),
-        variables: Optional[str] = Field(
+        name: str | None = Field(default=None, description="New name for the host"),
+        variables: str | None = Field(
             default=None, description="JSON string of host variables"
         ),
-        description: Optional[str] = Field(
+        description: str | None = Field(
             default=None, description="New description for the host"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -601,8 +610,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Updates an existing host in Ansible Tower. Returns a dictionary with the updated host's details.
         """
@@ -642,27 +651,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_host(
         host_id: int = Field(description="ID of the host"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -670,8 +679,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Deletes a specific host by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -710,27 +719,27 @@ def register_tools(mcp: FastMCP):
     async def list_groups(
         inventory_id: int = Field(description="ID of the inventory"),
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -738,9 +747,11 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
-        Retrieves a paginated list of groups in a specified inventory from Ansible Tower. Returns a list of dictionaries, each with group details like id, name, and variables. Display in a markdown table.
+        Retrieves a paginated list of groups in a specified inventory from Ansible
+        Tower. Returns a list of dictionaries, each with group details like id,
+        name, and variables. Display in a markdown table.
         """
         client = Api(
             base_url=base_url,
@@ -767,27 +778,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_group(
         group_id: int = Field(description="ID of the group"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -795,7 +806,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific group by ID from Ansible Tower. Returns a dictionary with group information such as name, variables, and inventory.
         """
@@ -831,27 +842,27 @@ def register_tools(mcp: FastMCP):
             default="{}", description="JSON string of group variables"
         ),
         description: str = Field(default="", description="Description of the group"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -859,7 +870,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new group in a specified inventory in Ansible Tower. Returns a dictionary with the created group's details, including its ID.
         """
@@ -893,34 +904,34 @@ def register_tools(mcp: FastMCP):
     )
     async def update_group(
         group_id: int = Field(description="ID of the group"),
-        name: Optional[str] = Field(default=None, description="New name for the group"),
-        variables: Optional[str] = Field(
+        name: str | None = Field(default=None, description="New name for the group"),
+        variables: str | None = Field(
             default=None, description="JSON string of group variables"
         ),
-        description: Optional[str] = Field(
+        description: str | None = Field(
             default=None, description="New description for the group"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -928,7 +939,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Updates an existing group in Ansible Tower. Returns a dictionary with the updated group's details.
         """
@@ -959,27 +970,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_group(
         group_id: int = Field(description="ID of the group"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -987,7 +998,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Deletes a specific group by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -1017,27 +1028,27 @@ def register_tools(mcp: FastMCP):
     async def add_host_to_group(
         group_id: int = Field(description="ID of the group"),
         host_id: int = Field(description="ID of the host"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1045,7 +1056,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Adds a host to a group in Ansible Tower. Returns a dictionary confirming the association.
         """
@@ -1075,27 +1086,27 @@ def register_tools(mcp: FastMCP):
     async def remove_host_from_group(
         group_id: int = Field(description="ID of the group"),
         host_id: int = Field(description="ID of the host"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1103,7 +1114,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Removes a host from a group in Ansible Tower. Returns a dictionary confirming the disassociation.
         """
@@ -1132,27 +1143,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_job_templates(
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1160,9 +1171,11 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
-        Retrieves a paginated list of job templates from Ansible Tower. Returns a list of dictionaries, each with template details like id, name, and playbook. Display in a markdown table.
+        Retrieves a paginated list of job templates from Ansible Tower. Returns a
+        list of dictionaries, each with template details like id, name, and
+        playbook. Display in a markdown table.
         """
         client = Api(
             base_url=base_url,
@@ -1189,27 +1202,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_job_template(
         template_id: int = Field(description="ID of the job template"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1217,7 +1230,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific job template by ID from Ansible Tower. Returns a dictionary with template information such as name, inventory, and extra_vars.
         """
@@ -1251,7 +1264,7 @@ def register_tools(mcp: FastMCP):
         playbook: str = Field(
             description="Name of the playbook (e.g., 'playbook.yml')"
         ),
-        credential_id: Optional[int] = Field(
+        credential_id: int | None = Field(
             default=None, description="Optional ID of the credential"
         ),
         description: str = Field(
@@ -1260,27 +1273,27 @@ def register_tools(mcp: FastMCP):
         extra_vars: str = Field(
             default="{}", description="JSON string of extra variables"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1288,7 +1301,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new job template in Ansible Tower. Returns a dictionary with the created template's details, including its ID.
         """
@@ -1325,38 +1338,36 @@ def register_tools(mcp: FastMCP):
     )
     async def update_job_template(
         template_id: int = Field(description="ID of the job template"),
-        name: Optional[str] = Field(
+        name: str | None = Field(
             default=None, description="New name for the job template"
         ),
-        inventory_id: Optional[int] = Field(
-            default=None, description="New inventory ID"
-        ),
-        playbook: Optional[str] = Field(default=None, description="New playbook name"),
-        description: Optional[str] = Field(default=None, description="New description"),
-        extra_vars: Optional[str] = Field(
+        inventory_id: int | None = Field(default=None, description="New inventory ID"),
+        playbook: str | None = Field(default=None, description="New playbook name"),
+        description: str | None = Field(default=None, description="New description"),
+        extra_vars: str | None = Field(
             default=None, description="JSON string of extra variables"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1364,8 +1375,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Updates an existing job template in Ansible Tower. Returns a dictionary with the updated template's details.
         """
@@ -1410,27 +1421,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_job_template(
         template_id: int = Field(description="ID of the job template"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1438,8 +1449,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Deletes a specific job template by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -1477,31 +1488,31 @@ def register_tools(mcp: FastMCP):
     )
     async def launch_job(
         template_id: int = Field(description="ID of the job template"),
-        extra_vars: Optional[str] = Field(
+        extra_vars: str | None = Field(
             default=None,
             description="JSON string of extra variables to override the template's variables",
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1509,8 +1520,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Launches a job from a template in Ansible Tower, optionally with extra variables. Returns a dictionary with the launched job's details, including its ID.
         """
@@ -1549,33 +1560,33 @@ def register_tools(mcp: FastMCP):
         tags={"jobs"},
     )
     async def list_jobs(
-        status: Optional[str] = Field(
+        status: str | None = Field(
             default=None,
             description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
         ),
         page_size: int = Field(10, description="Number of results per page"),
         _page: int = Field(1, description="Page number to retrieve"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1583,7 +1594,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of jobs from Ansible Tower, optionally filtered by status. Returns a list of dictionaries, each with job details like id, status, and elapsed time. Display in a markdown table.
         """
@@ -1612,27 +1623,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_job(
         job_id: int = Field(description="ID of the job"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1640,7 +1651,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific job by ID from Ansible Tower. Returns a dictionary with job information such as status, start time, and artifacts.
         """
@@ -1669,27 +1680,27 @@ def register_tools(mcp: FastMCP):
     )
     async def cancel_job(
         job_id: int = Field(description="ID of the job"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1697,8 +1708,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Cancels a running job in Ansible Tower. Returns a dictionary confirming the cancellation status.
         """
@@ -1736,27 +1747,27 @@ def register_tools(mcp: FastMCP):
     )
     async def relaunch_job(
         job_id: int = Field(description="ID of the job to relaunch"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1764,8 +1775,8 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-        ctx: Context = None,
-    ) -> Dict:
+        ctx: Context | None = None,
+    ) -> dict:
         """
         Relaunches a job by getting its details and launching the same job template with the same variables. Returns a dictionary with the results of the new job.
         """
@@ -1819,27 +1830,27 @@ def register_tools(mcp: FastMCP):
     async def get_job_events(
         job_id: int = Field(description="ID of the job"),
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1847,7 +1858,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of events for a specific job from Ansible Tower. Returns a list of dictionaries, each with event details like type, host, and stdout. Display in a markdown table.
         """
@@ -1879,27 +1890,27 @@ def register_tools(mcp: FastMCP):
         format: str = Field(
             default="txt", description="Format of the output (txt, html, json, ansi)"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1907,7 +1918,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches the stdout output of a job in the specified format from Ansible Tower. Returns a dictionary with the output content.
         """
@@ -1936,27 +1947,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_projects(
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -1964,7 +1975,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of projects from Ansible Tower. Returns a list of dictionaries, each with project details like id, name, and scm_type. Display in a markdown table.
         """
@@ -1993,27 +2004,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_project(
         project_id: int = Field(description="ID of the project"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2021,7 +2032,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific project by ID from Ansible Tower. Returns a dictionary with project information such as name, scm_url, and status.
         """
@@ -2052,37 +2063,35 @@ def register_tools(mcp: FastMCP):
         name: str = Field(description="Name of the project"),
         organization_id: int = Field(description="ID of the organization"),
         scm_type: str = Field(description="SCM type (git, hg, svn, manual)"),
-        scm_url: Optional[str] = Field(
-            default=None, description="URL for the repository"
-        ),
-        scm_branch: Optional[str] = Field(
+        scm_url: str | None = Field(default=None, description="URL for the repository"),
+        scm_branch: str | None = Field(
             default=None, description="Branch/tag/commit to checkout"
         ),
-        credential_id: Optional[int] = Field(
+        credential_id: int | None = Field(
             default=None, description="ID of the credential for SCM access"
         ),
         description: str = Field(default="", description="Description of the project"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2090,7 +2099,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new project in Ansible Tower. Returns a dictionary with the created project's details, including its ID.
         """
@@ -2127,40 +2136,38 @@ def register_tools(mcp: FastMCP):
     )
     async def update_project(
         project_id: int = Field(description="ID of the project"),
-        name: Optional[str] = Field(
-            default=None, description="New name for the project"
-        ),
-        scm_type: Optional[str] = Field(
+        name: str | None = Field(default=None, description="New name for the project"),
+        scm_type: str | None = Field(
             default=None, description="New SCM type (git, hg, svn, manual)"
         ),
-        scm_url: Optional[str] = Field(
+        scm_url: str | None = Field(
             default=None, description="New URL for the repository"
         ),
-        scm_branch: Optional[str] = Field(
+        scm_branch: str | None = Field(
             default=None, description="New branch/tag/commit to checkout"
         ),
-        description: Optional[str] = Field(default=None, description="New description"),
-        base_url: str = Field(
+        description: str | None = Field(default=None, description="New description"),
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2168,7 +2175,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Updates an existing project in Ansible Tower. Returns a dictionary with the updated project's details.
         """
@@ -2204,27 +2211,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_project(
         project_id: int = Field(description="ID of the project"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2232,7 +2239,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Deletes a specific project by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -2261,27 +2268,27 @@ def register_tools(mcp: FastMCP):
     )
     async def sync_project(
         project_id: int = Field(description="ID of the project"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2289,7 +2296,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Syncs (updates from SCM) a project in Ansible Tower. Returns a dictionary with the sync job's details.
         """
@@ -2318,27 +2325,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_credentials(
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2346,7 +2353,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of credentials from Ansible Tower. Returns a list of dictionaries, each with credential details like id, name, and type. Display in a markdown table.
         """
@@ -2375,27 +2382,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_credential(
         credential_id: int = Field(description="ID of the credential"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2403,7 +2410,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific credential by ID from Ansible Tower. Returns a dictionary with credential information such as name and inputs (masked).
         """
@@ -2432,27 +2439,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_credential_types(
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2460,7 +2467,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of credential types from Ansible Tower. Returns a list of dictionaries, each with type details like id and name. Display in a markdown table.
         """
@@ -2497,27 +2504,27 @@ def register_tools(mcp: FastMCP):
         description: str = Field(
             default="", description="Description of the credential"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2525,7 +2532,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new credential in Ansible Tower. Returns a dictionary with the created credential's details, including its ID.
         """
@@ -2560,34 +2567,34 @@ def register_tools(mcp: FastMCP):
     )
     async def update_credential(
         credential_id: int = Field(description="ID of the credential"),
-        name: Optional[str] = Field(
+        name: str | None = Field(
             default=None, description="New name for the credential"
         ),
-        inputs: Optional[str] = Field(
+        inputs: str | None = Field(
             default=None, description="JSON string of credential inputs"
         ),
-        description: Optional[str] = Field(default=None, description="New description"),
-        base_url: str = Field(
+        description: str | None = Field(default=None, description="New description"),
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2595,7 +2602,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Updates an existing credential in Ansible Tower. Returns a dictionary with the updated credential's details.
         """
@@ -2629,27 +2636,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_credential(
         credential_id: int = Field(description="ID of the credential"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2657,7 +2664,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Deletes a specific credential by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -2686,27 +2693,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_organizations(
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2714,7 +2721,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of organizations from Ansible Tower. Returns a list of dictionaries, each with organization details like id and name. Display in a markdown table.
         """
@@ -2743,27 +2750,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_organization(
         organization_id: int = Field(description="ID of the organization"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2771,7 +2778,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific organization by ID from Ansible Tower. Returns a dictionary with organization information such as name and description.
         """
@@ -2803,27 +2810,27 @@ def register_tools(mcp: FastMCP):
         description: str = Field(
             default="", description="Description of the organization"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2831,7 +2838,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new organization in Ansible Tower. Returns a dictionary with the created organization's details, including its ID.
         """
@@ -2860,31 +2867,31 @@ def register_tools(mcp: FastMCP):
     )
     async def update_organization(
         organization_id: int = Field(description="ID of the organization"),
-        name: Optional[str] = Field(
+        name: str | None = Field(
             default=None, description="New name for the organization"
         ),
-        description: Optional[str] = Field(default=None, description="New description"),
-        base_url: str = Field(
+        description: str | None = Field(default=None, description="New description"),
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2892,7 +2899,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Updates an existing organization in Ansible Tower. Returns a dictionary with the updated organization's details.
         """
@@ -2923,27 +2930,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_organization(
         organization_id: int = Field(description="ID of the organization"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -2951,7 +2958,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Deletes a specific organization by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -2979,32 +2986,32 @@ def register_tools(mcp: FastMCP):
         tags={"teams"},
     )
     async def list_teams(
-        organization_id: Optional[int] = Field(
+        organization_id: int | None = Field(
             default=None, description="Optional ID of organization to filter teams"
         ),
         page_size: int = Field(10, description="Number of results per page"),
         _page: int = Field(1, description="Page number to retrieve"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3012,7 +3019,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of teams from Ansible Tower, optionally filtered by organization. Returns a list of dictionaries, each with team details like id and name. Display in a markdown table.
         """
@@ -3041,27 +3048,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_team(
         team_id: int = Field(description="ID of the team"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3069,7 +3076,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific team by ID from Ansible Tower. Returns a dictionary with team information such as name and organization.
         """
@@ -3100,27 +3107,27 @@ def register_tools(mcp: FastMCP):
         name: str = Field(description="Name of the team"),
         organization_id: int = Field(description="ID of the organization"),
         description: str = Field(default="", description="Description of the team"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3128,7 +3135,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new team in a specified organization in Ansible Tower. Returns a dictionary with the created team's details, including its ID.
         """
@@ -3159,29 +3166,29 @@ def register_tools(mcp: FastMCP):
     )
     async def update_team(
         team_id: int = Field(description="ID of the team"),
-        name: Optional[str] = Field(default=None, description="New name for the team"),
-        description: Optional[str] = Field(default=None, description="New description"),
-        base_url: str = Field(
+        name: str | None = Field(default=None, description="New name for the team"),
+        description: str | None = Field(default=None, description="New description"),
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3189,7 +3196,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Updates an existing team in Ansible Tower. Returns a dictionary with the updated team's details.
         """
@@ -3218,27 +3225,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_team(
         team_id: int = Field(description="ID of the team"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3246,7 +3253,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Deletes a specific team by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -3275,27 +3282,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_users(
         page_size: int = Field(10, description="Page number to retrieve"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3303,7 +3310,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of users from Ansible Tower. Returns a list of dictionaries, each with user details like id, username, and email. Display in a markdown table.
         """
@@ -3332,27 +3339,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_user(
         user_id: int = Field(description="ID of the user"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3360,7 +3367,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific user by ID from Ansible Tower. Returns a dictionary with user information such as username, email, and roles.
         """
@@ -3399,27 +3406,27 @@ def register_tools(mcp: FastMCP):
         is_system_auditor: bool = Field(
             default=False, description="Whether the user should be a system auditor"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3427,7 +3434,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new user in Ansible Tower. Returns a dictionary with the created user's details, including its ID.
         """
@@ -3464,38 +3471,38 @@ def register_tools(mcp: FastMCP):
     )
     async def update_user(
         user_id: int = Field(description="ID of the user"),
-        new_username: Optional[str] = Field(default=None, description="New username"),
-        new_password: Optional[str] = Field(default=None, description="New password"),
-        first_name: Optional[str] = Field(default=None, description="New first name"),
-        last_name: Optional[str] = Field(default=None, description="New last name"),
-        email: Optional[str] = Field(default=None, description="New email address"),
-        is_superuser: Optional[bool] = Field(
+        new_username: str | None = Field(default=None, description="New username"),
+        new_password: str | None = Field(default=None, description="New password"),
+        first_name: str | None = Field(default=None, description="New first name"),
+        last_name: str | None = Field(default=None, description="New last name"),
+        email: str | None = Field(default=None, description="New email address"),
+        is_superuser: bool | None = Field(
             default=None, description="Whether the user should be a superuser"
         ),
-        is_system_auditor: Optional[bool] = Field(
+        is_system_auditor: bool | None = Field(
             default=None, description="Whether the user should be a system auditor"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3503,7 +3510,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Updates an existing user in Ansible Tower. Returns a dictionary with the updated user's details.
         """
@@ -3541,27 +3548,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_user(
         user_id: int = Field(description="ID of the user"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3569,7 +3576,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Deletes a specific user by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -3605,27 +3612,27 @@ def register_tools(mcp: FastMCP):
         module_args: str = Field(description="Module arguments"),
         limit: str = Field(default="", description="Host pattern to target"),
         verbosity: int = Field(default=0, description="Verbosity level (0-4)"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3633,7 +3640,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Runs an ad hoc command on hosts in Ansible Tower. Returns a dictionary with the command job's details, including its ID.
         """
@@ -3669,27 +3676,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_ad_hoc_command(
         command_id: int = Field(description="ID of the ad hoc command"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3697,7 +3704,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific ad hoc command by ID from Ansible Tower. Returns a dictionary with command information such as status and module_args.
         """
@@ -3726,27 +3733,27 @@ def register_tools(mcp: FastMCP):
     )
     async def cancel_ad_hoc_command(
         command_id: int = Field(description="ID of the ad hoc command"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3754,7 +3761,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Cancels a running ad hoc command in Ansible Tower. Returns a dictionary confirming the cancellation status.
         """
@@ -3783,27 +3790,27 @@ def register_tools(mcp: FastMCP):
     )
     async def list_workflow_templates(
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3811,7 +3818,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of workflow templates from Ansible Tower. Returns a list of dictionaries, each with template details like id and name. Display in a markdown table.
         """
@@ -3840,27 +3847,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_workflow_template(
         template_id: int = Field(description="ID of the workflow template"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3868,7 +3875,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific workflow template by ID from Ansible Tower. Returns a dictionary with template information such as name and extra_vars.
         """
@@ -3897,31 +3904,31 @@ def register_tools(mcp: FastMCP):
     )
     async def launch_workflow(
         template_id: int = Field(description="ID of the workflow template"),
-        extra_vars: Optional[str] = Field(
+        extra_vars: str | None = Field(
             default=None,
             description="JSON string of extra variables to override the template's variables",
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3929,7 +3936,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Launches a workflow from a template in Ansible Tower, optionally with extra variables. Returns a dictionary with the launched workflow job's details, including its ID.
         """
@@ -3957,32 +3964,32 @@ def register_tools(mcp: FastMCP):
         tags={"workflow_jobs"},
     )
     async def list_workflow_jobs(
-        status: Optional[str] = Field(
+        status: str | None = Field(
             default=None,
             description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
         ),
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -3990,7 +3997,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of workflow jobs from Ansible Tower, optionally filtered by status. Returns a list of dictionaries, each with job details like id and status. Display in a markdown table.
         """
@@ -4019,27 +4026,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_workflow_job(
         job_id: int = Field(description="ID of the workflow job"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4047,7 +4054,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific workflow job by ID from Ansible Tower. Returns a dictionary with job information such as status and start time.
         """
@@ -4076,27 +4083,27 @@ def register_tools(mcp: FastMCP):
     )
     async def cancel_workflow_job(
         job_id: int = Field(description="ID of the workflow job"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4104,7 +4111,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Cancels a running workflow job in Ansible Tower. Returns a dictionary confirming the cancellation status.
         """
@@ -4132,32 +4139,32 @@ def register_tools(mcp: FastMCP):
         tags={"schedules"},
     )
     async def list_schedules(
-        unified_job_template_id: Optional[int] = Field(
+        unified_job_template_id: int | None = Field(
             default=None,
             description="Optional ID of job or workflow template to filter schedules",
         ),
         page_size: int = Field(10, description="Number of results per page"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4165,7 +4172,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Retrieves a paginated list of schedules from Ansible Tower, optionally filtered by template. Returns a list of dictionaries, each with schedule details like id, name, and rrule. Display in a markdown table.
         """
@@ -4196,27 +4203,27 @@ def register_tools(mcp: FastMCP):
     )
     async def get_schedule(
         schedule_id: int = Field(description="ID of the schedule"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4224,7 +4231,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches details of a specific schedule by ID from Ansible Tower. Returns a dictionary with schedule information such as name and rrule.
         """
@@ -4263,27 +4270,27 @@ def register_tools(mcp: FastMCP):
         extra_data: str = Field(
             default="{}", description="JSON string of extra variables"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4291,7 +4298,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Creates a new schedule for a template in Ansible Tower. Returns a dictionary with the created schedule's details, including its ID.
         """
@@ -4326,37 +4333,33 @@ def register_tools(mcp: FastMCP):
     )
     async def update_schedule(
         schedule_id: int = Field(description="ID of the schedule"),
-        name: Optional[str] = Field(
-            default=None, description="New name for the schedule"
-        ),
-        rrule: Optional[str] = Field(
-            default=None, description="New iCal recurrence rule"
-        ),
-        description: Optional[str] = Field(default=None, description="New description"),
-        extra_data: Optional[str] = Field(
+        name: str | None = Field(default=None, description="New name for the schedule"),
+        rrule: str | None = Field(default=None, description="New iCal recurrence rule"),
+        description: str | None = Field(default=None, description="New description"),
+        extra_data: str | None = Field(
             default=None, description="JSON string of extra variables"
         ),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4364,7 +4367,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Updates an existing schedule in Ansible Tower. Returns a dictionary with the updated schedule's details.
         """
@@ -4399,27 +4402,27 @@ def register_tools(mcp: FastMCP):
     )
     async def delete_schedule(
         schedule_id: int = Field(description="ID of the schedule"),
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4427,7 +4430,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Deletes a specific schedule by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
@@ -4455,27 +4458,27 @@ def register_tools(mcp: FastMCP):
         tags={"system"},
     )
     async def get_ansible_version(
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4483,7 +4486,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Retrieves the Ansible version information from Ansible Tower. Returns a dictionary with version details.
         """
@@ -4511,27 +4514,27 @@ def register_tools(mcp: FastMCP):
         tags={"system"},
     )
     async def get_dashboard_stats(
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4539,7 +4542,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Fetches dashboard statistics from Ansible Tower. Returns a dictionary with stats like host counts and recent jobs.
         """
@@ -4567,27 +4570,27 @@ def register_tools(mcp: FastMCP):
         tags={"system"},
     )
     async def get_metrics(
-        base_url: str = Field(
+        base_url: str | None = Field(
             default=os.environ.get("ANSIBLE_BASE_URL", None),
             description="The base URL of the Ansible Tower instance",
         ),
-        username: Optional[str] = Field(
+        username: str | None = Field(
             default=os.environ.get("ANSIBLE_USERNAME", None),
             description="Username for authentication",
         ),
-        password: Optional[str] = Field(
+        password: str | None = Field(
             default=os.environ.get("ANSIBLE_PASSWORD", None),
             description="Password for authentication",
         ),
-        token: Optional[str] = Field(
+        token: str | None = Field(
             default=os.environ.get("ANSIBLE_TOKEN", None),
             description="API token for authentication",
         ),
-        client_id: Optional[str] = Field(
+        client_id: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_ID", None),
             description="Client ID for OAuth authentication",
         ),
-        client_secret: Optional[str] = Field(
+        client_secret: str | None = Field(
             default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
             description="Client secret for OAuth authentication",
         ),
@@ -4595,7 +4598,7 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
-    ) -> Dict:
+    ) -> dict:
         """
         Retrieves system metrics from Ansible Tower. Returns a dictionary with performance and usage metrics.
         """
@@ -4619,7 +4622,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for listing inventories in Ansible Tower.
         """
-        return f"List inventories in Ansible Tower. Page size: {page_size}. Use the `list_inventories` tool."
+        return (
+            f"List inventories in Ansible Tower. Page size: {page_size}. "
+            "Use the `list_inventories` tool."
+        )
 
     @mcp.prompt
     def manage_inventory_prompt(
@@ -4629,7 +4635,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for managing a specific inventory (get, update, delete).
         """
-        return f"Perform action '{action}' on inventory with ID {inventory_id}. Use `get_inventory`, `update_inventory`, or `delete_inventory`."
+        return (
+            f"Perform action '{action}' on inventory with ID {inventory_id}. "
+            "Use `get_inventory`, `update_inventory`, or `delete_inventory`."
+        )
 
     @mcp.prompt
     def create_inventory_prompt(
@@ -4640,7 +4649,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for creating a new inventory.
         """
-        return f"Create a new inventory named '{name}' in organization {organization_id}. Description: '{description}'. Use the `create_inventory` tool."
+        return (
+            f"Create a new inventory named '{name}' in organization {organization_id}. "
+            f"Description: '{description}'. Use the `create_inventory` tool."
+        )
 
     @mcp.prompt
     def list_hosts_prompt(
@@ -4651,7 +4663,10 @@ def register_prompts(mcp: FastMCP):
         Generates a prompt for listing hosts, optionally filtered by inventory.
         """
         if inventory_id:
-            return f"List hosts for inventory ID {inventory_id}. Page size: {page_size}. Use the `list_hosts` tool."
+            return (
+                f"List hosts for inventory ID {inventory_id}. "
+                f"Page size: {page_size}. Use the `list_hosts` tool."
+            )
         return f"List all hosts. Page size: {page_size}. Use the `list_hosts` tool."
 
     @mcp.prompt
@@ -4662,7 +4677,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for managing a specific host (get, update, delete).
         """
-        return f"Perform action '{action}' on host with ID {host_id}. Use `get_host`, `update_host`, or `delete_host`."
+        return (
+            f"Perform action '{action}' on host with ID {host_id}. "
+            "Use `get_host`, `update_host`, or `delete_host`."
+        )
 
     @mcp.prompt
     def create_host_prompt(
@@ -4673,7 +4691,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for creating a new host.
         """
-        return f"Create a new host named '{name}' in inventory {inventory_id}. Variables: '{variables}'. Use the `create_host` tool."
+        return (
+            f"Create a new host named '{name}' in inventory {inventory_id}. "
+            f"Variables: '{variables}'. Use the `create_host` tool."
+        )
 
     @mcp.prompt
     def list_job_templates_prompt(
@@ -4682,7 +4703,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for listing job templates.
         """
-        return f"List job templates. Page size: {page_size}. Use the `list_job_templates` tool."
+        return (
+            f"List job templates. Page size: {page_size}. "
+            "Use the `list_job_templates` tool."
+        )
 
     @mcp.prompt
     def launch_job_prompt(
@@ -4692,7 +4716,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for launching a job from a template.
         """
-        return f"Launch a job using template ID {template_id}. Extra vars: '{extra_vars}'. Use the `launch_job` tool."
+        return (
+            f"Launch a job using template ID {template_id}. "
+            f"Extra vars: '{extra_vars}'. Use the `launch_job` tool."
+        )
 
     @mcp.prompt
     def list_jobs_prompt(
@@ -4702,7 +4729,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for listing jobs, optionally filtered by status.
         """
-        return f"List jobs. Status: '{status}', Page size: {page_size}. Use the `list_jobs` tool."
+        return (
+            f"List jobs. Status: '{status}', Page size: {page_size}. "
+            "Use the `list_jobs` tool."
+        )
 
     @mcp.prompt
     def get_job_details_prompt(
@@ -4712,7 +4742,10 @@ def register_prompts(mcp: FastMCP):
         """
         Generates a prompt for getting job details, events, or stdout.
         """
-        return f"Get '{detail_type}' for job ID {job_id}. Use `get_job` (info), `get_job_events`, or `get_job_stdout`."
+        return (
+            f"Get '{detail_type}' for job ID {job_id}. "
+            "Use `get_job` (info), `get_job_events`, or `get_job_stdout`."
+        )
 
     @mcp.prompt
     def list_projects_prompt(
@@ -4748,7 +4781,7 @@ def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
 
     for mw in middlewares:
         mcp.add_middleware(mw)
-    registered_tags = []
+    registered_tags: list[str] = []
     return mcp, args, middlewares, registered_tags
 
 
