@@ -1,0 +1,17 @@
+# Vulture ignore file
+create_host_prompt
+list_job_templates_prompt
+launch_job_prompt
+list_jobs_prompt
+get_job_details_prompt
+list_projects_prompt
+sync_project_prompt
+health_check
+relaunch_job
+list_inventories_prompt
+manage_inventory_prompt
+create_inventory_prompt
+list_hosts_prompt
+manage_host_prompt
+DEFAULT_AGENT_DESCRIPTION
+DEFAULT_AGENT_SYSTEM_PROMPT

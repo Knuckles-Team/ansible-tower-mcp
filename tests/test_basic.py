@@ -1,4 +1,4 @@
-from ansible_tower_mcp.ansible_tower_api import Api
+from ansible_tower_mcp.api_client import Api
 
 def test_api_init():
     api = Api(base_url="http://localhost", token="test")

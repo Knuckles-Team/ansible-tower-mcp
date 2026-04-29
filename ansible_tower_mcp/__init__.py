@@ -7,7 +7,7 @@ import inspect
 __all__: list[str] = []
 
 CORE_MODULES = [
-    "ansible_tower_mcp.ansible_tower_api",
+    "ansible_tower_mcp.api_client",
 ]
 
 OPTIONAL_MODULES = {

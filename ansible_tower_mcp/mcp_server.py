@@ -29,6 +29,8 @@ from typing import Any
 from agent_utilities.base_utilities import to_boolean
 from agent_utilities.mcp_utilities import (
     create_mcp_server,
+    ctx_confirm_destructive,
+    ctx_progress,
 )
 from dotenv import find_dotenv, load_dotenv
 from fastmcp import Context, FastMCP
@@ -37,7 +39,7 @@ from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from ansible_tower_mcp.ansible_tower_api import Api
+from ansible_tower_mcp.api_client import Api
 
 __version__ = "1.3.54"
 
@@ -91,6 +93,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -150,6 +155,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -213,6 +221,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -418,6 +429,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> list[dict]:
         """
         Retrieves a paginated list of hosts from Ansible Tower, optionally filtered
@@ -476,6 +490,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -539,6 +556,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -747,6 +767,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> list[dict]:
         """
         Retrieves a paginated list of groups in a specified inventory from Ansible
@@ -805,6 +828,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -869,6 +895,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -939,6 +968,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Updates an existing group in Ansible Tower. Returns a dictionary with the updated group's details.
@@ -998,10 +1030,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Deletes a specific group by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if not await ctx_confirm_destructive(ctx, "delete group"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -1055,6 +1093,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -1114,10 +1155,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Removes a host from a group in Ansible Tower. Returns a dictionary confirming the disassociation.
         """
+        if not await ctx_confirm_destructive(ctx, "remove host from group"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -1170,6 +1217,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -1229,6 +1279,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -1300,6 +1353,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -1594,6 +1650,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> list[dict]:
         """
         Retrieves a paginated list of jobs from Ansible Tower, optionally filtered by status. Returns a list of dictionaries, each with job details like id, status, and elapsed time. Display in a markdown table.
@@ -1650,6 +1709,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -1858,6 +1920,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> list[dict]:
         """
         Retrieves a paginated list of events for a specific job from Ansible Tower. Returns a list of dictionaries, each with event details like type, host, and stdout. Display in a markdown table.
@@ -1918,6 +1983,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Fetches the stdout output of a job in the specified format from Ansible Tower. Returns a dictionary with the output content.
@@ -1975,6 +2043,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> list[dict]:
         """
         Retrieves a paginated list of projects from Ansible Tower. Returns a list of dictionaries, each with project details like id, name, and scm_type. Display in a markdown table.
@@ -2031,6 +2102,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -2098,6 +2172,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -2175,6 +2252,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Updates an existing project in Ansible Tower. Returns a dictionary with the updated project's details.
@@ -2239,10 +2319,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Deletes a specific project by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if not await ctx_confirm_destructive(ctx, "delete project"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -2296,7 +2382,11 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
+        await ctx_progress(ctx, 0, 100)
         """
         Syncs (updates from SCM) a project in Ansible Tower. Returns a dictionary with the sync job's details.
         """
@@ -2309,6 +2399,7 @@ def register_tools(mcp: FastMCP):
             client_secret=client_secret,
             verify=verify,
         )
+        await ctx_progress(ctx, 100, 100)
         return client.sync_project(project_id=project_id)
 
     @mcp.tool(
@@ -2352,6 +2443,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -2410,6 +2504,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Fetches details of a specific credential by ID from Ansible Tower. Returns a dictionary with credential information such as name and inputs (masked).
@@ -2466,6 +2563,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -2531,6 +2631,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -2602,6 +2705,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Updates an existing credential in Ansible Tower. Returns a dictionary with the updated credential's details.
@@ -2664,10 +2770,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Deletes a specific credential by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if not await ctx_confirm_destructive(ctx, "delete credential"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -2720,6 +2832,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -2777,6 +2892,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -2837,6 +2955,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -2899,6 +3020,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Updates an existing organization in Ansible Tower. Returns a dictionary with the updated organization's details.
@@ -2958,10 +3082,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Deletes a specific organization by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if not await ctx_confirm_destructive(ctx, "delete organization"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -3019,6 +3149,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> list[dict]:
         """
         Retrieves a paginated list of teams from Ansible Tower, optionally filtered by organization. Returns a list of dictionaries, each with team details like id and name. Display in a markdown table.
@@ -3075,6 +3208,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -3134,6 +3270,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -3196,6 +3335,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Updates an existing team in Ansible Tower. Returns a dictionary with the updated team's details.
@@ -3253,10 +3395,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Deletes a specific team by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if not await ctx_confirm_destructive(ctx, "delete team"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -3309,6 +3457,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -3366,6 +3517,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -3433,6 +3587,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -3510,6 +3667,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Updates an existing user in Ansible Tower. Returns a dictionary with the updated user's details.
@@ -3576,10 +3736,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Deletes a specific user by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if not await ctx_confirm_destructive(ctx, "delete user"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -3640,7 +3806,11 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
+        await ctx_progress(ctx, 0, 100)
         """
         Runs an ad hoc command on hosts in Ansible Tower. Returns a dictionary with the command job's details, including its ID.
         """
@@ -3653,6 +3823,7 @@ def register_tools(mcp: FastMCP):
             client_secret=client_secret,
             verify=verify,
         )
+        await ctx_progress(ctx, 100, 100)
         return client.run_ad_hoc_command(
             inventory_id=inventory_id,
             credential_id=credential_id,
@@ -3703,6 +3874,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -3761,10 +3935,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Cancels a running ad hoc command in Ansible Tower. Returns a dictionary confirming the cancellation status.
         """
+        if not await ctx_confirm_destructive(ctx, "cancel ad hoc command"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -3817,6 +3997,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -3874,6 +4057,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -3936,6 +4122,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Launches a workflow from a template in Ansible Tower, optionally with extra variables. Returns a dictionary with the launched workflow job's details, including its ID.
@@ -3997,6 +4186,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> list[dict]:
         """
         Retrieves a paginated list of workflow jobs from Ansible Tower, optionally filtered by status. Returns a list of dictionaries, each with job details like id and status. Display in a markdown table.
@@ -4053,6 +4245,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -4111,10 +4306,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Cancels a running workflow job in Ansible Tower. Returns a dictionary confirming the cancellation status.
         """
+        if not await ctx_confirm_destructive(ctx, "cancel workflow job"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -4171,6 +4372,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> list[dict]:
         """
@@ -4230,6 +4434,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -4297,6 +4504,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -4367,6 +4577,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Updates an existing schedule in Ansible Tower. Returns a dictionary with the updated schedule's details.
@@ -4430,10 +4643,16 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Deletes a specific schedule by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
         """
+        if not await ctx_confirm_destructive(ctx, "delete schedule"):
+            return {"status": "cancelled", "message": "Operation cancelled by user"}
+        await ctx_progress(ctx, 0, 100)
         client = Api(
             base_url=base_url,
             username=username,
@@ -4485,6 +4704,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
@@ -4542,6 +4764,9 @@ def register_tools(mcp: FastMCP):
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
         ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
+        ),
     ) -> dict:
         """
         Fetches dashboard statistics from Ansible Tower. Returns a dictionary with stats like host counts and recent jobs.
@@ -4597,6 +4822,9 @@ def register_tools(mcp: FastMCP):
         verify: bool = Field(
             default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
             description="Whether to verify SSL certificates",
+        ),
+        ctx: Context = Field(
+            description="MCP context for progress reporting", default=None
         ),
     ) -> dict:
         """
