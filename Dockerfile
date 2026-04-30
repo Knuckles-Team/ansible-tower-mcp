@@ -57,7 +57,7 @@ RUN apt-get update \
      && curl -sS https://starship.rs/install.sh | sh -s -- --yes \
     && mkdir -p /root/.config \
     && echo 'eval "$(starship init bash)"' >> /root/.bashrc \ \
-    uv pip install --system --upgrade --verbose --no-cache --break-system-packages --prerelease=allow ansible-tower-mcp[all]>=1.3.54
+    uv pip install --system --upgrade --verbose --no-cache --break-system-packages --prerelease=allow ansible-tower-mcp[all]>=1.3.56
 
 COPY starship.toml /root/.config/starship.toml
 
