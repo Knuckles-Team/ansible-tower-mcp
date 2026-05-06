@@ -41,7 +41,7 @@ from starlette.responses import JSONResponse
 
 from ansible_tower_mcp.api_client import Api
 
-__version__ = "1.7.0"
+__version__ = "1.8.0"
 
 logger = get_logger(name="TokenMiddleware")
 logger.setLevel(logging.DEBUG)
