@@ -22,7 +22,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/ansible-tower-mcp)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/ansible-tower-mcp)
 
-*Version: 1.6.0*
+*Version: 1.7.0*
 
 ## Overview
 
@@ -573,3 +573,68 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Support
 
 For issues or feature requests, please open an issue on the [GitHub repository](https://github.com/Knuckles-Team/ansible-tower-mcp). For general inquiries, contact the maintainers via GitHub.
+
+
+## MCP Configuration Examples
+
+### 1. Standard IO (stdio) Deployment
+
+```json
+{
+  "mcpServers": {
+    "ansible-tower-mcp": {
+      "command": "uv",
+      "args": [
+        "run",
+        "ansible-tower-mcp"
+      ],
+      "env": {
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "ANSIBLE_BASE_URL": "<YOUR_ANSIBLE_BASE_URL>",
+        "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
+        "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
+        "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
+        "ANSIBLE_TOKEN": "<YOUR_ANSIBLE_TOKEN>",
+        "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
+        "ANSIBLE_VERIFY": "<YOUR_ANSIBLE_VERIFY>",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>"
+      }
+    }
+  }
+}
+```
+
+### 2. Streamable HTTP (SSE) Deployment
+
+```json
+{
+  "mcpServers": {
+    "ansible-tower-mcp": {
+      "command": "uv",
+      "args": [
+        "run",
+        "ansible-tower-mcp",
+        "--transport",
+        "http",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "env": {
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "ANSIBLE_BASE_URL": "<YOUR_ANSIBLE_BASE_URL>",
+        "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
+        "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
+        "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
+        "ANSIBLE_TOKEN": "<YOUR_ANSIBLE_TOKEN>",
+        "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
+        "ANSIBLE_VERIFY": "<YOUR_ANSIBLE_VERIFY>",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>"
+      }
+    }
+  }
+}
+```

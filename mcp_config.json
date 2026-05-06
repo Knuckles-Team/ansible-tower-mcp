@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "ansible-tower-mcp": {
+      "command": "uv",
+      "args": [
+        "run",
+        "ansible-tower-mcp"
+      ],
+      "env": {
+        "ANSIBLE_BASE_URL": "<YOUR_ANSIBLE_BASE_URL>",
+        "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
+        "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
+        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
+        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
+        "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
+        "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
+        "ANSIBLE_TOKEN": "<YOUR_ANSIBLE_TOKEN>",
+        "ANSIBLE_VERIFY": "<YOUR_ANSIBLE_VERIFY>",
+        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>"
+      }
+    }
+  }
+}
