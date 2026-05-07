@@ -22,7 +22,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/ansible-tower-mcp)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/ansible-tower-mcp)
 
-*Version: 1.8.2*
+*Version: 1.9.0*
 
 ## Overview
 
