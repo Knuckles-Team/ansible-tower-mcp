@@ -87,7 +87,7 @@ def test_mcp_server_coverage(mock_session):
         return await call_next(context)
 
     with patch.object(RateLimitingMiddleware, "on_request", mock_on_request):
-        with patch("ansible_tower_mcp.mcp_server.Api") as mock_api:
+        with patch("ansible_tower_mcp.auth.get_client") as mock_api:
             # Setup mock API methods
             mock_inst = mock_api.return_value
             # We want tools to succeed or at least not crash

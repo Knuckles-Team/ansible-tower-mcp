@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 import warnings
 
 # Filter RequestsDependencyWarning early to prevent log spam
@@ -11,15 +11,8 @@ with warnings.catch_warnings():
     except ImportError:
         pass
 
-# General urllib3/chardet mismatch warnings
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
-
-"""
-Ansible MCP Server
-
-This server provides tools for interacting with the Ansible API through the Model Context Protocol.
-"""
 
 import logging
 import os
@@ -27,4999 +20,947 @@ import sys
 from typing import Any
 
 from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import (
-    create_mcp_server,
-    ctx_confirm_destructive,
-    ctx_progress,
-)
+from agent_utilities.mcp_utilities import create_mcp_server
 from dotenv import find_dotenv, load_dotenv
-from fastmcp import Context, FastMCP
+from fastmcp import FastMCP
+from fastmcp.dependencies import Depends
 from fastmcp.utilities.logging import get_logger
 from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from ansible_tower_mcp.api_client import Api
+from ansible_tower_mcp.auth import get_client
 
-__version__ = "1.12.0"
+__version__ = "1.13.0"
 
-logger = get_logger(name="TokenMiddleware")
-logger.setLevel(logging.DEBUG)
+logger = get_logger(name="ansible-tower-mcp")
+logger.setLevel(logging.INFO)
 
 
-def register_tools(mcp: FastMCP):
+def register_inventory_tools(mcp: FastMCP):
+    @mcp.tool(tags={"inventory"})
+    async def ansible_tower_inventory(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_inventories', 'get_inventory', 'create_inventory', 'update_inventory', 'delete_inventory'"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        inventory_id: int | None = Field(default=None, description="inventory id"),
+        name: Any | None = Field(default=None, description="name"),
+        organization_id: int | None = Field(
+            default=None, description="organization id"
+        ),
+        description: Any | None = Field(default=None, description="description"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage inventory operations.
+
+        Actions:
+          - 'list_inventories': Call list_inventories
+          - 'get_inventory': Call get_inventory
+          - 'create_inventory': Call create_inventory
+          - 'update_inventory': Call update_inventory
+          - 'delete_inventory': Call delete_inventory
+        """
+        kwargs: dict[str, Any]
+        if action == "list_inventories":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_inventories(**kwargs)
+        if action == "get_inventory":
+            kwargs = {"inventory_id": inventory_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_inventory(**kwargs)
+        if action == "create_inventory":
+            kwargs = {
+                "name": name,
+                "organization_id": organization_id,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_inventory(**kwargs)
+        if action == "update_inventory":
+            kwargs = {
+                "inventory_id": inventory_id,
+                "name": name,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_inventory(**kwargs)
+        if action == "delete_inventory":
+            kwargs = {"inventory_id": inventory_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_inventory(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_inventories', 'get_inventory', 'create_inventory', 'update_inventory', 'delete_inventory"
+        )
+
+
+def register_hosts_tools(mcp: FastMCP):
+    @mcp.tool(tags={"hosts"})
+    async def ansible_tower_hosts(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_hosts', 'get_host', 'create_host', 'update_host', 'delete_host'"
+        ),
+        inventory_id: Any | None = Field(default=None, description="inventory id"),
+        page_size: int | None = Field(default=None, description="page size"),
+        host_id: int | None = Field(default=None, description="host id"),
+        name: Any | None = Field(default=None, description="name"),
+        variables: Any | None = Field(default=None, description="variables"),
+        description: Any | None = Field(default=None, description="description"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage hosts operations.
+
+        Actions:
+          - 'list_hosts': Call list_hosts
+          - 'get_host': Call get_host
+          - 'create_host': Call create_host
+          - 'update_host': Call update_host
+          - 'delete_host': Call delete_host
+        """
+        kwargs: dict[str, Any]
+        if action == "list_hosts":
+            kwargs = {"inventory_id": inventory_id, "page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_hosts(**kwargs)
+        if action == "get_host":
+            kwargs = {"host_id": host_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_host(**kwargs)
+        if action == "create_host":
+            kwargs = {
+                "name": name,
+                "inventory_id": inventory_id,
+                "variables": variables,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_host(**kwargs)
+        if action == "update_host":
+            kwargs = {
+                "host_id": host_id,
+                "name": name,
+                "variables": variables,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_host(**kwargs)
+        if action == "delete_host":
+            kwargs = {"host_id": host_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_host(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_hosts', 'get_host', 'create_host', 'update_host', 'delete_host"
+        )
+
+
+def register_groups_tools(mcp: FastMCP):
+    @mcp.tool(tags={"groups"})
+    async def ansible_tower_groups(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_groups', 'get_group', 'create_group', 'update_group', 'delete_group', 'add_host_to_group', 'remove_host_from_group'"
+        ),
+        inventory_id: int | None = Field(default=None, description="inventory id"),
+        page_size: int | None = Field(default=None, description="page size"),
+        group_id: int | None = Field(default=None, description="group id"),
+        name: Any | None = Field(default=None, description="name"),
+        variables: Any | None = Field(default=None, description="variables"),
+        description: Any | None = Field(default=None, description="description"),
+        host_id: int | None = Field(default=None, description="host id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage groups operations.
+
+        Actions:
+          - 'list_groups': Call list_groups
+          - 'get_group': Call get_group
+          - 'create_group': Call create_group
+          - 'update_group': Call update_group
+          - 'delete_group': Call delete_group
+          - 'add_host_to_group': Call add_host_to_group
+          - 'remove_host_from_group': Call remove_host_from_group
+        """
+        kwargs: dict[str, Any]
+        if action == "list_groups":
+            kwargs = {"inventory_id": inventory_id, "page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_groups(**kwargs)
+        if action == "get_group":
+            kwargs = {"group_id": group_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_group(**kwargs)
+        if action == "create_group":
+            kwargs = {
+                "name": name,
+                "inventory_id": inventory_id,
+                "variables": variables,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_group(**kwargs)
+        if action == "update_group":
+            kwargs = {
+                "group_id": group_id,
+                "name": name,
+                "variables": variables,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_group(**kwargs)
+        if action == "delete_group":
+            kwargs = {"group_id": group_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_group(**kwargs)
+        if action == "add_host_to_group":
+            kwargs = {"group_id": group_id, "host_id": host_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.add_host_to_group(**kwargs)
+        if action == "remove_host_from_group":
+            kwargs = {"group_id": group_id, "host_id": host_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.remove_host_from_group(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_groups', 'get_group', 'create_group', 'update_group', 'delete_group', 'add_host_to_group', 'remove_host_from_group"
+        )
+
+
+def register_job_templates_tools(mcp: FastMCP):
+    @mcp.tool(tags={"job-templates"})
+    async def ansible_tower_job_templates(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_job_templates', 'get_job_template', 'create_job_template', 'update_job_template', 'delete_job_template', 'launch_job'"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        template_id: int | None = Field(default=None, description="template id"),
+        name: Any | None = Field(default=None, description="name"),
+        inventory_id: Any | None = Field(default=None, description="inventory id"),
+        project_id: int | None = Field(default=None, description="project id"),
+        playbook: Any | None = Field(default=None, description="playbook"),
+        credential_id: int | None = Field(default=None, description="credential id"),
+        description: Any | None = Field(default=None, description="description"),
+        extra_vars: Any | None = Field(default=None, description="extra vars"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage job templates operations.
+
+        Actions:
+          - 'list_job_templates': Call list_job_templates
+          - 'get_job_template': Call get_job_template
+          - 'create_job_template': Call create_job_template
+          - 'update_job_template': Call update_job_template
+          - 'delete_job_template': Call delete_job_template
+          - 'launch_job': Call launch_job
+        """
+        kwargs: dict[str, Any]
+        if action == "list_job_templates":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_job_templates(**kwargs)
+        if action == "get_job_template":
+            kwargs = {"template_id": template_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_job_template(**kwargs)
+        if action == "create_job_template":
+            kwargs = {
+                "name": name,
+                "inventory_id": inventory_id,
+                "project_id": project_id,
+                "playbook": playbook,
+                "credential_id": credential_id,
+                "description": description,
+                "extra_vars": extra_vars,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_job_template(**kwargs)
+        if action == "update_job_template":
+            kwargs = {
+                "template_id": template_id,
+                "name": name,
+                "inventory_id": inventory_id,
+                "playbook": playbook,
+                "description": description,
+                "extra_vars": extra_vars,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_job_template(**kwargs)
+        if action == "delete_job_template":
+            kwargs = {"template_id": template_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_job_template(**kwargs)
+        if action == "launch_job":
+            kwargs = {"template_id": template_id, "extra_vars": extra_vars}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.launch_job(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_job_templates', 'get_job_template', 'create_job_template', 'update_job_template', 'delete_job_template', 'launch_job"
+        )
+
+
+def register_jobs_tools(mcp: FastMCP):
+    @mcp.tool(tags={"jobs"})
+    async def ansible_tower_jobs(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_jobs', 'get_job', 'cancel_job', 'relaunch_job', 'get_job_events', 'get_job_stdout'"
+        ),
+        status: str | None = Field(default=None, description="status"),
+        page_size: int | None = Field(default=None, description="page size"),
+        job_id: int | None = Field(default=None, description="job id"),
+        format: str | None = Field(default=None, description="format"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage jobs operations.
+
+        Actions:
+          - 'list_jobs': Call list_jobs
+          - 'get_job': Call get_job
+          - 'cancel_job': Call cancel_job
+          - 'relaunch_job': Call relaunch_job
+          - 'get_job_events': Call get_job_events
+          - 'get_job_stdout': Call get_job_stdout
+        """
+        kwargs: dict[str, Any]
+        if action == "list_jobs":
+            kwargs = {"status": status, "page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_jobs(**kwargs)
+        if action == "get_job":
+            kwargs = {"job_id": job_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_job(**kwargs)
+        if action == "cancel_job":
+            kwargs = {"job_id": job_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.cancel_job(**kwargs)
+        if action == "relaunch_job":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.relaunch_job(**kwargs)
+        if action == "get_job_events":
+            kwargs = {"job_id": job_id, "page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_job_events(**kwargs)
+        if action == "get_job_stdout":
+            kwargs = {"job_id": job_id, "format": format}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_job_stdout(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_jobs', 'get_job', 'cancel_job', 'relaunch_job', 'get_job_events', 'get_job_stdout"
+        )
+
+
+def register_projects_tools(mcp: FastMCP):
+    @mcp.tool(tags={"projects"})
+    async def ansible_tower_projects(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_projects', 'get_project', 'create_project', 'update_project', 'delete_project', 'sync_project'"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        project_id: int | None = Field(default=None, description="project id"),
+        name: Any | None = Field(default=None, description="name"),
+        organization_id: int | None = Field(
+            default=None, description="organization id"
+        ),
+        scm_type: Any | None = Field(default=None, description="scm type"),
+        scm_url: str | None = Field(default=None, description="scm url"),
+        scm_branch: str | None = Field(default=None, description="scm branch"),
+        credential_id: int | None = Field(default=None, description="credential id"),
+        description: Any | None = Field(default=None, description="description"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage projects operations.
+
+        Actions:
+          - 'list_projects': Call list_projects
+          - 'get_project': Call get_project
+          - 'create_project': Call create_project
+          - 'update_project': Call update_project
+          - 'delete_project': Call delete_project
+          - 'sync_project': Call sync_project
+        """
+        kwargs: dict[str, Any]
+        if action == "list_projects":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_projects(**kwargs)
+        if action == "get_project":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_project(**kwargs)
+        if action == "create_project":
+            kwargs = {
+                "name": name,
+                "organization_id": organization_id,
+                "scm_type": scm_type,
+                "scm_url": scm_url,  # type: ignore
+                "scm_branch": scm_branch,  # type: ignore
+                "credential_id": credential_id,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_project(**kwargs)
+        if action == "update_project":
+            kwargs = {
+                "project_id": project_id,
+                "name": name,
+                "scm_type": scm_type,
+                "scm_url": scm_url,  # type: ignore
+                "scm_branch": scm_branch,  # type: ignore
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_project(**kwargs)
+        if action == "delete_project":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_project(**kwargs)
+        if action == "sync_project":
+            kwargs = {"project_id": project_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.sync_project(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_projects', 'get_project', 'create_project', 'update_project', 'delete_project', 'sync_project"
+        )
+
+
+def register_credentials_tools(mcp: FastMCP):
+    @mcp.tool(tags={"credentials"})
+    async def ansible_tower_credentials(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_credentials', 'get_credential', 'list_credential_types', 'create_credential', 'update_credential', 'delete_credential'"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        credential_id: int | None = Field(default=None, description="credential id"),
+        name: Any | None = Field(default=None, description="name"),
+        credential_type_id: int | None = Field(
+            default=None, description="credential type id"
+        ),
+        organization_id: int | None = Field(
+            default=None, description="organization id"
+        ),
+        inputs: Any | None = Field(default=None, description="inputs"),
+        description: Any | None = Field(default=None, description="description"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage credentials operations.
+
+        Actions:
+          - 'list_credentials': Call list_credentials
+          - 'get_credential': Call get_credential
+          - 'list_credential_types': Call list_credential_types
+          - 'create_credential': Call create_credential
+          - 'update_credential': Call update_credential
+          - 'delete_credential': Call delete_credential
+        """
+        kwargs: dict[str, Any]
+        if action == "list_credentials":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_credentials(**kwargs)
+        if action == "get_credential":
+            kwargs = {"credential_id": credential_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_credential(**kwargs)
+        if action == "list_credential_types":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_credential_types(**kwargs)
+        if action == "create_credential":
+            kwargs = {
+                "name": name,
+                "credential_type_id": credential_type_id,
+                "organization_id": organization_id,
+                "inputs": inputs,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_credential(**kwargs)
+        if action == "update_credential":
+            kwargs = {
+                "credential_id": credential_id,
+                "name": name,
+                "inputs": inputs,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_credential(**kwargs)
+        if action == "delete_credential":
+            kwargs = {"credential_id": credential_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_credential(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_credentials', 'get_credential', 'list_credential_types', 'create_credential', 'update_credential', 'delete_credential"
+        )
+
+
+def register_organizations_tools(mcp: FastMCP):
+    @mcp.tool(tags={"organizations"})
+    async def ansible_tower_organizations(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_organizations', 'get_organization', 'create_organization', 'update_organization', 'delete_organization'"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        organization_id: int | None = Field(
+            default=None, description="organization id"
+        ),
+        name: Any | None = Field(default=None, description="name"),
+        description: Any | None = Field(default=None, description="description"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage organizations operations.
+
+        Actions:
+          - 'list_organizations': Call list_organizations
+          - 'get_organization': Call get_organization
+          - 'create_organization': Call create_organization
+          - 'update_organization': Call update_organization
+          - 'delete_organization': Call delete_organization
+        """
+        kwargs: dict[str, Any]
+        if action == "list_organizations":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_organizations(**kwargs)
+        if action == "get_organization":
+            kwargs = {"organization_id": organization_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_organization(**kwargs)
+        if action == "create_organization":
+            kwargs = {"name": name, "description": description}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_organization(**kwargs)
+        if action == "update_organization":
+            kwargs = {
+                "organization_id": organization_id,
+                "name": name,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_organization(**kwargs)
+        if action == "delete_organization":
+            kwargs = {"organization_id": organization_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_organization(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_organizations', 'get_organization', 'create_organization', 'update_organization', 'delete_organization"
+        )
+
+
+def register_teams_tools(mcp: FastMCP):
+    @mcp.tool(tags={"teams"})
+    async def ansible_tower_teams(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_teams', 'get_team', 'create_team', 'update_team', 'delete_team'"
+        ),
+        organization_id: Any | None = Field(
+            default=None, description="organization id"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        team_id: int | None = Field(default=None, description="team id"),
+        name: Any | None = Field(default=None, description="name"),
+        description: Any | None = Field(default=None, description="description"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage teams operations.
+
+        Actions:
+          - 'list_teams': Call list_teams
+          - 'get_team': Call get_team
+          - 'create_team': Call create_team
+          - 'update_team': Call update_team
+          - 'delete_team': Call delete_team
+        """
+        kwargs: dict[str, Any]
+        if action == "list_teams":
+            kwargs = {"organization_id": organization_id, "page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_teams(**kwargs)
+        if action == "get_team":
+            kwargs = {"team_id": team_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_team(**kwargs)
+        if action == "create_team":
+            kwargs = {
+                "name": name,
+                "organization_id": organization_id,
+                "description": description,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_team(**kwargs)
+        if action == "update_team":
+            kwargs = {"team_id": team_id, "name": name, "description": description}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_team(**kwargs)
+        if action == "delete_team":
+            kwargs = {"team_id": team_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_team(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_teams', 'get_team', 'create_team', 'update_team', 'delete_team"
+        )
+
+
+def register_users_tools(mcp: FastMCP):
+    @mcp.tool(tags={"users"})
+    async def ansible_tower_users(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_users', 'get_user', 'create_user', 'update_user', 'delete_user'"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        user_id: int | None = Field(default=None, description="user id"),
+        username: Any | None = Field(default=None, description="username"),
+        password: Any | None = Field(default=None, description="password"),
+        first_name: Any | None = Field(default=None, description="first name"),
+        last_name: Any | None = Field(default=None, description="last name"),
+        email: Any | None = Field(default=None, description="email"),
+        is_superuser: Any | None = Field(default=None, description="is superuser"),
+        is_system_auditor: Any | None = Field(
+            default=None, description="is system auditor"
+        ),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage users operations.
+
+        Actions:
+          - 'list_users': Call list_users
+          - 'get_user': Call get_user
+          - 'create_user': Call create_user
+          - 'update_user': Call update_user
+          - 'delete_user': Call delete_user
+        """
+        kwargs: dict[str, Any]
+        if action == "list_users":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_users(**kwargs)
+        if action == "get_user":
+            kwargs = {"user_id": user_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_user(**kwargs)
+        if action == "create_user":
+            kwargs = {
+                "username": username,
+                "password": password,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "is_superuser": is_superuser,
+                "is_system_auditor": is_system_auditor,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_user(**kwargs)
+        if action == "update_user":
+            kwargs = {
+                "user_id": user_id,
+                "username": username,
+                "password": password,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "is_superuser": is_superuser,
+                "is_system_auditor": is_system_auditor,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_user(**kwargs)
+        if action == "delete_user":
+            kwargs = {"user_id": user_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_user(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_users', 'get_user', 'create_user', 'update_user', 'delete_user"
+        )
+
+
+def register_ad_hoc_commands_tools(mcp: FastMCP):
+    @mcp.tool(tags={"ad_hoc_commands"})
+    async def ansible_tower_ad_hoc_commands(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'run_ad_hoc_command', 'get_ad_hoc_command', 'cancel_ad_hoc_command'"
+        ),
+        inventory_id: int | None = Field(default=None, description="inventory id"),
+        credential_id: int | None = Field(default=None, description="credential id"),
+        module_name: str | None = Field(default=None, description="module name"),
+        module_args: str | None = Field(default=None, description="module args"),
+        limit: str | None = Field(default=None, description="limit"),
+        verbosity: int | None = Field(default=None, description="verbosity"),
+        command_id: int | None = Field(default=None, description="command id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage ad hoc commands operations.
+
+        Actions:
+          - 'run_ad_hoc_command': Call run_ad_hoc_command
+          - 'get_ad_hoc_command': Call get_ad_hoc_command
+          - 'cancel_ad_hoc_command': Call cancel_ad_hoc_command
+        """
+        kwargs: dict[str, Any]
+        if action == "run_ad_hoc_command":
+            kwargs = {
+                "inventory_id": inventory_id,
+                "credential_id": credential_id,
+                "module_name": module_name,
+                "module_args": module_args,
+                "limit": limit,
+                "verbosity": verbosity,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.run_ad_hoc_command(**kwargs)
+        if action == "get_ad_hoc_command":
+            kwargs = {"command_id": command_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_ad_hoc_command(**kwargs)
+        if action == "cancel_ad_hoc_command":
+            kwargs = {"command_id": command_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.cancel_ad_hoc_command(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: run_ad_hoc_command', 'get_ad_hoc_command', 'cancel_ad_hoc_command"
+        )
+
+
+def register_workflow_templates_tools(mcp: FastMCP):
+    @mcp.tool(tags={"workflow_templates"})
+    async def ansible_tower_workflow_templates(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_workflow_templates', 'get_workflow_template', 'launch_workflow'"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        template_id: int | None = Field(default=None, description="template id"),
+        extra_vars: str | None = Field(default=None, description="extra vars"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage workflow templates operations.
+
+        Actions:
+          - 'list_workflow_templates': Call list_workflow_templates
+          - 'get_workflow_template': Call get_workflow_template
+          - 'launch_workflow': Call launch_workflow
+        """
+        kwargs: dict[str, Any]
+        if action == "list_workflow_templates":
+            kwargs = {"page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_workflow_templates(**kwargs)
+        if action == "get_workflow_template":
+            kwargs = {"template_id": template_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workflow_template(**kwargs)
+        if action == "launch_workflow":
+            kwargs = {"template_id": template_id, "extra_vars": extra_vars}  # type: ignore
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.launch_workflow(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_workflow_templates', 'get_workflow_template', 'launch_workflow"
+        )
+
+
+def register_workflow_jobs_tools(mcp: FastMCP):
+    @mcp.tool(tags={"workflow_jobs"})
+    async def ansible_tower_workflow_jobs(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_workflow_jobs', 'get_workflow_job', 'cancel_workflow_job'"
+        ),
+        status: str | None = Field(default=None, description="status"),
+        page_size: int | None = Field(default=None, description="page size"),
+        job_id: int | None = Field(default=None, description="job id"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage workflow jobs operations.
+
+        Actions:
+          - 'list_workflow_jobs': Call list_workflow_jobs
+          - 'get_workflow_job': Call get_workflow_job
+          - 'cancel_workflow_job': Call cancel_workflow_job
+        """
+        kwargs: dict[str, Any]
+        if action == "list_workflow_jobs":
+            kwargs = {"status": status, "page_size": page_size}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_workflow_jobs(**kwargs)
+        if action == "get_workflow_job":
+            kwargs = {"job_id": job_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_workflow_job(**kwargs)
+        if action == "cancel_workflow_job":
+            kwargs = {"job_id": job_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.cancel_workflow_job(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_workflow_jobs', 'get_workflow_job', 'cancel_workflow_job"
+        )
+
+
+def register_schedules_tools(mcp: FastMCP):
+    @mcp.tool(tags={"schedules"})
+    async def ansible_tower_schedules(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'list_schedules', 'get_schedule', 'create_schedule', 'update_schedule', 'delete_schedule'"
+        ),
+        unified_job_template_id: Any | None = Field(
+            default=None, description="unified job template id"
+        ),
+        page_size: int | None = Field(default=None, description="page size"),
+        schedule_id: int | None = Field(default=None, description="schedule id"),
+        name: Any | None = Field(default=None, description="name"),
+        rrule: Any | None = Field(default=None, description="rrule"),
+        description: Any | None = Field(default=None, description="description"),
+        extra_data: Any | None = Field(default=None, description="extra data"),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage schedules operations.
+
+        Actions:
+          - 'list_schedules': Call list_schedules
+          - 'get_schedule': Call get_schedule
+          - 'create_schedule': Call create_schedule
+          - 'update_schedule': Call update_schedule
+          - 'delete_schedule': Call delete_schedule
+        """
+        kwargs: dict[str, Any]
+        if action == "list_schedules":
+            kwargs = {
+                "unified_job_template_id": unified_job_template_id,
+                "page_size": page_size,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.list_schedules(**kwargs)
+        if action == "get_schedule":
+            kwargs = {"schedule_id": schedule_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_schedule(**kwargs)
+        if action == "create_schedule":
+            kwargs = {
+                "name": name,
+                "rrule": rrule,
+                "unified_job_template_id": unified_job_template_id,
+                "description": description,
+                "extra_data": extra_data,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.create_schedule(**kwargs)
+        if action == "update_schedule":
+            kwargs = {
+                "schedule_id": schedule_id,
+                "name": name,
+                "rrule": rrule,
+                "description": description,
+                "extra_data": extra_data,
+            }
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.update_schedule(**kwargs)
+        if action == "delete_schedule":
+            kwargs = {"schedule_id": schedule_id}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.delete_schedule(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: list_schedules', 'get_schedule', 'create_schedule', 'update_schedule', 'delete_schedule"
+        )
+
+
+def register_system_tools(mcp: FastMCP):
+    @mcp.tool(tags={"system"})
+    async def ansible_tower_system(
+        action: str = Field(
+            description="Action to perform. Must be one of: 'get_ansible_version', 'get_dashboard_stats', 'get_metrics'"
+        ),
+        client=Depends(get_client),
+    ) -> dict:
+        """Manage system operations.
+
+        Actions:
+          - 'get_ansible_version': Call get_ansible_version
+          - 'get_dashboard_stats': Call get_dashboard_stats
+          - 'get_metrics': Call get_metrics
+        """
+        kwargs: dict[str, Any]
+        if action == "get_ansible_version":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_ansible_version(**kwargs)
+        if action == "get_dashboard_stats":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_dashboard_stats(**kwargs)
+        if action == "get_metrics":
+            kwargs = {}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            return client.get_metrics(**kwargs)
+        raise ValueError(
+            f"Unknown action: {action}. Must be one of: get_ansible_version', 'get_dashboard_stats', 'get_metrics"
+        )
+
+
+def get_mcp_instance() -> tuple[Any, ...]:
+    """Initialize and return the MCP instance."""
+    load_dotenv(find_dotenv())
+    args, mcp, middlewares = create_mcp_server(
+        name="ansible-tower-mcp MCP",
+        version=__version__,
+        instructions="ansible-tower-mcp MCP Server — Condensed Action-Routed Tools.",
+    )
+
     @mcp.custom_route("/health", methods=["GET"])
     async def health_check(request: Request) -> JSONResponse:
         return JSONResponse({"status": "OK"})
 
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"inventory"},
-    )
-    async def list_inventories(
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of inventories from Ansible Tower. Returns a list
-        of dictionaries, each containing inventory details like id, name, and
-        description. Display results in a markdown table for clarity.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_inventories(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"inventory"},
-    )
-    async def get_inventory(
-        inventory_id: int = Field(description="ID of the inventory"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific inventory by ID from Ansible Tower. Returns
-        a dictionary with inventory information such as name, description, and
-        hosts count.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_inventory(inventory_id=inventory_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"inventory"},
-    )
-    async def create_inventory(
-        name: str = Field(description="Name of the inventory"),
-        organization_id: int = Field(description="ID of the organization"),
-        description: str = Field(
-            default="", description="Description of the inventory"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new inventory in Ansible Tower. Returns a dictionary with the created inventory's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_inventory(
-            name=name, organization_id=organization_id, description=description
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"inventory"},
-    )
-    async def update_inventory(
-        inventory_id: int = Field(description="ID of the inventory"),
-        name: str | None = Field(
-            default=None, description="New name for the inventory"
-        ),
-        description: str | None = Field(
-            default=None, description="New description for the inventory"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Updates an existing inventory in Ansible Tower. Returns a dictionary with the updated inventory's details.
-        """
-        if ctx:
-            message = f"Are you sure you want to UPDATE inventory {inventory_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_inventory(
-            inventory_id=inventory_id, name=name, description=description
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"inventory"},
-    )
-    async def delete_inventory(
-        inventory_id: int = Field(description="ID of the inventory"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Deletes a specific inventory by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if ctx:
-            message = f"Are you sure you want to DELETE inventory {inventory_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_inventory(inventory_id=inventory_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"hosts"},
-    )
-    async def list_hosts(
-        inventory_id: int | None = Field(
-            default=None, description="Optional ID of inventory to filter hosts"
-        ),
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of hosts from Ansible Tower, optionally filtered
-        by inventory. Returns a list of dictionaries, each with host details like
-        id, name, and variables. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_hosts(inventory_id=inventory_id, page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"hosts"},
-    )
-    async def get_host(
-        host_id: int = Field(description="ID of the host"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific host by ID from Ansible Tower. Returns a
-        dictionary with host information such as name, variables, and inventory.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_host(host_id=host_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"hosts"},
-    )
-    async def create_host(
-        name: str = Field(description="Name or IP address of the host"),
-        inventory_id: int = Field(description="ID of the inventory to add the host to"),
-        variables: str = Field(
-            default="{}", description="JSON string of host variables"
-        ),
-        description: str = Field(default="", description="Description of the host"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new host in a specified inventory in Ansible Tower. Returns a
-        dictionary with the created host's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_host(
-            name=name,
-            inventory_id=inventory_id,
-            variables=variables,
-            description=description,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"hosts"},
-    )
-    async def update_host(
-        host_id: int = Field(description="ID of the host"),
-        name: str | None = Field(default=None, description="New name for the host"),
-        variables: str | None = Field(
-            default=None, description="JSON string of host variables"
-        ),
-        description: str | None = Field(
-            default=None, description="New description for the host"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Updates an existing host in Ansible Tower. Returns a dictionary with the updated host's details.
-        """
-        if ctx:
-            message = f"Are you sure you want to UPDATE host {host_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_host(
-            host_id=host_id, name=name, variables=variables, description=description
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"hosts"},
-    )
-    async def delete_host(
-        host_id: int = Field(description="ID of the host"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Deletes a specific host by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if ctx:
-            message = f"Are you sure you want to DELETE host {host_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_host(host_id=host_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"groups"},
-    )
-    async def list_groups(
-        inventory_id: int = Field(description="ID of the inventory"),
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of groups in a specified inventory from Ansible
-        Tower. Returns a list of dictionaries, each with group details like id,
-        name, and variables. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_groups(inventory_id=inventory_id, page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"groups"},
-    )
-    async def get_group(
-        group_id: int = Field(description="ID of the group"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific group by ID from Ansible Tower. Returns a dictionary with group information such as name, variables, and inventory.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_group(group_id=group_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"groups"},
-    )
-    async def create_group(
-        name: str = Field(description="Name of the group"),
-        inventory_id: int = Field(
-            description="ID of the inventory to add the group to"
-        ),
-        variables: str = Field(
-            default="{}", description="JSON string of group variables"
-        ),
-        description: str = Field(default="", description="Description of the group"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new group in a specified inventory in Ansible Tower. Returns a dictionary with the created group's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_group(
-            name=name,
-            inventory_id=inventory_id,
-            variables=variables,
-            description=description,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"groups"},
-    )
-    async def update_group(
-        group_id: int = Field(description="ID of the group"),
-        name: str | None = Field(default=None, description="New name for the group"),
-        variables: str | None = Field(
-            default=None, description="JSON string of group variables"
-        ),
-        description: str | None = Field(
-            default=None, description="New description for the group"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Updates an existing group in Ansible Tower. Returns a dictionary with the updated group's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_group(
-            group_id=group_id, name=name, variables=variables, description=description
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"groups"},
-    )
-    async def delete_group(
-        group_id: int = Field(description="ID of the group"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Deletes a specific group by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete group"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_group(group_id=group_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"groups"},
-    )
-    async def add_host_to_group(
-        group_id: int = Field(description="ID of the group"),
-        host_id: int = Field(description="ID of the host"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Adds a host to a group in Ansible Tower. Returns a dictionary confirming the association.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.add_host_to_group(group_id=group_id, host_id=host_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"groups"},
-    )
-    async def remove_host_from_group(
-        group_id: int = Field(description="ID of the group"),
-        host_id: int = Field(description="ID of the host"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Removes a host from a group in Ansible Tower. Returns a dictionary confirming the disassociation.
-        """
-        if not await ctx_confirm_destructive(ctx, "remove host from group"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.remove_host_from_group(group_id=group_id, host_id=host_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"job-templates"},
-    )
-    async def list_job_templates(
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of job templates from Ansible Tower. Returns a
-        list of dictionaries, each with template details like id, name, and
-        playbook. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_job_templates(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"job-templates"},
-    )
-    async def get_job_template(
-        template_id: int = Field(description="ID of the job template"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific job template by ID from Ansible Tower. Returns a dictionary with template information such as name, inventory, and extra_vars.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_job_template(template_id=template_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"job-templates"},
-    )
-    async def create_job_template(
-        name: str = Field(description="Name of the job template"),
-        inventory_id: int = Field(description="ID of the inventory"),
-        project_id: int = Field(description="ID of the project"),
-        playbook: str = Field(
-            description="Name of the playbook (e.g., 'playbook.yml')"
-        ),
-        credential_id: int | None = Field(
-            default=None, description="Optional ID of the credential"
-        ),
-        description: str = Field(
-            default="", description="Description of the job template"
-        ),
-        extra_vars: str = Field(
-            default="{}", description="JSON string of extra variables"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new job template in Ansible Tower. Returns a dictionary with the created template's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_job_template(
-            name=name,
-            inventory_id=inventory_id,
-            project_id=project_id,
-            playbook=playbook,
-            credential_id=credential_id,
-            description=description,
-            extra_vars=extra_vars,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"job-templates"},
-    )
-    async def update_job_template(
-        template_id: int = Field(description="ID of the job template"),
-        name: str | None = Field(
-            default=None, description="New name for the job template"
-        ),
-        inventory_id: int | None = Field(default=None, description="New inventory ID"),
-        playbook: str | None = Field(default=None, description="New playbook name"),
-        description: str | None = Field(default=None, description="New description"),
-        extra_vars: str | None = Field(
-            default=None, description="JSON string of extra variables"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Updates an existing job template in Ansible Tower. Returns a dictionary with the updated template's details.
-        """
-        if ctx:
-            message = f"Are you sure you want to UPDATE job template {template_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_job_template(
-            template_id=template_id,
-            name=name,
-            inventory_id=inventory_id,
-            playbook=playbook,
-            description=description,
-            extra_vars=extra_vars,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"job-templates"},
-    )
-    async def delete_job_template(
-        template_id: int = Field(description="ID of the job template"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Deletes a specific job template by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if ctx:
-            message = f"Are you sure you want to DELETE job template {template_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_job_template(template_id=template_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"job-templates"},
-    )
-    async def launch_job(
-        template_id: int = Field(description="ID of the job template"),
-        extra_vars: str | None = Field(
-            default=None,
-            description="JSON string of extra variables to override the template's variables",
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Launches a job from a template in Ansible Tower, optionally with extra variables. Returns a dictionary with the launched job's details, including its ID.
-        """
-        if ctx:
-            message = (
-                f"Are you sure you want to LAUNCH job from template {template_id}?"
-            )
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.launch_job(template_id=template_id, extra_vars=extra_vars)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"jobs"},
-    )
-    async def list_jobs(
-        status: str | None = Field(
-            default=None,
-            description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
-        ),
-        page_size: int = Field(10, description="Number of results per page"),
-        _page: int = Field(1, description="Page number to retrieve"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of jobs from Ansible Tower, optionally filtered by status. Returns a list of dictionaries, each with job details like id, status, and elapsed time. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_jobs(status=status, page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"jobs"},
-    )
-    async def get_job(
-        job_id: int = Field(description="ID of the job"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific job by ID from Ansible Tower. Returns a dictionary with job information such as status, start time, and artifacts.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_job(job_id=job_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"jobs"},
-    )
-    async def cancel_job(
-        job_id: int = Field(description="ID of the job"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Cancels a running job in Ansible Tower. Returns a dictionary confirming the cancellation status.
-        """
-        if ctx:
-            message = f"Are you sure you want to CANCEL job {job_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.cancel_job(job_id=job_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"jobs"},
-    )
-    async def relaunch_job(
-        job_id: int = Field(description="ID of the job to relaunch"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context | None = None,
-    ) -> dict:
-        """
-        Relaunches a job by getting its details and launching the same job template with the same variables. Returns a dictionary with the results of the new job.
-        """
-        if ctx:
-            message = f"Are you sure you want to RELAUNCH job {job_id}?"
-            result = await ctx.elicit(message, response_type=bool)
-            if result.action != "accept" or not result.data:
-                return {
-                    "status": "cancelled",
-                    "message": "Operation cancelled by user.",
-                }
-
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-
-        job = client.get_job(job_id=job_id)
-
-        template_id = job.get("job_template")
-        if not template_id:
-            raise ValueError("Job does not have an associated job template")
-
-        extra_vars = job.get("extra_vars")
-
-        result = client.launch_job(template_id=template_id, extra_vars=extra_vars)
-
-        if "id" in result:
-            result["relaunched_from"] = job_id
-            result["original_job_name"] = job.get("name", "")
-
-        return result
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"jobs"},
-    )
-    async def get_job_events(
-        job_id: int = Field(description="ID of the job"),
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of events for a specific job from Ansible Tower. Returns a list of dictionaries, each with event details like type, host, and stdout. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_job_events(job_id=job_id, page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"jobs"},
-    )
-    async def get_job_stdout(
-        job_id: int = Field(description="ID of the job"),
-        format: str = Field(
-            default="txt", description="Format of the output (txt, html, json, ansi)"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches the stdout output of a job in the specified format from Ansible Tower. Returns a dictionary with the output content.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_job_stdout(job_id=job_id, format=format)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"projects"},
-    )
-    async def list_projects(
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of projects from Ansible Tower. Returns a list of dictionaries, each with project details like id, name, and scm_type. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_projects(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"projects"},
-    )
-    async def get_project(
-        project_id: int = Field(description="ID of the project"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific project by ID from Ansible Tower. Returns a dictionary with project information such as name, scm_url, and status.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_project(project_id=project_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"projects"},
-    )
-    async def create_project(
-        name: str = Field(description="Name of the project"),
-        organization_id: int = Field(description="ID of the organization"),
-        scm_type: str = Field(description="SCM type (git, hg, svn, manual)"),
-        scm_url: str | None = Field(default=None, description="URL for the repository"),
-        scm_branch: str | None = Field(
-            default=None, description="Branch/tag/commit to checkout"
-        ),
-        credential_id: int | None = Field(
-            default=None, description="ID of the credential for SCM access"
-        ),
-        description: str = Field(default="", description="Description of the project"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new project in Ansible Tower. Returns a dictionary with the created project's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_project(
-            name=name,
-            organization_id=organization_id,
-            scm_type=scm_type,
-            scm_url=scm_url,
-            scm_branch=scm_branch,
-            credential_id=credential_id,
-            description=description,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"projects"},
-    )
-    async def update_project(
-        project_id: int = Field(description="ID of the project"),
-        name: str | None = Field(default=None, description="New name for the project"),
-        scm_type: str | None = Field(
-            default=None, description="New SCM type (git, hg, svn, manual)"
-        ),
-        scm_url: str | None = Field(
-            default=None, description="New URL for the repository"
-        ),
-        scm_branch: str | None = Field(
-            default=None, description="New branch/tag/commit to checkout"
-        ),
-        description: str | None = Field(default=None, description="New description"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Updates an existing project in Ansible Tower. Returns a dictionary with the updated project's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_project(
-            project_id=project_id,
-            name=name,
-            scm_type=scm_type,
-            scm_url=scm_url,
-            scm_branch=scm_branch,
-            description=description,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"projects"},
-    )
-    async def delete_project(
-        project_id: int = Field(description="ID of the project"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Deletes a specific project by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete project"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_project(project_id=project_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"projects"},
-    )
-    async def sync_project(
-        project_id: int = Field(description="ID of the project"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        await ctx_progress(ctx, 0, 100)
-        """
-        Syncs (updates from SCM) a project in Ansible Tower. Returns a dictionary with the sync job's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        await ctx_progress(ctx, 100, 100)
-        return client.sync_project(project_id=project_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"credentials"},
-    )
-    async def list_credentials(
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of credentials from Ansible Tower. Returns a list of dictionaries, each with credential details like id, name, and type. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_credentials(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"credentials"},
-    )
-    async def get_credential(
-        credential_id: int = Field(description="ID of the credential"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific credential by ID from Ansible Tower. Returns a dictionary with credential information such as name and inputs (masked).
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_credential(credential_id=credential_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"credentials"},
-    )
-    async def list_credential_types(
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of credential types from Ansible Tower. Returns a list of dictionaries, each with type details like id and name. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_credential_types(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"credentials"},
-    )
-    async def create_credential(
-        name: str = Field(description="Name of the credential"),
-        credential_type_id: int = Field(description="ID of the credential type"),
-        organization_id: int = Field(description="ID of the organization"),
-        inputs: str = Field(
-            description="JSON string of credential inputs (e.g., username, password)"
-        ),
-        description: str = Field(
-            default="", description="Description of the credential"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new credential in Ansible Tower. Returns a dictionary with the created credential's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_credential(
-            name=name,
-            credential_type_id=credential_type_id,
-            organization_id=organization_id,
-            inputs=inputs,
-            description=description,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"credentials"},
-    )
-    async def update_credential(
-        credential_id: int = Field(description="ID of the credential"),
-        name: str | None = Field(
-            default=None, description="New name for the credential"
-        ),
-        inputs: str | None = Field(
-            default=None, description="JSON string of credential inputs"
-        ),
-        description: str | None = Field(default=None, description="New description"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Updates an existing credential in Ansible Tower. Returns a dictionary with the updated credential's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_credential(
-            credential_id=credential_id,
-            name=name,
-            inputs=inputs,
-            description=description,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"credentials"},
-    )
-    async def delete_credential(
-        credential_id: int = Field(description="ID of the credential"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Deletes a specific credential by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete credential"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_credential(credential_id=credential_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"organizations"},
-    )
-    async def list_organizations(
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of organizations from Ansible Tower. Returns a list of dictionaries, each with organization details like id and name. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_organizations(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"organizations"},
-    )
-    async def get_organization(
-        organization_id: int = Field(description="ID of the organization"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific organization by ID from Ansible Tower. Returns a dictionary with organization information such as name and description.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_organization(organization_id=organization_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"organizations"},
-    )
-    async def create_organization(
-        name: str = Field(description="Name of the organization"),
-        description: str = Field(
-            default="", description="Description of the organization"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new organization in Ansible Tower. Returns a dictionary with the created organization's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_organization(name=name, description=description)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"organizations"},
-    )
-    async def update_organization(
-        organization_id: int = Field(description="ID of the organization"),
-        name: str | None = Field(
-            default=None, description="New name for the organization"
-        ),
-        description: str | None = Field(default=None, description="New description"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Updates an existing organization in Ansible Tower. Returns a dictionary with the updated organization's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_organization(
-            organization_id=organization_id, name=name, description=description
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"organizations"},
-    )
-    async def delete_organization(
-        organization_id: int = Field(description="ID of the organization"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Deletes a specific organization by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete organization"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_organization(organization_id=organization_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"teams"},
-    )
-    async def list_teams(
-        organization_id: int | None = Field(
-            default=None, description="Optional ID of organization to filter teams"
-        ),
-        page_size: int = Field(10, description="Number of results per page"),
-        _page: int = Field(1, description="Page number to retrieve"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of teams from Ansible Tower, optionally filtered by organization. Returns a list of dictionaries, each with team details like id and name. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_teams(organization_id=organization_id, page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"teams"},
-    )
-    async def get_team(
-        team_id: int = Field(description="ID of the team"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific team by ID from Ansible Tower. Returns a dictionary with team information such as name and organization.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_team(team_id=team_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"teams"},
-    )
-    async def create_team(
-        name: str = Field(description="Name of the team"),
-        organization_id: int = Field(description="ID of the organization"),
-        description: str = Field(default="", description="Description of the team"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new team in a specified organization in Ansible Tower. Returns a dictionary with the created team's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_team(
-            name=name, organization_id=organization_id, description=description
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"teams"},
-    )
-    async def update_team(
-        team_id: int = Field(description="ID of the team"),
-        name: str | None = Field(default=None, description="New name for the team"),
-        description: str | None = Field(default=None, description="New description"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Updates an existing team in Ansible Tower. Returns a dictionary with the updated team's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_team(team_id=team_id, name=name, description=description)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"teams"},
-    )
-    async def delete_team(
-        team_id: int = Field(description="ID of the team"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Deletes a specific team by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete team"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_team(team_id=team_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"users"},
-    )
-    async def list_users(
-        page_size: int = Field(10, description="Page number to retrieve"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of users from Ansible Tower. Returns a list of dictionaries, each with user details like id, username, and email. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_users(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"users"},
-    )
-    async def get_user(
-        user_id: int = Field(description="ID of the user"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific user by ID from Ansible Tower. Returns a dictionary with user information such as username, email, and roles.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_user(user_id=user_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"users"},
-    )
-    async def create_user(
-        new_username: str = Field(description="Username for the new user"),
-        new_password: str = Field(description="Password for the new user"),
-        first_name: str = Field(default="", description="First name of the user"),
-        last_name: str = Field(default="", description="Last name of the user"),
-        email: str = Field(default="", description="Email address of the user"),
-        is_superuser: bool = Field(
-            default=False, description="Whether the user should be a superuser"
-        ),
-        is_system_auditor: bool = Field(
-            default=False, description="Whether the user should be a system auditor"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new user in Ansible Tower. Returns a dictionary with the created user's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_user(
-            username=new_username,
-            password=new_password,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            is_superuser=is_superuser,
-            is_system_auditor=is_system_auditor,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"users"},
-    )
-    async def update_user(
-        user_id: int = Field(description="ID of the user"),
-        new_username: str | None = Field(default=None, description="New username"),
-        new_password: str | None = Field(default=None, description="New password"),
-        first_name: str | None = Field(default=None, description="New first name"),
-        last_name: str | None = Field(default=None, description="New last name"),
-        email: str | None = Field(default=None, description="New email address"),
-        is_superuser: bool | None = Field(
-            default=None, description="Whether the user should be a superuser"
-        ),
-        is_system_auditor: bool | None = Field(
-            default=None, description="Whether the user should be a system auditor"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Updates an existing user in Ansible Tower. Returns a dictionary with the updated user's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_user(
-            user_id=user_id,
-            username=new_username,
-            password=new_password,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            is_superuser=is_superuser,
-            is_system_auditor=is_system_auditor,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"users"},
-    )
-    async def delete_user(
-        user_id: int = Field(description="ID of the user"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Deletes a specific user by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete user"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_user(user_id=user_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"ad_hoc_commands"},
-    )
-    async def run_ad_hoc_command(
-        inventory_id: int = Field(description="ID of the inventory"),
-        credential_id: int = Field(description="ID of the credential"),
-        module_name: str = Field(
-            description="Module name (e.g., command, shell, ping)"
-        ),
-        module_args: str = Field(description="Module arguments"),
-        limit: str = Field(default="", description="Host pattern to target"),
-        verbosity: int = Field(default=0, description="Verbosity level (0-4)"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        await ctx_progress(ctx, 0, 100)
-        """
-        Runs an ad hoc command on hosts in Ansible Tower. Returns a dictionary with the command job's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        await ctx_progress(ctx, 100, 100)
-        return client.run_ad_hoc_command(
-            inventory_id=inventory_id,
-            credential_id=credential_id,
-            module_name=module_name,
-            module_args=module_args,
-            limit=limit,
-            verbosity=verbosity,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"ad_hoc_commands"},
-    )
-    async def get_ad_hoc_command(
-        command_id: int = Field(description="ID of the ad hoc command"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific ad hoc command by ID from Ansible Tower. Returns a dictionary with command information such as status and module_args.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_ad_hoc_command(command_id=command_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"ad_hoc_commands"},
-    )
-    async def cancel_ad_hoc_command(
-        command_id: int = Field(description="ID of the ad hoc command"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Cancels a running ad hoc command in Ansible Tower. Returns a dictionary confirming the cancellation status.
-        """
-        if not await ctx_confirm_destructive(ctx, "cancel ad hoc command"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.cancel_ad_hoc_command(command_id=command_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"workflow_templates"},
-    )
-    async def list_workflow_templates(
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of workflow templates from Ansible Tower. Returns a list of dictionaries, each with template details like id and name. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_workflow_templates(page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"workflow_templates"},
-    )
-    async def get_workflow_template(
-        template_id: int = Field(description="ID of the workflow template"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific workflow template by ID from Ansible Tower. Returns a dictionary with template information such as name and extra_vars.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_workflow_template(template_id=template_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"workflow_templates"},
-    )
-    async def launch_workflow(
-        template_id: int = Field(description="ID of the workflow template"),
-        extra_vars: str | None = Field(
-            default=None,
-            description="JSON string of extra variables to override the template's variables",
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Launches a workflow from a template in Ansible Tower, optionally with extra variables. Returns a dictionary with the launched workflow job's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.launch_workflow(template_id=template_id, extra_vars=extra_vars)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"workflow_jobs"},
-    )
-    async def list_workflow_jobs(
-        status: str | None = Field(
-            default=None,
-            description="Filter by job status (pending, waiting, running, successful, failed, canceled)",
-        ),
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of workflow jobs from Ansible Tower, optionally filtered by status. Returns a list of dictionaries, each with job details like id and status. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_workflow_jobs(status=status, page_size=page_size)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"workflow_jobs"},
-    )
-    async def get_workflow_job(
-        job_id: int = Field(description="ID of the workflow job"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific workflow job by ID from Ansible Tower. Returns a dictionary with job information such as status and start time.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_workflow_job(job_id=job_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"workflow_jobs"},
-    )
-    async def cancel_workflow_job(
-        job_id: int = Field(description="ID of the workflow job"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Cancels a running workflow job in Ansible Tower. Returns a dictionary confirming the cancellation status.
-        """
-        if not await ctx_confirm_destructive(ctx, "cancel workflow job"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.cancel_workflow_job(job_id=job_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"schedules"},
-    )
-    async def list_schedules(
-        unified_job_template_id: int | None = Field(
-            default=None,
-            description="Optional ID of job or workflow template to filter schedules",
-        ),
-        page_size: int = Field(10, description="Number of results per page"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> list[dict]:
-        """
-        Retrieves a paginated list of schedules from Ansible Tower, optionally filtered by template. Returns a list of dictionaries, each with schedule details like id, name, and rrule. Display in a markdown table.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.list_schedules(
-            unified_job_template_id=unified_job_template_id, page_size=page_size
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"schedules"},
-    )
-    async def get_schedule(
-        schedule_id: int = Field(description="ID of the schedule"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches details of a specific schedule by ID from Ansible Tower. Returns a dictionary with schedule information such as name and rrule.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_schedule(schedule_id=schedule_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"schedules"},
-    )
-    async def create_schedule(
-        name: str = Field(description="Name of the schedule"),
-        unified_job_template_id: int = Field(
-            description="ID of the job or workflow template"
-        ),
-        rrule: str = Field(
-            description="iCal recurrence rule (e.g., 'DTSTART:20231001T120000Z RRULE:FREQ=DAILY;INTERVAL=1')"
-        ),
-        description: str = Field(default="", description="Description of the schedule"),
-        extra_data: str = Field(
-            default="{}", description="JSON string of extra variables"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Creates a new schedule for a template in Ansible Tower. Returns a dictionary with the created schedule's details, including its ID.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.create_schedule(
-            name=name,
-            unified_job_template_id=unified_job_template_id,
-            rrule=rrule,
-            description=description,
-            extra_data=extra_data,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"schedules"},
-    )
-    async def update_schedule(
-        schedule_id: int = Field(description="ID of the schedule"),
-        name: str | None = Field(default=None, description="New name for the schedule"),
-        rrule: str | None = Field(default=None, description="New iCal recurrence rule"),
-        description: str | None = Field(default=None, description="New description"),
-        extra_data: str | None = Field(
-            default=None, description="JSON string of extra variables"
-        ),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Updates an existing schedule in Ansible Tower. Returns a dictionary with the updated schedule's details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.update_schedule(
-            schedule_id=schedule_id,
-            name=name,
-            rrule=rrule,
-            description=description,
-            extra_data=extra_data,
-        )
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"schedules"},
-    )
-    async def delete_schedule(
-        schedule_id: int = Field(description="ID of the schedule"),
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Deletes a specific schedule by ID from Ansible Tower. Returns a dictionary confirming the deletion status.
-        """
-        if not await ctx_confirm_destructive(ctx, "delete schedule"):
-            return {"status": "cancelled", "message": "Operation cancelled by user"}
-        await ctx_progress(ctx, 0, 100)
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.delete_schedule(schedule_id=schedule_id)
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"system"},
-    )
-    async def get_ansible_version(
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Retrieves the Ansible version information from Ansible Tower. Returns a dictionary with version details.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_ansible_version()
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"system"},
-    )
-    async def get_dashboard_stats(
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Fetches dashboard statistics from Ansible Tower. Returns a dictionary with stats like host counts and recent jobs.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_dashboard_stats()
-
-    @mcp.tool(
-        exclude_args=[
-            "base_url",
-            "username",
-            "password",
-            "token",
-            "verify",
-            "client_id",
-            "client_secret",
-        ],
-        tags={"system"},
-    )
-    async def get_metrics(
-        base_url: str | None = Field(
-            default=os.environ.get("ANSIBLE_BASE_URL", None),
-            description="The base URL of the Ansible Tower instance",
-        ),
-        username: str | None = Field(
-            default=os.environ.get("ANSIBLE_USERNAME", None),
-            description="Username for authentication",
-        ),
-        password: str | None = Field(
-            default=os.environ.get("ANSIBLE_PASSWORD", None),
-            description="Password for authentication",
-        ),
-        token: str | None = Field(
-            default=os.environ.get("ANSIBLE_TOKEN", None),
-            description="API token for authentication",
-        ),
-        client_id: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_ID", None),
-            description="Client ID for OAuth authentication",
-        ),
-        client_secret: str | None = Field(
-            default=os.environ.get("ANSIBLE_CLIENT_SECRET", None),
-            description="Client secret for OAuth authentication",
-        ),
-        verify: bool = Field(
-            default=to_boolean(os.environ.get("ANSIBLE_VERIFY", "False")),
-            description="Whether to verify SSL certificates",
-        ),
-        ctx: Context = Field(
-            description="MCP context for progress reporting", default=None
-        ),
-    ) -> dict:
-        """
-        Retrieves system metrics from Ansible Tower. Returns a dictionary with performance and usage metrics.
-        """
-        client = Api(
-            base_url=base_url,
-            username=username,
-            password=password,
-            token=token,
-            client_id=client_id,
-            client_secret=client_secret,
-            verify=verify,
-        )
-        return client.get_metrics()
-
-
-def register_prompts(mcp: FastMCP):
-    @mcp.prompt
-    def list_inventories_prompt(
-        page_size: int = 10,
-    ) -> str:
-        """
-        Generates a prompt for listing inventories in Ansible Tower.
-        """
-        return (
-            f"List inventories in Ansible Tower. Page size: {page_size}. "
-            "Use the `list_inventories` tool."
-        )
-
-    @mcp.prompt
-    def manage_inventory_prompt(
-        inventory_id: int,
-        action: str = "get",
-    ) -> str:
-        """
-        Generates a prompt for managing a specific inventory (get, update, delete).
-        """
-        return (
-            f"Perform action '{action}' on inventory with ID {inventory_id}. "
-            "Use `get_inventory`, `update_inventory`, or `delete_inventory`."
-        )
-
-    @mcp.prompt
-    def create_inventory_prompt(
-        name: str,
-        organization_id: int,
-        description: str = "",
-    ) -> str:
-        """
-        Generates a prompt for creating a new inventory.
-        """
-        return (
-            f"Create a new inventory named '{name}' in organization {organization_id}. "
-            f"Description: '{description}'. Use the `create_inventory` tool."
-        )
-
-    @mcp.prompt
-    def list_hosts_prompt(
-        inventory_id: int = 0,
-        page_size: int = 10,
-    ) -> str:
-        """
-        Generates a prompt for listing hosts, optionally filtered by inventory.
-        """
-        if inventory_id:
-            return (
-                f"List hosts for inventory ID {inventory_id}. "
-                f"Page size: {page_size}. Use the `list_hosts` tool."
-            )
-        return f"List all hosts. Page size: {page_size}. Use the `list_hosts` tool."
-
-    @mcp.prompt
-    def manage_host_prompt(
-        host_id: int,
-        action: str = "get",
-    ) -> str:
-        """
-        Generates a prompt for managing a specific host (get, update, delete).
-        """
-        return (
-            f"Perform action '{action}' on host with ID {host_id}. "
-            "Use `get_host`, `update_host`, or `delete_host`."
-        )
-
-    @mcp.prompt
-    def create_host_prompt(
-        name: str,
-        inventory_id: int,
-        variables: str = "{}",
-    ) -> str:
-        """
-        Generates a prompt for creating a new host.
-        """
-        return (
-            f"Create a new host named '{name}' in inventory {inventory_id}. "
-            f"Variables: '{variables}'. Use the `create_host` tool."
-        )
-
-    @mcp.prompt
-    def list_job_templates_prompt(
-        page_size: int = 10,
-    ) -> str:
-        """
-        Generates a prompt for listing job templates.
-        """
-        return (
-            f"List job templates. Page size: {page_size}. "
-            "Use the `list_job_templates` tool."
-        )
-
-    @mcp.prompt
-    def launch_job_prompt(
-        template_id: int,
-        extra_vars: str = "{}",
-    ) -> str:
-        """
-        Generates a prompt for launching a job from a template.
-        """
-        return (
-            f"Launch a job using template ID {template_id}. "
-            f"Extra vars: '{extra_vars}'. Use the `launch_job` tool."
-        )
-
-    @mcp.prompt
-    def list_jobs_prompt(
-        status: str = "",
-        page_size: int = 10,
-    ) -> str:
-        """
-        Generates a prompt for listing jobs, optionally filtered by status.
-        """
-        return (
-            f"List jobs. Status: '{status}', Page size: {page_size}. "
-            "Use the `list_jobs` tool."
-        )
-
-    @mcp.prompt
-    def get_job_details_prompt(
-        job_id: int,
-        detail_type: str = "info",
-    ) -> str:
-        """
-        Generates a prompt for getting job details, events, or stdout.
-        """
-        return (
-            f"Get '{detail_type}' for job ID {job_id}. "
-            "Use `get_job` (info), `get_job_events`, or `get_job_stdout`."
-        )
-
-    @mcp.prompt
-    def list_projects_prompt(
-        page_size: int = 10,
-    ) -> str:
-        """
-        Generates a prompt for listing projects.
-        """
-        return f"List projects. Page size: {page_size}. Use the `list_projects` tool."
-
-    @mcp.prompt
-    def sync_project_prompt(
-        project_id: int,
-    ) -> str:
-        """
-        Generates a prompt for syncing a project.
-        """
-        return f"Sync project with ID {project_id}. Use the `sync_project` tool."
-
-
-def get_mcp_instance() -> tuple[Any, Any, Any, Any]:
-    """Initialize and return the MCP instance, args, and middlewares."""
-    load_dotenv(find_dotenv())
-
-    args, mcp, middlewares = create_mcp_server(
-        name="Ansible Tower",
-        version=__version__,
-        instructions="Ansible Tower MCP Server - Manage inventories, hosts, groups, and projects.",
-    )
-
-    register_tools(mcp)
-    register_prompts(mcp)
+    DEFAULT_INVENTORYTOOL = to_boolean(os.getenv("INVENTORYTOOL", "True"))
+    if DEFAULT_INVENTORYTOOL:
+        register_inventory_tools(mcp)
+    DEFAULT_HOSTSTOOL = to_boolean(os.getenv("HOSTSTOOL", "True"))
+    if DEFAULT_HOSTSTOOL:
+        register_hosts_tools(mcp)
+    DEFAULT_GROUPSTOOL = to_boolean(os.getenv("GROUPSTOOL", "True"))
+    if DEFAULT_GROUPSTOOL:
+        register_groups_tools(mcp)
+    DEFAULT_JOB_TEMPLATESTOOL = to_boolean(os.getenv("JOB_TEMPLATESTOOL", "True"))
+    if DEFAULT_JOB_TEMPLATESTOOL:
+        register_job_templates_tools(mcp)
+    DEFAULT_JOBSTOOL = to_boolean(os.getenv("JOBSTOOL", "True"))
+    if DEFAULT_JOBSTOOL:
+        register_jobs_tools(mcp)
+    DEFAULT_PROJECTSTOOL = to_boolean(os.getenv("PROJECTSTOOL", "True"))
+    if DEFAULT_PROJECTSTOOL:
+        register_projects_tools(mcp)
+    DEFAULT_CREDENTIALSTOOL = to_boolean(os.getenv("CREDENTIALSTOOL", "True"))
+    if DEFAULT_CREDENTIALSTOOL:
+        register_credentials_tools(mcp)
+    DEFAULT_ORGANIZATIONSTOOL = to_boolean(os.getenv("ORGANIZATIONSTOOL", "True"))
+    if DEFAULT_ORGANIZATIONSTOOL:
+        register_organizations_tools(mcp)
+    DEFAULT_TEAMSTOOL = to_boolean(os.getenv("TEAMSTOOL", "True"))
+    if DEFAULT_TEAMSTOOL:
+        register_teams_tools(mcp)
+    DEFAULT_USERSTOOL = to_boolean(os.getenv("USERSTOOL", "True"))
+    if DEFAULT_USERSTOOL:
+        register_users_tools(mcp)
+    DEFAULT_AD_HOC_COMMANDSTOOL = to_boolean(os.getenv("AD_HOC_COMMANDSTOOL", "True"))
+    if DEFAULT_AD_HOC_COMMANDSTOOL:
+        register_ad_hoc_commands_tools(mcp)
+    DEFAULT_WORKFLOW_TEMPLATESTOOL = to_boolean(
+        os.getenv("WORKFLOW_TEMPLATESTOOL", "True")
+    )
+    if DEFAULT_WORKFLOW_TEMPLATESTOOL:
+        register_workflow_templates_tools(mcp)
+    DEFAULT_WORKFLOW_JOBSTOOL = to_boolean(os.getenv("WORKFLOW_JOBSTOOL", "True"))
+    if DEFAULT_WORKFLOW_JOBSTOOL:
+        register_workflow_jobs_tools(mcp)
+    DEFAULT_SCHEDULESTOOL = to_boolean(os.getenv("SCHEDULESTOOL", "True"))
+    if DEFAULT_SCHEDULESTOOL:
+        register_schedules_tools(mcp)
+    DEFAULT_SYSTEMTOOL = to_boolean(os.getenv("SYSTEMTOOL", "True"))
+    if DEFAULT_SYSTEMTOOL:
+        register_system_tools(mcp)
 
     for mw in middlewares:
         mcp.add_middleware(mw)
-    registered_tags: list[str] = []
-    return mcp, args, middlewares, registered_tags
+    return mcp, args, middlewares
 
 
 def mcp_server() -> None:
-    mcp, args, middlewares, registered_tags = get_mcp_instance()
-    print(f"{'ansible-tower-mcp'} MCP v{__version__}", file=sys.stderr)
+    mcp, args, middlewares = get_mcp_instance()
+    print(f"ansible-tower-mcp MCP v{__version__}", file=sys.stderr)
     print("\nStarting MCP Server", file=sys.stderr)
     print(f"  Transport: {args.transport.upper()}", file=sys.stderr)
     print(f"  Auth: {args.auth_type}", file=sys.stderr)
-    print(f"  Dynamic Tags Loaded: {len(set(registered_tags))}", file=sys.stderr)
 
     if args.transport == "stdio":
         mcp.run(transport="stdio")

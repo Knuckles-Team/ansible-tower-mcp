@@ -3,15 +3,14 @@ services:
   ansible-tower-agent:
     # image: docker.io/knucklessg1/ansible-tower-mcp:latest
     build:
-      context: .
-      dockerfile: debug.Dockerfile
+      context: ..
+      dockerfile: docker/debug.Dockerfile
     container_name: ansible-tower-agent
     hostname: ansible-tower-agent
     command: [ "ansible-tower-agent" ]
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      - ansible-tower-mcp
+
     logging:
       driver: json-file
       options:
@@ -19,7 +18,7 @@ services:
         max-file: "3"
     restart: always
     env_file:
-      - .env
+      - ../.env
     environment:
       - "PYTHONUNBUFFERED=1"
       - "HOST=0.0.0.0"

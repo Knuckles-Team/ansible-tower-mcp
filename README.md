@@ -22,7 +22,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/ansible-tower-mcp)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/ansible-tower-mcp)
 
-*Version: 1.12.0*
+*Version: 1.13.0*
 
 ## Overview
 
@@ -44,112 +44,27 @@ Contributions are welcome!
 ## MCP
 
 
-### MCP Tools
+### Available MCP Tools
 
-The `ansible-tower-mcp` package exposes the following MCP tools, organized by category:
+This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
 
-### Inventory Management
-- `list_inventories(limit, offset)`: List all inventories.
-- `get_inventory(inventory_id)`: Get details of a specific inventory.
-- `create_inventory(name, organization_id, description)`: Create a new inventory.
-- `update_inventory(inventory_id, name, description)`: Update an existing inventory.
-- `delete_inventory(inventory_id)`: Delete an inventory.
-
-### Host Management
-- `list_hosts(inventory_id, limit, offset)`: List hosts, optionally filtered by inventory.
-- `get_host(host_id)`: Get details of a specific host.
-- `create_host(name, inventory_id, variables, description)`: Create a new host.
-- `update_host(host_id, name, variables, description)`: Update an existing host.
-- `delete_host(host_id)`: Delete a host.
-
-### Group Management
-- `list_groups(inventory_id, limit, offset)`: List groups in an inventory.
-- `get_group(group_id)`: Get details of a specific group.
-- `create_group(name, inventory_id, variables, description)`: Create a new group.
-- `update_group(group_id, name, variables, description)`: Update an existing group.
-- `delete_group(group_id)`: Delete a group.
-- `add_host_to_group(group_id, host_id)`: Add a host to a group.
-- `remove_host_from_group(group_id, host_id)`: Remove a host from a group.
-
-### Job Template Management
-- `list_job_templates(limit, offset)`: List all job templates.
-- `get_job_template(template_id)`: Get details of a specific job template.
-- `create_job_template(name, inventory_id, project_id, playbook, credential_id, description, extra_vars)`: Create a new job template.
-- `update_job_template(template_id, name, inventory_id, playbook, description, extra_vars)`: Update an existing job template.
-- `delete_job_template(template_id)`: Delete a job template.
-- `launch_job(template_id, extra_vars)`: Launch a job from a template.
-
-### Job Management
-- `list_jobs(status, limit, offset)`: List jobs, optionally filtered by status.
-- `get_job(job_id)`: Get details of a specific job.
-- `cancel_job(job_id)`: Cancel a running job.
-- `get_job_events(job_id, limit, offset)`: Get events for a job.
-- `get_job_stdout(job_id, format)`: Get the output of a job in specified format (txt, html, json, ansi).
-
-### Project Management
-- `list_projects(limit, offset)`: List all projects.
-- `get_project(project_id)`: Get details of a specific project.
-- `create_project(name, organization_id, scm_type, scm_url, scm_branch, credential_id, description)`: Create a new project.
-- `update_project(project_id, name, scm_type, scm_url, scm_branch, description)`: Update an existing project.
-- `delete_project(project_id)`: Delete a project.
-- `sync_project(project_id)`: Sync a project with its SCM.
-
-### Credential Management
-- `list_credentials(limit, offset)`: List all credentials.
-- `get_credential(credential_id)`: Get details of a specific credential.
-- `list_credential_types(limit, offset)`: List all credential types.
-- `create_credential(name, credential_type_id, organization_id, inputs, description)`: Create a new credential.
-- `update_credential(credential_id, name, inputs, description)`: Update an existing credential.
-- `delete_credential(credential_id)`: Delete a credential.
-
-### Organization Management
-- `list_organizations(limit, offset)`: List all organizations.
-- `get_organization(organization_id)`: Get details of a specific organization.
-- `create_organization(name, description)`: Create a new organization.
-- `update_organization(organization_id, name, description)`: Update an existing organization.
-- `delete_organization(organization_id)`: Delete an organization.
-
-### Team Management
-- `list_teams(organization_id, limit, offset)`: List teams, optionally filtered by organization.
-- `get_team(team_id)`: Get details of a specific team.
-- `create_team(name, organization_id, description)`: Create a new team.
-- `update_team(team_id, name, description)`: Update an existing team.
-- `delete_team(team_id)`: Delete a team.
-
-### User Management
-- `list_users(limit, offset)`: List all users.
-- `get_user(user_id)`: Get details of a specific user.
-- `create_user(username, password, first_name, last_name, email, is_superuser, is_system_auditor)`: Create a new user.
-- `update_user(user_id, username, password, first_name, last_name, email, is_superuser, is_system_auditor)`: Update an existing user.
-- `delete_user(user_id)`: Delete a user.
-
-### Ad Hoc Commands
-- `run_ad_hoc_command(inventory_id, credential_id, module_name, module_args, limit, verbosity)`: Run an ad hoc command.
-- `get_ad_hoc_command(command_id)`: Get details of an ad hoc command.
-- `cancel_ad_hoc_command(command_id)`: Cancel an ad hoc command.
-
-### Workflow Templates
-- `list_workflow_templates(limit, offset)`: List all workflow templates.
-- `get_workflow_template(template_id)`: Get details of a specific workflow template.
-- `launch_workflow(template_id, extra_vars)`: Launch a workflow from a template.
-
-### Workflow Jobs
-- `list_workflow_jobs(status, limit, offset)`: List workflow jobs, optionally filtered by status.
-- `get_workflow_job(job_id)`: Get details of a specific workflow job.
-- `cancel_workflow_job(job_id)`: Cancel a running workflow job.
-
-### Schedule Management
-- `list_schedules(unified_job_template_id, limit, offset)`: List schedules, optionally filtered by job/workflow template.
-- `get_schedule(schedule_id)`: Get details of a specific schedule.
-- `create_schedule(name, unified_job_template_id, rrule, description, extra_data)`: Create a new schedule.
-- `update_schedule(schedule_id, name, rrule, description, extra_data)`: Update an existing schedule.
-- `delete_schedule(schedule_id)`: Delete a schedule.
-
-### System Information
-- `get_ansible_version()`: Get the Ansible Tower version.
-- `get_dashboard_stats()`: Get dashboard statistics.
-- `get_metrics()`: Get system metrics.
-
+| Tool Name | Description |
+|-----------|-------------|
+| `ansible_ad_hoc_commands` | Consolidated Action-Routed tool for ad_hoc_commands. Methods: run_ad_hoc_command, get_ad_hoc_command, cancel_ad_hoc_command |
+| `ansible_credentials` | Consolidated Action-Routed tool for credentials. Methods: list_credentials, get_credential, list_credential_types, create_credential, update_credential, delete_credential |
+| `ansible_groups` | Consolidated Action-Routed tool for groups. Methods: list_groups, get_group, create_group, update_group, delete_group, add_host_to_group, remove_host_from_group |
+| `ansible_hosts` | Consolidated Action-Routed tool for hosts. Methods: list_hosts, get_host, create_host, update_host, delete_host |
+| `ansible_inventory` | Consolidated Action-Routed tool for inventory. Methods: list_inventories, get_inventory, create_inventory, update_inventory, delete_inventory |
+| `ansible_job_templates` | Consolidated Action-Routed tool for job-templates. Methods: list_job_templates, get_job_template, create_job_template, update_job_template, delete_job_template, launch_job |
+| `ansible_jobs` | Consolidated Action-Routed tool for jobs. Methods: list_jobs, get_job, cancel_job, relaunch_job, get_job_events, get_job_stdout |
+| `ansible_organizations` | Consolidated Action-Routed tool for organizations. Methods: list_organizations, get_organization, create_organization, update_organization, delete_organization |
+| `ansible_projects` | Consolidated Action-Routed tool for projects. Methods: list_projects, get_project, create_project, update_project, delete_project, sync_project |
+| `ansible_schedules` | Consolidated Action-Routed tool for schedules. Methods: list_schedules, get_schedule, create_schedule, update_schedule, delete_schedule |
+| `ansible_system` | Consolidated Action-Routed tool for system. Methods: get_ansible_version, get_dashboard_stats, get_metrics |
+| `ansible_teams` | Consolidated Action-Routed tool for teams. Methods: list_teams, get_team, create_team, update_team, delete_team |
+| `ansible_users` | Consolidated Action-Routed tool for users. Methods: list_users, get_user, create_user, update_user, delete_user |
+| `ansible_workflow_jobs` | Consolidated Action-Routed tool for workflow_jobs. Methods: list_workflow_jobs, get_workflow_job, cancel_workflow_job |
+| `ansible_workflow_templates` | Consolidated Action-Routed tool for workflow_templates. Methods: list_workflow_templates, get_workflow_template, launch_workflow |
 
 ## A2A Agent
 
