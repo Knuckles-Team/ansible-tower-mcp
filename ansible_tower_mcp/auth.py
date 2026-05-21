@@ -20,6 +20,8 @@ import threading
 from agent_utilities.base_utilities import get_logger, to_boolean
 
 local = threading.local()
+from ansible_tower_mcp.api_client import Api
+
 logger = get_logger(__name__)
 
 
@@ -34,8 +36,6 @@ def get_client():
         get_user_identity,
         is_delegation_enabled,
     )
-
-    from ansible_tower_mcp.api_client import Api
 
     base_url = os.environ.get("ANSIBLE_BASE_URL")
     verify = to_boolean(os.environ.get("ANSIBLE_VERIFY", "False"))

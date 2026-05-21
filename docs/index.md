@@ -589,8 +589,6 @@ For issues or feature requests, please open an issue on the [GitHub repository](
         "ansible-tower-mcp"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
         "ANSIBLE_BASE_URL": "<YOUR_ANSIBLE_BASE_URL>",
         "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
         "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
@@ -598,7 +596,6 @@ For issues or feature requests, please open an issue on the [GitHub repository](
         "ANSIBLE_TOKEN": "<YOUR_ANSIBLE_TOKEN>",
         "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
         "ANSIBLE_VERIFY": "<YOUR_ANSIBLE_VERIFY>",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>"
       }
     }
   }
@@ -623,8 +620,6 @@ For issues or feature requests, please open an issue on the [GitHub repository](
         "8000"
       ],
       "env": {
-        "AGENT_DESCRIPTION": "<YOUR_AGENT_DESCRIPTION>",
-        "AGENT_SYSTEM_PROMPT": "<YOUR_AGENT_SYSTEM_PROMPT>",
         "ANSIBLE_BASE_URL": "<YOUR_ANSIBLE_BASE_URL>",
         "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
         "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
@@ -632,7 +627,6 @@ For issues or feature requests, please open an issue on the [GitHub repository](
         "ANSIBLE_TOKEN": "<YOUR_ANSIBLE_TOKEN>",
         "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
         "ANSIBLE_VERIFY": "<YOUR_ANSIBLE_VERIFY>",
-        "DEFAULT_AGENT_NAME": "<YOUR_DEFAULT_AGENT_NAME>"
       }
     }
   }
