@@ -32,7 +32,7 @@ from starlette.responses import JSONResponse
 
 from ansible_tower_mcp.auth import get_client
 
-__version__ = "1.13.1"
+__version__ = "1.14.0"
 
 logger = get_logger(name="ansible-tower-mcp")
 logger.setLevel(logging.INFO)
