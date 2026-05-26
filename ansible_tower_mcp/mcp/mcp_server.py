@@ -74,6 +74,7 @@ __all__ = [
 logger = get_logger(name="ansible-tower-mcp")
 logger.setLevel(logging.INFO)
 
+
 def get_mcp_instance() -> tuple[Any, ...]:
     """Initialize and return the MCP instance.
 
@@ -119,6 +120,7 @@ def get_mcp_instance() -> tuple[Any, ...]:
         mcp.add_middleware(mw)
     return mcp, args, middlewares
 
+
 def mcp_server() -> None:
     """Run the MCP server application.
 
@@ -139,6 +141,7 @@ def mcp_server() -> None:
     else:
         logger.error("Invalid transport", extra={"transport": args.transport})
         sys.exit(1)
+
 
 if __name__ == "__main__":
     mcp_server()
