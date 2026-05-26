@@ -1,0 +1,237 @@
+{
+  "feature_id": "code-enhancement-20260522",
+  "title": "Code Enhancement: ansible-tower-mcp",
+  "created": "2026-05-22T21:08:34.991805+00:00",
+  "overview": "Automated code enhancement review for ansible-tower-mcp. Covers 16 analysis domains.",
+  "user_stories": [
+    {
+      "role": "developer",
+      "action": "address Project Analysis findings (grade: C, score: 74)",
+      "value": "improve project project analysis from C to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Codebase Optimization findings (grade: D, score: 69)",
+      "value": "improve project codebase optimization from D to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Test Coverage findings (grade: C, score: 70)",
+      "value": "improve project test coverage from C to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Architecture & Design Patterns findings (grade: C, score: 70)",
+      "value": "improve project architecture & design patterns from C to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Concept Traceability findings (grade: F, score: 30)",
+      "value": "improve project concept traceability from F to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Test Execution findings (grade: F, score: 25)",
+      "value": "improve project test execution from F to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address UI/UX Quality findings (grade: N/A, score: -1)",
+      "value": "improve project ui/ux quality from N/A to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Changelog Audit findings (grade: C, score: 75)",
+      "value": "improve project changelog audit from C to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Pytest Quality findings (grade: D, score: 64)",
+      "value": "improve project pytest quality from D to at least B (80+)"
+    },
+    {
+      "role": "developer",
+      "action": "address Environment Variables findings (grade: D, score: 60)",
+      "value": "improve project environment variables from D to at least B (80+)"
+    }
+  ],
+  "functional_requirements": [
+    {
+      "id": "FR-001",
+      "description": "Minor update: pytest-xdist 3.6.0 (constraint \u2014 not installed) -> 3.8.0",
+      "testable": true
+    },
+    {
+      "id": "FR-002",
+      "description": "Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0",
+      "testable": true
+    },
+    {
+      "id": "FR-003",
+      "description": "Monolithic: mcp_server.py (707L) \u2014 1 functions with high complexity (worst: get_mcp_instance at 64L, CC=17); Low cohesion: 18 distinct concepts in one file",
+      "testable": true
+    },
+    {
+      "id": "FR-004",
+      "description": "9 functions with nesting depth >4",
+      "testable": true
+    },
+    {
+      "id": "FR-005",
+      "description": "6 tests without assertions",
+      "testable": true
+    },
+    {
+      "id": "FR-006",
+      "description": "14 potential doc-test drift items",
+      "testable": true
+    },
+    {
+      "id": "FR-007",
+      "description": "README.md missing sections: usage|quick start",
+      "testable": true
+    },
+    {
+      "id": "FR-008",
+      "description": "2 broken internal links in README.md",
+      "testable": true
+    },
+    {
+      "id": "FR-009",
+      "description": "README missing: Has a Table of Contents",
+      "testable": true
+    },
+    {
+      "id": "FR-010",
+      "description": "README missing: Has usage examples with code blocks",
+      "testable": true
+    },
+    {
+      "id": "FR-011",
+      "description": "SRP: 2 modules exceed 500 lines (god modules)",
+      "testable": true
+    },
+    {
+      "id": "FR-012",
+      "description": "No discernible layer architecture (no domain/service/adapter separation)",
+      "testable": true
+    },
+    {
+      "id": "FR-013",
+      "description": "Low dependency injection ratio: 7%",
+      "testable": true
+    },
+    {
+      "id": "FR-014",
+      "description": "Low traceability ratio: 0% concepts fully traced",
+      "testable": true
+    },
+    {
+      "id": "FR-015",
+      "description": "16 test functions missing concept markers",
+      "testable": true
+    },
+    {
+      "id": "FR-016",
+      "description": "66 significant functions (>10 lines) missing concept markers in docstrings",
+      "testable": true
+    },
+    {
+      "id": "FR-017",
+      "description": "Total lint findings: 1 (high/error: 0, medium/warning: 0, low: 1)",
+      "testable": true
+    },
+    {
+      "id": "FR-018",
+      "description": "1 rogue/throwaway scripts detected (fix_*, validate_*, patch_*, etc.): scripts/validate_a2a_agent.py",
+      "testable": true
+    },
+    {
+      "id": "FR-019",
+      "description": "No UI detected \u2014 domain not applicable",
+      "testable": true
+    },
+    {
+      "id": "FR-020",
+      "description": "CHANGELOG.md exists but could not be parsed \u2014 check format compliance",
+      "testable": true
+    },
+    {
+      "id": "FR-021",
+      "description": "No changelog entries within the last 30 days",
+      "testable": true
+    },
+    {
+      "id": "FR-022",
+      "description": "keepachangelog not installed \u2014 pip install 'universal-skills[code-enhancer]'",
+      "testable": true
+    },
+    {
+      "id": "FR-023",
+      "description": "1 test files exceed 500 lines \u2014 split into focused modules",
+      "testable": true
+    },
+    {
+      "id": "FR-024",
+      "description": "Test directory lacks subdirectory organization (consider unit/, integration/, e2e/)",
+      "testable": true
+    },
+    {
+      "id": "FR-025",
+      "description": "Missing conftest.py for shared fixtures",
+      "testable": true
+    },
+    {
+      "id": "FR-026",
+      "description": "No @pytest.mark.parametrize usage \u2014 consider data-driven tests",
+      "testable": true
+    },
+    {
+      "id": "FR-027",
+      "description": "No shared fixtures in conftest.py",
+      "testable": true
+    },
+    {
+      "id": "FR-028",
+      "description": "6 tests have no assertions",
+      "testable": true
+    },
+    {
+      "id": "FR-029",
+      "description": "3 tests exceed 100 lines \u2014 likely doing too much per test",
+      "testable": true
+    },
+    {
+      "id": "FR-030",
+      "description": "Only 13% of env vars documented in README.md",
+      "testable": true
+    },
+    {
+      "id": "FR-031",
+      "description": "Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME, ANSIBLE_VERIFY, AUDIENCE, AUTH_TYPE, CREDENTIALSTOOL",
+      "testable": true
+    },
+    {
+      "id": "FR-032",
+      "description": "8 Python env vars not in .env.example: ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME",
+      "testable": true
+    }
+  ],
+  "success_criteria": [
+    {
+      "metric": "Overall GPA",
+      "current": 2.19,
+      "target": 3.0
+    },
+    {
+      "metric": "Domains at B or above",
+      "current": 6,
+      "target": 16
+    },
+    {
+      "metric": "Actionable findings",
+      "current": 32,
+      "target": 0
+    }
+  ]
+}

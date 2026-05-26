@@ -25,7 +25,7 @@ test = [
     "pytest-xdist>=3.6.0", "pytest", "pytest-asyncio", "pytest-cov",]
 
 [project.scripts]
-ansible-tower-mcp = "ansible_tower_mcp.mcp_server:mcp_server"
+ansible-tower-mcp = "ansible_tower_mcp.mcp.mcp_server:mcp_server"
 ansible-tower-agent = "ansible_tower_mcp.agent_server:agent_server"
 
 [tool.setuptools]

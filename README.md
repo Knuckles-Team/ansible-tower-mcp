@@ -43,7 +43,7 @@
 
 This agent wraps the Ansible Tower MCP Server for Agentic AI! API. You can interact with it programmatically or via its integrated execution entrypoints.
 
-Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](file:///home/apps/workspace/agent-packages/agents/ansible-tower-mcp/docs/index.md).
+Detailed instructions on how to use the underlying API wrappers, extended schema bindings, and developer SDK references are maintained in [docs/index.md](docs/index.md).
 
 ---
 
@@ -54,23 +54,44 @@ This server utilizes dynamic Action-Routed tools to optimize token overhead and 
 ### Available MCP Tools
 | Tool Module | Toggle Env Var | Enabled by Default | Description & Nested Methods |
 |-------------|----------------|--------------------|------------------------------|
-| **Inventory** | `INVENTORYTOOL` | `True` | Manage ansible tower inventory operations. Action-routed methods: `list_inventories`, `get_inventory`, `create_inventory`, `update_inventory`, `delete_inventory`. |
-| **Hosts** | `HOSTSTOOL` | `True` | Manage ansible tower hosts operations. Action-routed methods: `list_hosts`, `get_host`, `create_host`, `update_host`, `delete_host`. |
-| **Groups** | `GROUPSTOOL` | `True` | Manage ansible tower groups operations. Action-routed methods: `list_groups`, `get_group`, `create_group`, `update_group`, `delete_group`, `add_host_to_group`, `remove_host_from_group`. |
-| **Job Templates** | `JOB_TEMPLATESTOOL` | `True` | Manage ansible tower job templates operations. Action-routed methods: `list_job_templates`, `get_job_template`, `create_job_template`, `update_job_template`, `delete_job_template`, `launch_job`. |
-| **Jobs** | `JOBSTOOL` | `True` | Manage ansible tower jobs operations. Action-routed methods: `list_jobs`, `get_job`, `cancel_job`, `relaunch_job`, `get_job_events`, `get_job_stdout`. |
-| **Projects** | `PROJECTSTOOL` | `True` | Manage ansible tower projects operations. Action-routed methods: `list_projects`, `get_project`, `create_project`, `update_project`, `delete_project`, `sync_project`. |
-| **Credentials** | `CREDENTIALSTOOL` | `True` | Manage ansible tower credentials operations. Action-routed methods: `list_credentials`, `get_credential`, `list_credential_types`, `create_credential`, `update_credential`, `delete_credential`. |
-| **Organizations** | `ORGANIZATIONSTOOL` | `True` | Manage ansible tower organizations operations. Action-routed methods: `list_organizations`, `get_organization`, `create_organization`, `update_organization`, `delete_organization`. |
-| **Teams** | `TEAMSTOOL` | `True` | Manage ansible tower teams operations. Action-routed methods: `list_teams`, `get_team`, `create_team`, `update_team`, `delete_team`. |
-| **Users** | `USERSTOOL` | `True` | Manage ansible tower users operations. Action-routed methods: `list_users`, `get_user`, `create_user`, `update_user`, `delete_user`. |
-| **Ad Hoc Commands** | `AD_HOC_COMMANDSTOOL` | `True` | Manage ansible tower ad hoc commands operations. Action-routed methods: `run_ad_hoc_command`, `get_ad_hoc_command`, `cancel_ad_hoc_command`. |
-| **Workflow Templates** | `WORKFLOW_TEMPLATESTOOL` | `True` | Manage ansible tower workflow templates operations. Action-routed methods: `list_workflow_templates`, `get_workflow_template`, `launch_workflow`. |
-| **Workflow Jobs** | `WORKFLOW_JOBSTOOL` | `True` | Manage ansible tower workflow jobs operations. Action-routed methods: `list_workflow_jobs`, `get_workflow_job`, `cancel_workflow_job`. |
-| **Schedules** | `SCHEDULESTOOL` | `True` | Manage ansible tower schedules operations. Action-routed methods: `list_schedules`, `get_schedule`, `create_schedule`, `update_schedule`, `delete_schedule`. |
-| **System** | `SYSTEMTOOL` | `True` | Manage ansible tower system operations. Action-routed methods: `get_ansible_version`, `get_dashboard_stats`, `get_metrics`. |
+| **Inventory** | `INVENTORY_TOOL` | `True` | Manage ansible tower inventory operations. Action-routed methods: `create_inventory`, `delete_inventory`, `get_inventory`, `list_inventories`, `update_inventory`. |
+| **Hosts** | `HOSTS_TOOL` | `True` | Manage ansible tower hosts operations. Action-routed methods: `create_host`, `delete_host`, `get_host`, `list_hosts`, `update_host`. |
+| **Groups** | `GROUPS_TOOL` | `True` | Manage ansible tower groups operations. Action-routed methods: `add_host_to_group`, `create_group`, `delete_group`, `get_group`, `list_groups`, `remove_host_from_group`, `update_group`. |
+| **Job Templates** | `JOB_TEMPLATES_TOOL` | `True` | Manage ansible tower job templates operations. Action-routed methods: `create_job_template`, `delete_job_template`, `get_job_template`, `launch_job`, `list_job_templates`, `update_job_template`. |
+| **Jobs** | `JOBS_TOOL` | `True` | Manage ansible tower jobs operations. Action-routed methods: `cancel_job`, `get_job`, `get_job_events`, `get_job_stdout`, `list_jobs`, `relaunch_job`. |
+| **Projects** | `PROJECTS_TOOL` | `True` | Manage ansible tower projects operations. Action-routed methods: `create_project`, `delete_project`, `get_project`, `list_projects`, `sync_project`, `update_project`. |
+| **Credentials** | `CREDENTIALS_TOOL` | `True` | Manage ansible tower credentials operations. Action-routed methods: `create_credential`, `delete_credential`, `get_credential`, `list_credential_types`, `list_credentials`, `update_credential`. |
+| **Organizations** | `ORGANIZATIONS_TOOL` | `True` | Manage ansible tower organizations operations. Action-routed methods: `create_organization`, `delete_organization`, `get_organization`, `list_organizations`, `update_organization`. |
+| **Teams** | `TEAMS_TOOL` | `True` | Manage ansible tower teams operations. Action-routed methods: `create_team`, `delete_team`, `get_team`, `list_teams`, `update_team`. |
+| **Users** | `USERS_TOOL` | `True` | Manage ansible tower users operations. Action-routed methods: `create_user`, `delete_user`, `get_user`, `list_users`, `update_user`. |
+| **Ad Hoc Commands** | `AD_HOC_COMMANDS_TOOL` | `True` | Manage ansible tower ad hoc commands operations. Action-routed methods: `cancel_ad_hoc_command`, `get_ad_hoc_command`, `run_ad_hoc_command`. |
+| **Workflow Templates** | `WORKFLOW_TEMPLATES_TOOL` | `True` | Manage ansible tower workflow templates operations. Action-routed methods: `get_workflow_template`, `launch_workflow`, `list_workflow_templates`. |
+| **Workflow Jobs** | `WORKFLOW_JOBS_TOOL` | `True` | Manage ansible tower workflow jobs operations. Action-routed methods: `cancel_workflow_job`, `get_workflow_job`, `list_workflow_jobs`. |
+| **Schedules** | `SCHEDULES_TOOL` | `True` | Manage ansible tower schedules operations. Action-routed methods: `create_schedule`, `delete_schedule`, `get_schedule`, `list_schedules`, `update_schedule`. |
+| **System** | `SYSTEM_TOOL` | `True` | Manage ansible tower system operations. Action-routed methods: `get_ansible_version`, `get_dashboard_stats`, `get_metrics`. |
 
-Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](file:///home/apps/workspace/agent-packages/agents/ansible-tower-mcp/docs/mcp.md).
+Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
+
+### Dynamic Tool Selection & Visibility
+
+This MCP server supports dynamic toolset selection and visibility filtering at runtime. This allows you to restrict the set of exposed tools in order to prevent blowing up the LLM's context window.
+
+You can configure tool filtering via multiple input channels:
+
+- **CLI Arguments:** Pass `--tools` or `--toolsets` (or their disabled counterparts `--disabled-tools` and `--disabled-toolsets`) during startup.
+- **Environment Variables:** Define standard environment variables:
+  - `MCP_ENABLED_TOOLS` / `MCP_DISABLED_TOOLS`
+  - `MCP_ENABLED_TAGS` / `MCP_DISABLED_TAGS`
+- **HTTP SSE Request Headers:** Pass custom headers during transport initialization:
+  - `x-mcp-enabled-tools` / `x-mcp-disabled-tools`
+  - `x-mcp-enabled-tags` / `x-mcp-disabled-tags`
+- **HTTP SSE Request Query Parameters:** Append query parameters directly to your transport connection URL:
+  - `?tools=tool1,tool2`
+  - `?tags=tag1`
+
+When query strings or parameters are supplied, an LLM-free **Knowledge Graph resolution layer** (using `DynamicToolOrchestrator`) matches query intents against known tool tags, names, or descriptions, with safe fallback and automated 24-hour background cache refreshing.
+
+---
 
 ### MCP Configuration Examples
 
@@ -224,7 +245,7 @@ services:
 
 ```
 
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](file:///home/apps/workspace/agent-packages/agents/ansible-tower-mcp/docs/agent.md).
+Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](docs/agent.md).
 
 ---
 

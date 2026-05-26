@@ -1,0 +1,1907 @@
+[
+  {
+    "domain": "Project Analysis",
+    "score": 74,
+    "grade": "C",
+    "findings": [
+      "Detected ecosystem marker: agent-utilities \u2192 Agent-Utilities Ecosystem",
+      "Protocol support: MCP"
+    ],
+    "justifications": [
+      {
+        "criterion": "has_pyproject",
+        "points": 10,
+        "evidence": "pyproject.toml and requirements.txt",
+        "reasoning": "Both pyproject.toml and requirements.txt exist, fulfilling mandatory Python project requirements"
+      },
+      {
+        "criterion": "project_type_detected",
+        "points": 10,
+        "evidence": "Agent-Utilities Ecosystem",
+        "reasoning": "Identified 1 ecosystem marker(s) in dependencies"
+      },
+      {
+        "criterion": "externalized_prompts",
+        "points": 0,
+        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp",
+        "reasoning": "No prompts/ directory found. Prompts may be hardcoded in source."
+      },
+      {
+        "criterion": "observability",
+        "points": 0,
+        "evidence": "dependency list",
+        "reasoning": "No observability tools (logfire, sentry, opentelemetry) found"
+      },
+      {
+        "criterion": "testing_suite",
+        "points": 10,
+        "evidence": "tests dir: True, pytest dep: True",
+        "reasoning": "Tests directory exists, pytest in dependencies"
+      },
+      {
+        "criterion": "agents_md",
+        "points": 10,
+        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/AGENTS.md (5265 bytes)",
+        "reasoning": "AGENTS.md exists with comprehensive content"
+      },
+      {
+        "criterion": "pre_commit_hooks",
+        "points": 10,
+        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.pre-commit-config.yaml",
+        "reasoning": "Pre-commit configuration found for automated code quality checks"
+      },
+      {
+        "criterion": "gitignore",
+        "points": 10,
+        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.gitignore",
+        "reasoning": ".gitignore exists to prevent committing build artifacts and secrets"
+      },
+      {
+        "criterion": "env_template",
+        "points": 10,
+        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.env.example",
+        "reasoning": "Environment template exists for onboarding and secret management"
+      },
+      {
+        "criterion": "protocol_support",
+        "points": 4,
+        "evidence": "MCP",
+        "reasoning": "1 communication protocol(s) detected"
+      }
+    ],
+    "details": {
+      "has_pyproject": true,
+      "has_requirements": true,
+      "dep_count": 5,
+      "project_types": [
+        "Agent-Utilities Ecosystem"
+      ],
+      "has_agent_skills": false
+    }
+  },
+  {
+    "domain": "Dependency Audit",
+    "score": 94,
+    "grade": "A",
+    "findings": [
+      "Minor update: pytest-xdist 3.6.0 (constraint \u2014 not installed) -> 3.8.0",
+      "Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0"
+    ],
+    "justifications": [
+      {
+        "criterion": "dependency_freshness",
+        "points": 94,
+        "evidence": "source=/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/pyproject.toml total=5 major=0 minor=2 patch=0 not_installed=2",
+        "reasoning": "Audited 5 deps (3 installed, 2 constraint-only). 0 major, 2 minor, 0 patch updates."
+      }
+    ],
+    "packages": {
+      "pytest-xdist": {
+        "current": "3.6.0",
+        "constraint": "3.6.0",
+        "installed": null,
+        "latest": "3.8.0",
+        "status": "minor",
+        "version_source": "constraint",
+        "summary": "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
+      },
+      "pytest": {
+        "current": "9.0.3",
+        "constraint": "Any",
+        "installed": "9.0.3",
+        "latest": "9.0.3",
+        "status": "up-to-date",
+        "version_source": "installed",
+        "summary": "pytest: simple powerful testing with Python"
+      },
+      "pytest-cov": {
+        "current": "7.1.0",
+        "constraint": "Any",
+        "installed": "7.1.0",
+        "latest": "7.1.0",
+        "status": "up-to-date",
+        "version_source": "installed",
+        "summary": "Pytest plugin for measuring coverage."
+      },
+      "pytest-asyncio": {
+        "current": "Any",
+        "constraint": "Any",
+        "installed": null,
+        "latest": "1.3.0",
+        "status": "unknown",
+        "version_source": "constraint",
+        "summary": "Pytest support for asyncio"
+      },
+      "agent-utilities": {
+        "current": "0.2.40",
+        "constraint": "0.16.0",
+        "installed": "0.2.40",
+        "latest": "0.16.0",
+        "status": "minor",
+        "version_source": "installed",
+        "summary": "Agent Utilities for Pydantic AI Agents"
+      }
+    }
+  },
+  {
+    "domain": "Codebase Optimization",
+    "score": 69,
+    "grade": "D",
+    "findings": [
+      "Monolithic: mcp_server.py (707L) \u2014 1 functions with high complexity (worst: get_mcp_instance at 64L, CC=17); Low cohesion: 18 distinct concepts in one file",
+      "9 functions with nesting depth >4"
+    ],
+    "justifications": [
+      {
+        "criterion": "code_quality",
+        "points": 69,
+        "evidence": "{\"file_count\": 28, \"total_lines\": 3485, \"function_count\": 151, \"avg_complexity\": 5.02, \"max_complexity\": 23, \"avg_function_length\": 23.9, \"max_function_length\": 167, \"max_nesting_depth\": 15, \"duplication_ratio\": 0.004, \"long_functions\": 15, \"complex_functions\": 12, \"deep_nesting_functions\": 9, \"parse_errors\": 0, \"structural_issues\": 1, \"truly_monolithic\": 1}",
+        "reasoning": "Analyzed 28 files, 151 functions. Avg CC=5.0, max length=167, duplication=0.4%, 1 structural issues (1 monolithic)."
+      }
+    ],
+    "metrics": {
+      "file_count": 28,
+      "total_lines": 3485,
+      "function_count": 151,
+      "avg_complexity": 5.02,
+      "max_complexity": 23,
+      "avg_function_length": 23.9,
+      "max_function_length": 167,
+      "max_nesting_depth": 15,
+      "duplication_ratio": 0.004,
+      "long_functions": 15,
+      "complex_functions": 12,
+      "deep_nesting_functions": 9,
+      "parse_errors": 0,
+      "structural_issues": 1,
+      "truly_monolithic": 1
+    },
+    "top_complex": [
+      {
+        "name": "main",
+        "line": 11,
+        "length": 125,
+        "complexity": 23,
+        "nesting_depth": 15,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py"
+      },
+      {
+        "name": "test_api_brute_force",
+        "line": 36,
+        "length": 71,
+        "complexity": 22,
+        "nesting_depth": 7,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py"
+      },
+      {
+        "name": "main",
+        "line": 177,
+        "length": 99,
+        "complexity": 19,
+        "nesting_depth": 4,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py"
+      },
+      {
+        "name": "test_mcp_server_tools_all_actions",
+        "line": 463,
+        "length": 138,
+        "complexity": 19,
+        "nesting_depth": 3,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+      },
+      {
+        "name": "get_mcp_instance",
+        "line": 622,
+        "length": 64,
+        "complexity": 17,
+        "nesting_depth": 1,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py"
+      }
+    ],
+    "top_long": [
+      {
+        "name": "test_api_client_base_edge_cases",
+        "line": 162,
+        "length": 167,
+        "complexity": 13,
+        "nesting_depth": 2,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+      },
+      {
+        "name": "test_mcp_server_tools_all_actions",
+        "line": 463,
+        "length": 138,
+        "complexity": 19,
+        "nesting_depth": 3,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+      },
+      {
+        "name": "main",
+        "line": 11,
+        "length": 125,
+        "complexity": 23,
+        "nesting_depth": 15,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py"
+      },
+      {
+        "name": "test_api_client_validation_edge_cases",
+        "line": 335,
+        "length": 122,
+        "complexity": 3,
+        "nesting_depth": 2,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+      },
+      {
+        "name": "main",
+        "line": 177,
+        "length": 99,
+        "complexity": 19,
+        "nesting_depth": 4,
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py"
+      }
+    ],
+    "structural_issues": [
+      {
+        "file": "mcp_server.py",
+        "path": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "lines": 707,
+        "issues": [
+          "1 functions with high complexity (worst: get_mcp_instance at 64L, CC=17)",
+          "Low cohesion: 18 distinct concepts in one file",
+          "17 public functions \u2014 consider grouping into modules"
+        ],
+        "func_issues": [
+          {
+            "name": "get_mcp_instance",
+            "lines": 64,
+            "complexity": 17,
+            "nesting": 1
+          }
+        ],
+        "classification": "monolithic"
+      }
+    ],
+    "flat_directories": []
+  },
+  {
+    "domain": "Security Analysis",
+    "score": 100,
+    "grade": "A",
+    "findings": [],
+    "justifications": [
+      {
+        "criterion": "security_posture",
+        "points": 100,
+        "evidence": "high=0 med=0 low=0 attack_surface={\"subprocess_calls\": 0, \"file_io_calls\": 4, \"network_endpoints\": 0, \"eval_exec_usage\": 0, \"sql_usage\": 0}",
+        "reasoning": "Scanned 28 files. Found 0 security findings. High: -0pts, Med: -0pts, Low: -0pts."
+      }
+    ],
+    "vulnerabilities": [],
+    "attack_surface": {
+      "subprocess_calls": 0,
+      "file_io_calls": 4,
+      "network_endpoints": 0,
+      "eval_exec_usage": 0,
+      "sql_usage": 0
+    }
+  },
+  {
+    "domain": "Test Coverage",
+    "score": 70,
+    "grade": "C",
+    "findings": [
+      "6 tests without assertions",
+      "14 potential doc-test drift items"
+    ],
+    "justifications": [
+      {
+        "criterion": "test_coverage_quality",
+        "points": 70,
+        "evidence": "{\"test_file_count\": 6, \"test_count\": 16, \"source_file_count\": 28, \"test_to_source_ratio\": 0.57, \"intent_distribution\": {\"unit\": 15, \"integration\": 1}, \"tests_without_assertions\": 6, \"concept_traced_tests\": 0, \"drift_items\": 14}",
+        "reasoning": "16 tests across 6 files. Ratio: 0.57. Intent: {'unit': 15, 'integration': 1}. 6 without assertions, 14 drift items."
+      }
+    ],
+    "metrics": {
+      "test_file_count": 6,
+      "test_count": 16,
+      "source_file_count": 28,
+      "test_to_source_ratio": 0.57,
+      "intent_distribution": {
+        "unit": 15,
+        "integration": 1
+      },
+      "tests_without_assertions": 6,
+      "concept_traced_tests": 0,
+      "drift_items": 14
+    },
+    "tests": [
+      {
+        "name": "test_server_startup",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_startup.py",
+        "line": 1,
+        "length": 12,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": false
+      },
+      {
+        "name": "test_api_brute_force",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "line": 36,
+        "length": 71,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": false
+      },
+      {
+        "name": "test_mcp_server_coverage",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "line": 109,
+        "length": 74,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": false
+      },
+      {
+        "name": "test_lazy_imports",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 19,
+        "length": 33,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_agent_server_cli",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 58,
+        "length": 13,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_auth_flows",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 77,
+        "length": 79,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_api_client_base_edge_cases",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 162,
+        "length": 167,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_api_client_validation_edge_cases",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 335,
+        "length": 122,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_mcp_server_tools_all_actions",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 463,
+        "length": 138,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_mcp_server_main",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 607,
+        "length": 11,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_mcp_server_import_warning_fallback",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 620,
+        "length": 18,
+        "intent": "integration",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": false
+      },
+      {
+        "name": "test_api_init",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_basic.py",
+        "line": 4,
+        "length": 4,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_ansible_tower_api_brute_force",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "line": 32,
+        "length": 58,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": false
+      },
+      {
+        "name": "test_mcp_server_coverage",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "line": 92,
+        "length": 75,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": false
+      },
+      {
+        "name": "test_agent_server_coverage",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "line": 169,
+        "length": 11,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      },
+      {
+        "name": "test_concept_parity",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_concept_parity.py",
+        "line": 58,
+        "length": 30,
+        "intent": "unit",
+        "markers": [],
+        "concept_id": "",
+        "has_assertions": true
+      }
+    ],
+    "drift": [
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "overview",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "key features",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "cli or api",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "mcp",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "mcp configuration examples",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "stdio transport (recommended for local ides e.g., cursor, claude desktop)",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "streamable-http transport (recommended for production deployments)",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "docker compose orchestration",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "security & governance",
+        "detail": "Feature heading in README has no corresponding test"
+      },
+      {
+        "type": "untested_feature",
+        "source": "README.md",
+        "feature": "access control & policy enforcement",
+        "detail": "Feature heading in README has no corresponding test"
+      }
+    ]
+  },
+  {
+    "domain": "Documentation & Governance",
+    "score": 97,
+    "grade": "A",
+    "findings": [
+      "README.md missing sections: usage|quick start",
+      "2 broken internal links in README.md",
+      "README missing: Has a Table of Contents",
+      "README missing: Has usage examples with code blocks"
+    ],
+    "justifications": [
+      {
+        "criterion": "documentation_quality",
+        "points": 97,
+        "evidence": "{\"README.md\": {\"exists\": true, \"missing\": [\"usage|quick start\"]}, \"AGENTS.md\": {\"exists\": true, \"missing\": []}, \"STANDARDS.md\": {\"exists\": false, \"missing\": []}, \"CONTRIBUTING.md\": {\"exists\": false, \"missing\": []}, \"CHANGELOG.md\": {\"exists\": true, \"missing\": []}, \"LICENSE\": {\"exists\": true, \"missing\": []}, \"docs/\": {\"exists\": true, \"missing\": []}}",
+        "reasoning": "Audited 6 standard docs + docs/ directory. 0 broken references, 5 docs present. README industry grade: B (81.2%)."
+      }
+    ],
+    "doc_results": {
+      "README.md": {
+        "exists": true,
+        "size": 11840,
+        "headings": [
+          "Ansible Tower Mcp",
+          "CLI or API | MCP | Agent",
+          "Overview",
+          "Key Features",
+          "CLI or API",
+          "MCP",
+          "Available MCP Tools",
+          "MCP Configuration Examples",
+          "stdio Transport (Recommended for local IDEs e.g., Cursor, Claude Desktop)",
+          "Streamable-HTTP Transport (Recommended for production deployments)",
+          "Agent",
+          "Running the Agent CLI",
+          "Set credentials",
+          "Run the agent server",
+          "Docker Compose Orchestration",
+          "Security & Governance",
+          "Access Control & Policy Enforcement",
+          "Runtime Security Grid",
+          "Installation",
+          "Using uv (highly recommended)"
+        ],
+        "missing_sections": [
+          "usage|quick start"
+        ],
+        "heading_count": 23,
+        "stale": false,
+        "last_modified": "2026-05-22 08:16:16 -0500",
+        "category": "project_overview"
+      },
+      "AGENTS.md": {
+        "exists": true,
+        "size": 4997,
+        "headings": [
+          "AGENTS.md",
+          "Tech Stack & Architecture",
+          "Architecture Diagram",
+          "Workflow Diagram",
+          "Commands (run these exactly)",
+          "Installation",
+          "Quality & Linting (run from project root)",
+          "Execution Commands",
+          "ansible-tower-mcp\\nansible_tower_mcp.mcp:mcp_server\\n# ansible-tower-agent\\nansible_tower_mcp.agent:agent_server",
+          "Project Structure Quick Reference",
+          "File Tree",
+          "Code Style & Conventions",
+          "Dos and Don'ts",
+          "Safety & Boundaries",
+          "When Stuck",
+          "Graph Architecture",
+          "Testing with Timeout"
+        ],
+        "missing_sections": [],
+        "heading_count": 17,
+        "stale": false,
+        "last_modified": "2026-05-05 09:23:26 -0500",
+        "category": "agentic_metadata"
+      },
+      "STANDARDS.md": {
+        "exists": false,
+        "missing_sections": [],
+        "size": 0,
+        "headings": [],
+        "stale": true,
+        "last_modified": "unknown",
+        "category": "standards"
+      },
+      "CONTRIBUTING.md": {
+        "exists": false,
+        "missing_sections": [],
+        "size": 0,
+        "headings": [],
+        "stale": true,
+        "last_modified": "unknown",
+        "category": "contributing"
+      },
+      "CHANGELOG.md": {
+        "exists": true,
+        "size": 365,
+        "headings": [
+          "Changelog",
+          "[Unreleased]",
+          "Added",
+          "Changed",
+          "Fixed",
+          "[1.3.54] - 2026-04-29",
+          "Added"
+        ],
+        "missing_sections": [],
+        "heading_count": 7,
+        "stale": false,
+        "last_modified": "2026-04-30 08:18:25 -0500",
+        "category": "changelog"
+      },
+      "LICENSE": {
+        "exists": true,
+        "size": 1062,
+        "headings": [],
+        "missing_sections": [],
+        "heading_count": 0,
+        "stale": false,
+        "last_modified": "2025-09-04 22:16:55 -0500",
+        "category": "license"
+      },
+      "docs/": {
+        "exists": true,
+        "file_count": 3,
+        "files": [
+          "docs/legacy_readme.md",
+          "docs/overview.md",
+          "docs/index.md"
+        ]
+      }
+    },
+    "drift": [
+      {
+        "type": "info",
+        "doc": "README.md",
+        "reference": "ansible-tower-mcp[all], ansible-tower-mcp[all]",
+        "detail": "README references 2 install commands"
+      }
+    ],
+    "readme_grade": {
+      "score": 26,
+      "max_score": 32,
+      "percentage": 81.2,
+      "grade": "B",
+      "criteria": {
+        "has_title": true,
+        "has_badges": true,
+        "has_description": true,
+        "has_toc": false,
+        "has_installation": true,
+        "has_usage": false,
+        "has_api_docs": true,
+        "has_architecture": true,
+        "has_contributing": true,
+        "has_license": false,
+        "has_code_blocks": true,
+        "has_docs_refs": true,
+        "no_broken_links": false,
+        "reasonable_length": true,
+        "has_cli_api_details": true,
+        "has_mcp_configs": true,
+        "has_agent_configs": true,
+        "has_env_var_docs": true,
+        "has_mcp_tool_table": true,
+        "has_deployment_docs": true
+      },
+      "findings": [
+        "2 broken internal links in README.md",
+        "README missing: Has a Table of Contents",
+        "README missing: Has usage examples with code blocks"
+      ]
+    }
+  },
+  {
+    "domain": "Architecture & Design Patterns",
+    "score": 70,
+    "grade": "C",
+    "findings": [
+      "SRP: 2 modules exceed 500 lines (god modules)",
+      "No discernible layer architecture (no domain/service/adapter separation)",
+      "Low dependency injection ratio: 7%"
+    ],
+    "justifications": [
+      {
+        "criterion": "architecture_quality",
+        "points": 70,
+        "evidence": "{\"layers\": 0, \"di_ratio\": 0.07, \"solid_violations\": 1}",
+        "reasoning": "Analyzed 28 files. 0/5 architecture layers present, DI ratio: 7%, 1 SOLID violations."
+      }
+    ],
+    "analysis": {
+      "solid_findings": [
+        {
+          "principle": "SRP",
+          "status": "violation",
+          "detail": "2 modules exceed 500 lines (god modules)",
+          "items": [
+            {
+              "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+              "lines": 637
+            },
+            {
+              "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+              "lines": 707
+            }
+          ]
+        }
+      ],
+      "layer_architecture": {
+        "has_domain_layer": false,
+        "has_adapter_layer": false,
+        "has_port_interfaces": false,
+        "has_service_layer": false,
+        "has_model_layer": false
+      },
+      "dependency_injection": {
+        "total_classes": 15,
+        "di_classes": 1,
+        "di_ratio": 0.07
+      },
+      "event_driven": {
+        "event_classes": 0,
+        "callback_patterns": 0,
+        "observer_patterns": 0,
+        "signal_patterns": 0
+      },
+      "file_count": 28
+    }
+  },
+  {
+    "domain": "Concept Traceability",
+    "score": 30,
+    "grade": "F",
+    "findings": [
+      "Low traceability ratio: 0% concepts fully traced",
+      "16 test functions missing concept markers",
+      "66 significant functions (>10 lines) missing concept markers in docstrings"
+    ],
+    "justifications": [
+      {
+        "criterion": "concept_traceability",
+        "points": 30,
+        "evidence": "{\"total_concepts\": 5, \"well_traced\": 0, \"orphans\": 5, \"drift\": 0, \"code_concepts\": 0, \"doc_concepts\": 7, \"test_concepts\": 0, \"decorator_concepts\": 0, \"tests_missing_markers\": 16, \"functions_missing_docstrings\": 66, \"registry_concepts\": 0, \"unimplemented_concepts\": 0}",
+        "reasoning": "5 unique concepts found. 0 fully traced (code+docs+tests), 5 orphans, 0 drifted. 16 tests without concept markers. 66 functions without concept docstrings."
+      }
+    ],
+    "metrics": {
+      "total_concepts": 5,
+      "well_traced": 0,
+      "orphans": 5,
+      "drift": 0,
+      "code_concepts": 0,
+      "doc_concepts": 7,
+      "test_concepts": 0,
+      "decorator_concepts": 0,
+      "tests_missing_markers": 16,
+      "functions_missing_docstrings": 66,
+      "registry_concepts": 0,
+      "unimplemented_concepts": 0
+    },
+    "concept_map": {
+      "OS-5.4": {
+        "code": 0,
+        "docs": 2,
+        "test": 0,
+        "test_decorator": 0,
+        "test_docstring": 0
+      },
+      "OS-5.1": {
+        "code": 0,
+        "docs": 1,
+        "test": 0,
+        "test_decorator": 0,
+        "test_docstring": 0
+      },
+      "OS-5.3": {
+        "code": 0,
+        "docs": 2,
+        "test": 0,
+        "test_decorator": 0,
+        "test_docstring": 0
+      },
+      "ORCH-1.4": {
+        "code": 0,
+        "docs": 1,
+        "test": 0,
+        "test_decorator": 0,
+        "test_docstring": 0
+      },
+      "OS-5.2": {
+        "code": 0,
+        "docs": 1,
+        "test": 0,
+        "test_decorator": 0,
+        "test_docstring": 0
+      }
+    },
+    "orphans": [
+      {
+        "concept_id": "OS-5.4",
+        "present_in": [
+          "docs"
+        ],
+        "missing_from": [
+          "code",
+          "test"
+        ]
+      },
+      {
+        "concept_id": "OS-5.1",
+        "present_in": [
+          "docs"
+        ],
+        "missing_from": [
+          "code",
+          "test"
+        ]
+      },
+      {
+        "concept_id": "OS-5.3",
+        "present_in": [
+          "docs"
+        ],
+        "missing_from": [
+          "code",
+          "test"
+        ]
+      },
+      {
+        "concept_id": "ORCH-1.4",
+        "present_in": [
+          "docs"
+        ],
+        "missing_from": [
+          "code",
+          "test"
+        ]
+      },
+      {
+        "concept_id": "OS-5.2",
+        "present_in": [
+          "docs"
+        ],
+        "missing_from": [
+          "code",
+          "test"
+        ]
+      }
+    ],
+    "drift": [],
+    "tests_missing_markers": [
+      {
+        "test_name": "test_server_startup",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_startup.py",
+        "line": 1
+      },
+      {
+        "test_name": "test_api_brute_force",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "line": 36
+      },
+      {
+        "test_name": "test_mcp_server_coverage",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "line": 109
+      },
+      {
+        "test_name": "test_lazy_imports",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 19
+      },
+      {
+        "test_name": "test_agent_server_cli",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 58
+      },
+      {
+        "test_name": "test_auth_flows",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 77
+      },
+      {
+        "test_name": "test_api_client_base_edge_cases",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 162
+      },
+      {
+        "test_name": "test_api_client_validation_edge_cases",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 335
+      },
+      {
+        "test_name": "test_mcp_server_tools_all_actions",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 463
+      },
+      {
+        "test_name": "test_mcp_server_main",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 607
+      },
+      {
+        "test_name": "test_mcp_server_import_warning_fallback",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "line": 620
+      },
+      {
+        "test_name": "test_api_init",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_basic.py",
+        "line": 4
+      },
+      {
+        "test_name": "test_ansible_tower_api_brute_force",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "line": 32
+      },
+      {
+        "test_name": "test_mcp_server_coverage",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "line": 92
+      },
+      {
+        "test_name": "test_agent_server_coverage",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "line": 169
+      },
+      {
+        "test_name": "test_concept_parity",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_concept_parity.py",
+        "line": 58
+      }
+    ],
+    "functions_missing_docstrings": [
+      {
+        "function": "parse_api_client",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "line": 33,
+        "length": 26
+      },
+      {
+        "function": "parse_mcp_server",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "line": 94,
+        "length": 41
+      },
+      {
+        "function": "verify_agent",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "line": 137,
+        "length": 38
+      },
+      {
+        "function": "main",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "line": 177,
+        "length": 99
+      },
+      {
+        "function": "main",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py",
+        "line": 11,
+        "length": 125
+      },
+      {
+        "function": "register_inventory_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 41,
+        "length": 37
+      },
+      {
+        "function": "register_hosts_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 80,
+        "length": 37
+      },
+      {
+        "function": "register_groups_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 119,
+        "length": 41
+      },
+      {
+        "function": "register_job_templates_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 162,
+        "length": 39
+      },
+      {
+        "function": "register_jobs_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 203,
+        "length": 39
+      },
+      {
+        "function": "register_projects_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 244,
+        "length": 39
+      },
+      {
+        "function": "register_credentials_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 285,
+        "length": 39
+      },
+      {
+        "function": "register_organizations_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 326,
+        "length": 37
+      },
+      {
+        "function": "register_teams_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 365,
+        "length": 37
+      },
+      {
+        "function": "register_users_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 404,
+        "length": 37
+      },
+      {
+        "function": "register_ad_hoc_commands_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 443,
+        "length": 33
+      },
+      {
+        "function": "register_workflow_templates_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 478,
+        "length": 33
+      },
+      {
+        "function": "register_workflow_jobs_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 513,
+        "length": 33
+      },
+      {
+        "function": "register_schedules_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 548,
+        "length": 37
+      },
+      {
+        "function": "register_system_tools",
+        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "line": 587,
+        "length": 33
+      }
+    ],
+    "unimplemented_concepts": []
+  },
+  {
+    "domain": "Linting & Formatting",
+    "score": 99,
+    "grade": "A",
+    "findings": [
+      "Total lint findings: 1 (high/error: 0, medium/warning: 0, low: 1)"
+    ],
+    "justifications": [
+      {
+        "criterion": "lint_compliance",
+        "points": 99,
+        "evidence": "ruff=1, bandit=0, mypy=0",
+        "reasoning": "1 total findings across 3 tools. High/error: -0pts, Med/warning: -0pts, Low: -1pt."
+      }
+    ],
+    "tool_results": {
+      "ruff": {
+        "available": true,
+        "finding_count": 1,
+        "returncode": 1
+      },
+      "bandit": {
+        "available": true,
+        "finding_count": 0,
+        "returncode": 1
+      },
+      "mypy": {
+        "available": true,
+        "finding_count": 0,
+        "returncode": 1
+      }
+    },
+    "all_findings": [
+      {
+        "file": "",
+        "line": "",
+        "col": "",
+        "message": "tests/test_coverage_edge_cases.py:2:8",
+        "tool": "ruff"
+      }
+    ]
+  },
+  {
+    "domain": "Test Execution",
+    "score": 25,
+    "grade": "F",
+    "findings": [
+      "No tests were executed (test framework detected but no tests found)"
+    ],
+    "justifications": [
+      {
+        "criterion": "test_execution",
+        "points": 25,
+        "evidence": "{\"frameworks_detected\": 1, \"total_passed\": 0, \"total_failed\": 0, \"total_errors\": 0, \"pass_rate\": 0.0, \"timeout\": 300}",
+        "reasoning": "Executed 1 framework(s). 0 passed, 0 failed, 0 errors. Pass rate: 0%."
+      }
+    ],
+    "framework_results": [
+      {
+        "language": "python",
+        "framework": "pytest",
+        "command": [
+          "python",
+          "-m",
+          "pytest",
+          "--tb=line",
+          "-q",
+          "--timeout=300",
+          "--no-header"
+        ],
+        "status": "failed",
+        "exit_code": 4,
+        "parsed": {
+          "passed": 0,
+          "failed": 0,
+          "errors": 0,
+          "warnings": 0,
+          "skipped": 0,
+          "failures": []
+        }
+      }
+    ],
+    "metrics": {
+      "frameworks_detected": 1,
+      "total_passed": 0,
+      "total_failed": 0,
+      "total_errors": 0,
+      "pass_rate": 0.0,
+      "timeout": 300
+    }
+  },
+  {
+    "domain": "Directory Organization",
+    "score": 97,
+    "grade": "A",
+    "findings": [
+      "1 rogue/throwaway scripts detected (fix_*, validate_*, patch_*, etc.): scripts/validate_a2a_agent.py"
+    ],
+    "justifications": [
+      {
+        "criterion": "directory_organization",
+        "points": 97,
+        "evidence": "{\"total_source_files\": 52, \"total_directories\": 9, \"max_depth\": 3, \"avg_depth\": 1.4, \"crowded_dirs_20plus\": 0, \"severely_crowded_40plus\": 0, \"monolithic_dirs\": 0, \"empty_dirs\": 1, \"avg_files_per_dir\": 5.8, \"rogue_scripts\": 1}",
+        "reasoning": "52 files across 9 directories. Max depth: 3, avg files/dir: 5.8. 0 crowded, 0 severely crowded, 0 monolithic, 1 rogue scripts."
+      }
+    ],
+    "metrics": {
+      "total_source_files": 52,
+      "total_directories": 9,
+      "max_depth": 3,
+      "avg_depth": 1.4,
+      "crowded_dirs_20plus": 0,
+      "severely_crowded_40plus": 0,
+      "monolithic_dirs": 0,
+      "empty_dirs": 1,
+      "avg_files_per_dir": 5.8,
+      "rogue_scripts": 1
+    },
+    "crowded_dirs": [],
+    "monolithic_dirs": [],
+    "suggestions": [],
+    "rogue_scripts": [
+      {
+        "file": "scripts/validate_a2a_agent.py",
+        "prefix": "validate",
+        "recommendation": "Remove or integrate into project modules"
+      }
+    ]
+  },
+  {
+    "domain": "UI/UX Quality",
+    "score": -1,
+    "grade": "N/A",
+    "ui_type": null,
+    "findings": [
+      "No UI detected \u2014 domain not applicable"
+    ],
+    "justifications": [
+      {
+        "criterion": "ui_detection",
+        "points": -1,
+        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp",
+        "reasoning": "No web or terminal UI framework detected. Domain skipped."
+      }
+    ],
+    "heuristic_results": [],
+    "accessibility": {}
+  },
+  {
+    "domain": "Version Sync Analysis",
+    "score": 100,
+    "grade": "A",
+    "findings": [
+      "All version '1.16.0' declarations appear to be tracked correctly."
+    ],
+    "justifications": [
+      {
+        "criterion": "bumpversion_exists",
+        "points": 20,
+        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.bumpversion.cfg",
+        "reasoning": ".bumpversion.cfg found"
+      },
+      {
+        "criterion": "current_version_defined",
+        "points": 20,
+        "evidence": "1.16.0",
+        "reasoning": "Current version tracked is 1.16.0"
+      },
+      {
+        "criterion": "files_tracked",
+        "points": 20,
+        "evidence": "6 files tracked",
+        "reasoning": "Found 6 files tracked in .bumpversion.cfg"
+      },
+      {
+        "criterion": "version_drift_check",
+        "points": 40,
+        "evidence": "0 drifted files",
+        "reasoning": "No version drift detected in codebase files"
+      }
+    ],
+    "details": {
+      "tracked_files": [
+        "pyproject.toml",
+        "README.md",
+        "docker/Dockerfile",
+        "ansible_tower_mcp/agent_server.py",
+        "ansible_tower_mcp/mcp_server.py",
+        "ansible_tower_mcp/api_client.py"
+      ],
+      "drifted_files": []
+    }
+  },
+  {
+    "domain": "Changelog Audit",
+    "score": 75,
+    "grade": "C",
+    "findings": [
+      "CHANGELOG.md exists but could not be parsed \u2014 check format compliance",
+      "No changelog entries within the last 30 days",
+      "keepachangelog not installed \u2014 pip install 'universal-skills[code-enhancer]'"
+    ],
+    "justifications": [
+      {
+        "criterion": "changelog_quality",
+        "points": 75,
+        "evidence": "{\"exists\": true, \"parseable\": false, \"version_count\": 0, \"has_drift\": false, \"dep_deltas_found\": 0}",
+        "reasoning": "CHANGELOG.md exists. 0 versions tracked. 0 dependency changelogs analyzed."
+      }
+    ],
+    "format_validation": {
+      "exists": true,
+      "parseable": false,
+      "has_unreleased": false,
+      "version_count": 0,
+      "uses_semver": true,
+      "valid_categories": true,
+      "has_dates": true,
+      "has_header": true,
+      "issues": [
+        "keepachangelog not installed \u2014 pip install 'universal-skills[code-enhancer]'"
+      ]
+    },
+    "version_drift": {
+      "has_drift": false,
+      "changelog_version": null,
+      "pyproject_version": "1.16.0"
+    },
+    "dependency_deltas": {}
+  },
+  {
+    "domain": "Pytest Quality",
+    "score": 64,
+    "grade": "D",
+    "findings": [
+      "1 test files exceed 500 lines \u2014 split into focused modules",
+      "Test directory lacks subdirectory organization (consider unit/, integration/, e2e/)",
+      "Missing conftest.py for shared fixtures",
+      "No @pytest.mark.parametrize usage \u2014 consider data-driven tests",
+      "No shared fixtures in conftest.py",
+      "6 tests have no assertions",
+      "3 tests exceed 100 lines \u2014 likely doing too much per test"
+    ],
+    "justifications": [
+      {
+        "criterion": "pytest_quality",
+        "points": 64,
+        "evidence": "{\"test_files\": 6, \"total_tests\": 16, \"descriptive_name_ratio\": 0.88, \"generic_names\": 0, \"fixture_usage_ratio\": 0.25, \"parametrize_users\": 0, \"conftest_fixtures\": 0, \"no_assertion_tests\": 6, \"weak_assertion_tests\": 1, \"duplicate_groups\": 0, \"large_files\": 1, \"over_mocked_tests\": 3, \"very_long_tests\": 3, \"subscores\": {\"naming\": 20, \"structure\": 12, \"fixtures\": 7, \"assertions\": 10, \"ai_slop\": 15}}",
+        "reasoning": "16 tests across 6 files. Naming: 20/20, Structure: 12/20, Fixtures: 7/20, Assertions: 10/20, AI Slop: 15/20."
+      }
+    ],
+    "metrics": {
+      "test_files": 6,
+      "total_tests": 16,
+      "descriptive_name_ratio": 0.88,
+      "generic_names": 0,
+      "fixture_usage_ratio": 0.25,
+      "parametrize_users": 0,
+      "conftest_fixtures": 0,
+      "no_assertion_tests": 6,
+      "weak_assertion_tests": 1,
+      "duplicate_groups": 0,
+      "large_files": 1,
+      "over_mocked_tests": 3,
+      "very_long_tests": 3,
+      "subscores": {
+        "naming": 20,
+        "structure": 12,
+        "fixtures": 7,
+        "assertions": 10,
+        "ai_slop": 15
+      }
+    },
+    "conftest": {
+      "conftest_count": 0,
+      "total_shared_fixtures": 0,
+      "has_root_conftest": false
+    },
+    "duplicates": [],
+    "large_files": [
+      {
+        "file": "test_coverage_edge_cases.py",
+        "lines": 637
+      }
+    ]
+  },
+  {
+    "domain": "Environment Variables",
+    "score": 60,
+    "grade": "D",
+    "findings": [
+      "Only 13% of env vars documented in README.md",
+      "Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME, ANSIBLE_VERIFY, AUDIENCE, AUTH_TYPE, CREDENTIALSTOOL",
+      "8 Python env vars not in .env.example: ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME"
+    ],
+    "justifications": [
+      {
+        "criterion": "env_var_documentation",
+        "points": 60,
+        "evidence": "{\"total_vars\": 31, \"python_vars\": 23, \"dockerfile_vars\": 4, \"compose_vars\": 0, \"dotenv_vars\": 22, \"readme_documented\": 4, \"readme_undocumented\": 27, \"documentation_coverage\": 0.13}",
+        "reasoning": "Found 31 unique env vars across 82 occurrences. README documents 4/31. Has .env.example."
+      }
+    ],
+    "metrics": {
+      "total_vars": 31,
+      "python_vars": 23,
+      "dockerfile_vars": 4,
+      "compose_vars": 0,
+      "dotenv_vars": 22,
+      "readme_documented": 4,
+      "readme_undocumented": 27,
+      "documentation_coverage": 0.13
+    },
+    "variables": {
+      "ANSIBLE_BASE_URL": {
+        "name": "ANSIBLE_BASE_URL",
+        "sources": [
+          "tests/test_ansible_tower_mcp_brute_force_coverage.py:4",
+          "tests/test_ansible_tower_mcp_brute_force_coverage.py:94",
+          "ansible_tower_mcp/auth.py:40"
+        ],
+        "defaults": [],
+        "source_types": [
+          "python"
+        ]
+      },
+      "ANSIBLE_USERNAME": {
+        "name": "ANSIBLE_USERNAME",
+        "sources": [
+          "tests/test_ansible_tower_mcp_brute_force_coverage.py:5",
+          "tests/test_ansible_tower_mcp_brute_force_coverage.py:95",
+          "ansible_tower_mcp/auth.py:80"
+        ],
+        "defaults": [],
+        "source_types": [
+          "python"
+        ]
+      },
+      "ANSIBLE_PASSWORD": {
+        "name": "ANSIBLE_PASSWORD",
+        "sources": [
+          "tests/test_ansible_tower_mcp_brute_force_coverage.py:6",
+          "tests/test_ansible_tower_mcp_brute_force_coverage.py:96",
+          "ansible_tower_mcp/auth.py:81"
+        ],
+        "defaults": [],
+        "source_types": [
+          "python"
+        ]
+      },
+      "INVENTORYTOOL": {
+        "name": "INVENTORYTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:635",
+          ".env:23",
+          ".env.example:23"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "HOSTSTOOL": {
+        "name": "HOSTSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:638",
+          ".env:24",
+          ".env.example:24"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "GROUPSTOOL": {
+        "name": "GROUPSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:641",
+          ".env:25",
+          ".env.example:25"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "JOB_TEMPLATESTOOL": {
+        "name": "JOB_TEMPLATESTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:644",
+          ".env:26",
+          ".env.example:26"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "JOBSTOOL": {
+        "name": "JOBSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:647",
+          ".env:27",
+          ".env.example:27"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "PROJECTSTOOL": {
+        "name": "PROJECTSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:650",
+          ".env:28",
+          ".env.example:28"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "CREDENTIALSTOOL": {
+        "name": "CREDENTIALSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:653",
+          ".env:29",
+          ".env.example:29"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "ORGANIZATIONSTOOL": {
+        "name": "ORGANIZATIONSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:656",
+          ".env:30",
+          ".env.example:30"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "TEAMSTOOL": {
+        "name": "TEAMSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:659",
+          ".env:31",
+          ".env.example:31"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "USERSTOOL": {
+        "name": "USERSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:662",
+          ".env:32",
+          ".env.example:32"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "AD_HOC_COMMANDSTOOL": {
+        "name": "AD_HOC_COMMANDSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:665",
+          ".env:33",
+          ".env.example:33"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "WORKFLOW_TEMPLATESTOOL": {
+        "name": "WORKFLOW_TEMPLATESTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:669",
+          ".env:34",
+          ".env.example:34"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "WORKFLOW_JOBSTOOL": {
+        "name": "WORKFLOW_JOBSTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:673",
+          ".env:35",
+          ".env.example:35"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "SCHEDULESTOOL": {
+        "name": "SCHEDULESTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:676",
+          ".env:36",
+          ".env.example:36"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "SYSTEMTOOL": {
+        "name": "SYSTEMTOOL",
+        "sources": [
+          "ansible_tower_mcp/mcp_server.py:679",
+          ".env:37",
+          ".env.example:37"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv",
+          "python"
+        ]
+      },
+      "ANSIBLE_VERIFY": {
+        "name": "ANSIBLE_VERIFY",
+        "sources": [
+          "ansible_tower_mcp/auth.py:41"
+        ],
+        "defaults": [
+          "False"
+        ],
+        "source_types": [
+          "python"
+        ]
+      },
+      "AUDIENCE": {
+        "name": "AUDIENCE",
+        "sources": [
+          "ansible_tower_mcp/auth.py:47"
+        ],
+        "defaults": [
+          "base_url"
+        ],
+        "source_types": [
+          "python"
+        ]
+      },
+      "DELEGATED_SCOPES": {
+        "name": "DELEGATED_SCOPES",
+        "sources": [
+          "ansible_tower_mcp/auth.py:48"
+        ],
+        "defaults": [
+          "api"
+        ],
+        "source_types": [
+          "python"
+        ]
+      },
+      "ANSIBLE_CLIENT_ID": {
+        "name": "ANSIBLE_CLIENT_ID",
+        "sources": [
+          "ansible_tower_mcp/auth.py:68"
+        ],
+        "defaults": [],
+        "source_types": [
+          "python"
+        ]
+      },
+      "ANSIBLE_CLIENT_SECRET": {
+        "name": "ANSIBLE_CLIENT_SECRET",
+        "sources": [
+          "ansible_tower_mcp/auth.py:69"
+        ],
+        "defaults": [],
+        "source_types": [
+          "python"
+        ]
+      },
+      "HOST": {
+        "name": "HOST",
+        "sources": [
+          "docker/Dockerfile:8",
+          "docker/Dockerfile:3",
+          "docker/debug.Dockerfile:8",
+          "docker/debug.Dockerfile:3",
+          ".env:6"
+        ],
+        "defaults": [
+          "0.0.0.0"
+        ],
+        "source_types": [
+          "dockerfile",
+          "dotenv"
+        ]
+      },
+      "PORT": {
+        "name": "PORT",
+        "sources": [
+          "docker/Dockerfile:4",
+          "docker/debug.Dockerfile:4",
+          ".env:7",
+          ".env.example:7"
+        ],
+        "defaults": [
+          "8000"
+        ],
+        "source_types": [
+          "dockerfile",
+          "dotenv"
+        ]
+      },
+      "TRANSPORT": {
+        "name": "TRANSPORT",
+        "sources": [
+          "docker/Dockerfile:5",
+          "docker/debug.Dockerfile:5",
+          ".env:8",
+          ".env.example:8"
+        ],
+        "defaults": [
+          "stdio # options: stdio, streamable-http, sse",
+          "stdio"
+        ],
+        "source_types": [
+          "dockerfile",
+          "dotenv"
+        ]
+      },
+      "AUTH_TYPE": {
+        "name": "AUTH_TYPE",
+        "sources": [
+          "docker/Dockerfile:6",
+          "docker/debug.Dockerfile:6"
+        ],
+        "defaults": [],
+        "source_types": [
+          "dockerfile"
+        ]
+      },
+      "ENABLE_OTEL": {
+        "name": "ENABLE_OTEL",
+        "sources": [
+          ".env:11",
+          ".env.example:11"
+        ],
+        "defaults": [
+          "True"
+        ],
+        "source_types": [
+          "dotenv"
+        ]
+      },
+      "OTEL_EXPORTER_OTLP_ENDPOINT": {
+        "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
+        "sources": [
+          ".env:12"
+        ],
+        "defaults": [
+          "http://langfuse.arpa/api/public/otel"
+        ],
+        "source_types": [
+          "dotenv"
+        ]
+      },
+      "EUNOMIA_TYPE": {
+        "name": "EUNOMIA_TYPE",
+        "sources": [
+          ".env:18",
+          ".env.example:18"
+        ],
+        "defaults": [
+          "none # options: none, embedded, remote",
+          "none"
+        ],
+        "source_types": [
+          "dotenv"
+        ]
+      },
+      "EUNOMIA_POLICY_FILE": {
+        "name": "EUNOMIA_POLICY_FILE",
+        "sources": [
+          ".env:19",
+          ".env.example:19"
+        ],
+        "defaults": [
+          "mcp_policies.json"
+        ],
+        "source_types": [
+          "dotenv"
+        ]
+      }
+    },
+    "readme_coverage": {
+      "documented": [
+        "ENABLE_OTEL",
+        "HOST",
+        "PORT",
+        "TRANSPORT"
+      ],
+      "undocumented": [
+        "AD_HOC_COMMANDSTOOL",
+        "ANSIBLE_BASE_URL",
+        "ANSIBLE_CLIENT_ID",
+        "ANSIBLE_CLIENT_SECRET",
+        "ANSIBLE_PASSWORD",
+        "ANSIBLE_USERNAME",
+        "ANSIBLE_VERIFY",
+        "AUDIENCE",
+        "AUTH_TYPE",
+        "CREDENTIALSTOOL",
+        "DELEGATED_SCOPES",
+        "EUNOMIA_POLICY_FILE",
+        "EUNOMIA_TYPE",
+        "GROUPSTOOL",
+        "HOSTSTOOL",
+        "INVENTORYTOOL",
+        "JOBSTOOL",
+        "JOB_TEMPLATESTOOL",
+        "ORGANIZATIONSTOOL",
+        "OTEL_EXPORTER_OTLP_ENDPOINT",
+        "PROJECTSTOOL",
+        "SCHEDULESTOOL",
+        "SYSTEMTOOL",
+        "TEAMSTOOL",
+        "USERSTOOL",
+        "WORKFLOW_JOBSTOOL",
+        "WORKFLOW_TEMPLATESTOOL"
+      ],
+      "coverage": 0.12903225806451613
+    }
+  }
+]

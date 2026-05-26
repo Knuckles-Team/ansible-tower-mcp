@@ -20,6 +20,10 @@ DEFAULT_AGENT_SYSTEM_PROMPT = None
 
 
 def agent_server():
+    """Start the agent server.
+
+    CONCEPT:ANSIBLE-03: Bootstraps and creates the Pydantic AI agent server with auto-discovery configs.
+    """
     from agent_utilities import (
         build_system_prompt_from_workspace,
         create_agent_parser,

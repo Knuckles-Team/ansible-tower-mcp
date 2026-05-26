@@ -1,0 +1,75 @@
+# Tasks: Code Enhancement: ansible-tower-mcp
+
+Generated: 2026-05-24T04:17:16.159836+00:00
+Skipped informational: 5
+
+- [ ] [P] **T001** [Dependency Audit] Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T002** [Dependency Audit] Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T003** [Codebase Optimization] Needs attention: tools.py (651L) — Low cohesion: 16 distinct concepts in one fil
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T004** [Codebase Optimization] 9 functions with nesting depth >4
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T005** [Test Coverage] 6 tests without assertions
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T006** [Test Coverage] 14 potential doc-test drift items
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T007** [Documentation & Governance] README.md missing sections: usage|quick start
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T008** [Documentation & Governance] 2 broken internal links in README.md
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T009** [Documentation & Governance] README missing: Has a Table of Contents
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T010** [Documentation & Governance] README missing: Has usage examples with code blocks
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T011** [Architecture & Design Patterns] SRP: 2 modules exceed 500 lines (god modules)
+  - Priority: P2-Medium | Effort: Large
+- [ ] [P] **T012** [Architecture & Design Patterns] No discernible layer architecture (no domain/service/adapter separation)
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T013** [Architecture & Design Patterns] Low dependency injection ratio: 7%
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T014** [Concept Traceability] Low traceability ratio: 0% concepts fully traced
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T015** [Concept Traceability] 26 orphaned concepts (only in one source)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T016** [Concept Traceability] 19 test functions missing concept markers
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T017** [Concept Traceability] 32 significant functions (>10 lines) missing concept markers in docstrings
+  - Priority: P4-Enhancement | Effort: Small
+- [ ] [P] **T018** [Linting & Formatting] Total lint findings: 1 (high/error: 0, medium/warning: 0, low: 1)
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T019** [Pre-Commit Compliance] 2 hook(s) may be outdated: ruff-pre-commit, uv-pre-commit
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T020** [Directory Organization] 1 rogue/throwaway scripts detected (fix_*, validate_*, patch_*, etc.): scripts/v
+  - Priority: P4-Enhancement | Effort: Medium
+- [ ] [P] **T021** [Version Sync Analysis] Found 2 file(s) with version '1.16.0' that are NOT tracked in .bumpversion.cfg:
+  - Priority: P2-Medium | Effort: Small
+- [ ] [P] **T022** [Version Sync Analysis]   - test_results.json
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T023** [Version Sync Analysis]   - .specify/reports/code_enhancement_report.md
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T024** [Changelog Audit] CHANGELOG.md exists but could not be parsed — check format compliance
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T025** [Changelog Audit] No changelog entries within the last 30 days
+  - Priority: P3-Low | Effort: Medium
+- [ ] [P] **T026** [Changelog Audit] keepachangelog not installed — pip install 'universal-skills[code-enhancer]'
+  - Priority: P3-Low | Effort: Small
+- [ ] [P] **T027** [Pytest Quality] 1 test files exceed 500 lines — split into focused modules
+  - Priority: P2-Medium | Effort: Large
+- [ ] [P] **T028** [Pytest Quality] Test directory lacks subdirectory organization (consider unit/, integration/, e2
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T029** [Pytest Quality] No @pytest.mark.parametrize usage — consider data-driven tests
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T030** [Pytest Quality] 6 tests have no assertions
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T031** [Pytest Quality] 3 tests exceed 100 lines — likely doing too much per test
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T032** [Environment Variables] Only 13% of env vars documented in README.md
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T033** [Environment Variables] Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID,
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T034** [Environment Variables] 8 Python env vars not in .env.example: ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSI
+  - Priority: P2-Medium | Effort: Medium
+- [ ] [P] **T035** [analyze_xdg_kg] Analysis error: No module named 'agent_utilities.knowledge_graph'
+  - Priority: P1-High | Effort: Medium
