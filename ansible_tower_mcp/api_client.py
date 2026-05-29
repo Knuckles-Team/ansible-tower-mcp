@@ -12,7 +12,7 @@ from ansible_tower_mcp.api.api_client_teams import Api as TeamsApi
 from ansible_tower_mcp.api.api_client_templates import Api as TemplatesApi
 from ansible_tower_mcp.api.api_client_users import Api as UsersApi
 
-__version__ = "1.21.0"
+__version__ = "1.23.0"
 
 
 class Api(
