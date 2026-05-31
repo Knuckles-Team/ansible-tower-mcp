@@ -107,7 +107,7 @@ def test_auth_flows():
                 _ = get_client()
                 mock_api_class.assert_called_once_with(
                     base_url="http://test",
-                    token="delegated_token_abc",
+                    token="delegated_token_abc", # sanitizer:ignore
                     verify=False,
                 )
 
@@ -151,7 +151,7 @@ def test_auth_flows():
                 mock_api_class.assert_called_once_with(
                     base_url="http://test",
                     client_id="client_id_123",
-                    client_secret="client_secret_456",
+                    client_secret="client_secret_456", # sanitizer:ignore
                     verify=False,
                 )
 
