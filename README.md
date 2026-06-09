@@ -22,6 +22,10 @@
 
 *Version: 1.31.0*
 
+> **Documentation** — Installation, deployment, and usage across the API, CLI,
+> MCP, and A2A agent interfaces are maintained in the
+> [official documentation](https://knuckles-team.github.io/ansible-tower-mcp/).
+
 ---
 
 ## Overview
@@ -278,6 +282,23 @@ uv pip install ansible-tower-mcp[all]
 # Using standard pip
 python -m pip install ansible-tower-mcp[all]
 ```
+
+---
+
+## Documentation
+
+The complete documentation is published as the
+[official documentation site](https://knuckles-team.github.io/ansible-tower-mcp/)
+and is the recommended reference for installation, deployment, and day-to-day
+operation.
+
+| Page | Contents |
+|---|---|
+| [Installation](https://knuckles-team.github.io/ansible-tower-mcp/installation/) | pip, source, extras, prebuilt Docker image |
+| [Deployment](https://knuckles-team.github.io/ansible-tower-mcp/deployment/) | run the MCP and agent servers, Compose, Caddy + Technitium, env config |
+| [Usage](https://knuckles-team.github.io/ansible-tower-mcp/usage/) | the MCP tools, the `Api` client, the CLI |
+| [Overview](https://knuckles-team.github.io/ansible-tower-mcp/overview/) | ecosystem role, concept registry, architecture |
+| [Concepts](https://knuckles-team.github.io/ansible-tower-mcp/concepts/) | concept registry (`CONCEPT:ANSIBLE-*`) |
 
 ---
 
