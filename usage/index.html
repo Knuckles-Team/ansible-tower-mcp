@@ -10,11 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://knuckles-team.github.io/ansible-tower-mcp/concepts/">
+        <link rel="canonical" href="https://knuckles-team.github.io/ansible-tower-mcp/usage/">
       
       
-        <link rel="prev" href="../usage/">
+        <link rel="prev" href="../deployment/">
       
+      
+        <link rel="next" href="../concepts/">
       
       
         
@@ -25,7 +27,7 @@
     
     
       
-        <title>Concepts - ansible-tower-mcp</title>
+        <title>Usage (API / CLI / MCP) - ansible-tower-mcp</title>
       
     
     
@@ -76,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#concept-registry-ansible-tower-mcp" class="md-skip">
+        <a href="#usage-mcp-api-cli" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Concepts
+              Usage (API / CLI / MCP)
             
           </span>
         </div>
@@ -308,9 +310,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../usage/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -327,11 +331,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
         
   
   
@@ -507,33 +509,6 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../usage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Usage (API / CLI / MCP)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
@@ -553,7 +528,7 @@
   <span class="md-ellipsis">
     
   
-    Concepts
+    Usage (API / CLI / MCP)
   
 
     
@@ -571,7 +546,7 @@
   <span class="md-ellipsis">
     
   
-    Concepts
+    Usage (API / CLI / MCP)
   
 
     
@@ -597,10 +572,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#project-specific-concepts" class="md-nav__link">
+  <a href="#as-an-mcp-server" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Project-Specific Concepts
+        As an MCP server
       
     </span>
   </a>
@@ -608,21 +583,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cross-project-references-from-agent-utilities" class="md-nav__link">
+  <a href="#as-a-python-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cross-Project References (from agent-utilities)
+        As a Python API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="As a Python API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#launching-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Launching work
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#synergy-with-agent-utilities" class="md-nav__link">
+  <a href="#as-a-cli" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Synergy with agent-utilities
+        As a CLI
       
     </span>
   </a>
@@ -633,6 +625,33 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -664,10 +683,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#project-specific-concepts" class="md-nav__link">
+  <a href="#as-an-mcp-server" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Project-Specific Concepts
+        As an MCP server
       
     </span>
   </a>
@@ -675,21 +694,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#cross-project-references-from-agent-utilities" class="md-nav__link">
+  <a href="#as-a-python-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Cross-Project References (from agent-utilities)
+        As a Python API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="As a Python API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#launching-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Launching work
       
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#synergy-with-agent-utilities" class="md-nav__link">
+  <a href="#as-a-cli" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Synergy with agent-utilities
+        As a CLI
       
     </span>
   </a>
@@ -716,149 +752,129 @@
   
 
 
-<h1 id="concept-registry-ansible-tower-mcp">Concept Registry — ansible-tower-mcp<a class="headerlink" href="#concept-registry-ansible-tower-mcp" title="Permanent link">&para;</a></h1>
-<blockquote>
-<p><strong>Prefix</strong>: <code>CONCEPT:ANSIBLE-*</code>
-<strong>Version</strong>: 1.16.0
-<strong>Bridge</strong>: <a href="https://github.com/Knuckles-Team/agent-utilities/blob/main/docs/concepts.md"><code>CONCEPT:ECO-4.0</code></a> (Unified Toolkit Ingestion)</p>
-</blockquote>
-<hr />
-<h2 id="project-specific-concepts">Project-Specific Concepts<a class="headerlink" href="#project-specific-concepts" title="Permanent link">&para;</a></h2>
+<h1 id="usage-mcp-api-cli">Usage — MCP / API / CLI<a class="headerlink" href="#usage-mcp-api-cli" title="Permanent link">&para;</a></h1>
+<p><code>ansible-tower-mcp</code> exposes the same capability three ways: as <strong>MCP tools</strong> an
+agent calls, as a <strong>Python API</strong> (<code>Api</code>) you import, and as a <strong>CLI</strong> that runs
+the server processes. The complete tool surface and the ecosystem role are
+described in <a href="../overview/">Overview</a>.</p>
+<h2 id="as-an-mcp-server">As an MCP server<a class="headerlink" href="#as-an-mcp-server" title="Permanent link">&para;</a></h2>
+<p>Once <a href="../deployment/">deployed</a>, the server registers one consolidated,
+action-routed tool per resource domain. Each tool takes an <code>action</code> argument
+and a JSON <code>params</code> string, and each domain can be enabled or disabled with its
+<code>*TOOL</code> environment switch.</p>
 <table>
 <thead>
 <tr>
-<th>Concept ID</th>
-<th>Name</th>
-<th>Description</th>
+<th>Domain</th>
+<th>Toggle</th>
+<th>Representative actions</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>CONCEPT:ANSIBLE-001</code></td>
-<td>Ad Hoc Commands Operations</td>
-<td>MCP tool domain <code>ad_hoc_commands</code> — Action-routed dynamic tool registration</td>
+<td>Inventory</td>
+<td><code>INVENTORYTOOL</code></td>
+<td><code>list_inventories</code>, <code>get_inventory</code>, <code>create_inventory</code>, <code>update_inventory</code>, <code>delete_inventory</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-002</code></td>
-<td>Credentials Operations</td>
-<td>MCP tool domain <code>credentials</code> — Action-routed dynamic tool registration</td>
+<td>Hosts</td>
+<td><code>HOSTSTOOL</code></td>
+<td><code>list_hosts</code>, <code>get_host</code>, <code>create_host</code>, <code>update_host</code>, <code>delete_host</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-003</code></td>
-<td>Group Management</td>
-<td>MCP tool domain <code>groups</code> — Action-routed dynamic tool registration</td>
+<td>Groups</td>
+<td><code>GROUPSTOOL</code></td>
+<td><code>list_groups</code>, <code>create_group</code>, <code>add_host_to_group</code>, <code>remove_host_from_group</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-004</code></td>
-<td>Hosts Operations</td>
-<td>MCP tool domain <code>hosts</code> — Action-routed dynamic tool registration</td>
+<td>Job Templates</td>
+<td><code>JOB_TEMPLATESTOOL</code></td>
+<td><code>list_job_templates</code>, <code>launch_job</code>, <code>create_job_template</code>, <code>update_job_template</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-005</code></td>
-<td>Inventory Operations</td>
-<td>MCP tool domain <code>inventory</code> — Action-routed dynamic tool registration</td>
+<td>Jobs</td>
+<td><code>JOBSTOOL</code></td>
+<td><code>list_jobs</code>, <code>get_job</code>, <code>cancel_job</code>, <code>get_job_stdout</code>, <code>get_job_events</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-006</code></td>
-<td>Job Templates Operations</td>
-<td>MCP tool domain <code>job_templates</code> — Action-routed dynamic tool registration</td>
+<td>Projects</td>
+<td><code>PROJECTSTOOL</code></td>
+<td><code>list_projects</code>, <code>get_project</code>, <code>update_project</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-007</code></td>
-<td>Jobs Operations</td>
-<td>MCP tool domain <code>jobs</code> — Action-routed dynamic tool registration</td>
+<td>Credentials</td>
+<td><code>CREDENTIALSTOOL</code></td>
+<td><code>list_credentials</code>, <code>get_credential</code>, <code>create_credential</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-008</code></td>
-<td>Organizations Operations</td>
-<td>MCP tool domain <code>organizations</code> — Action-routed dynamic tool registration</td>
+<td>Organizations / Teams / Users</td>
+<td><code>ORGANIZATIONSTOOL</code> / <code>TEAMSTOOL</code> / <code>USERSTOOL</code></td>
+<td>list / get / create / update</td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-009</code></td>
-<td>Projects Operations</td>
-<td>MCP tool domain <code>projects</code> — Action-routed dynamic tool registration</td>
+<td>Schedules</td>
+<td><code>SCHEDULESTOOL</code></td>
+<td><code>list_schedules</code>, <code>create_schedule</code></td>
 </tr>
 <tr>
-<td><code>CONCEPT:ANSIBLE-010</code></td>
-<td>Schedules Operations</td>
-<td>MCP tool domain <code>schedules</code> — Action-routed dynamic tool registration</td>
-</tr>
-<tr>
-<td><code>CONCEPT:ANSIBLE-011</code></td>
-<td>System Information &amp; Health</td>
-<td>MCP tool domain <code>system</code> — Action-routed dynamic tool registration</td>
-</tr>
-<tr>
-<td><code>CONCEPT:ANSIBLE-012</code></td>
-<td>Teams Operations</td>
-<td>MCP tool domain <code>teams</code> — Action-routed dynamic tool registration</td>
-</tr>
-<tr>
-<td><code>CONCEPT:ANSIBLE-013</code></td>
-<td>Users Operations</td>
-<td>MCP tool domain <code>users</code> — Action-routed dynamic tool registration</td>
-</tr>
-<tr>
-<td><code>CONCEPT:ANSIBLE-014</code></td>
-<td>Workflow Jobs Operations</td>
-<td>MCP tool domain <code>workflow_jobs</code> — Action-routed dynamic tool registration</td>
-</tr>
-<tr>
-<td><code>CONCEPT:ANSIBLE-015</code></td>
-<td>Workflow Templates Operations</td>
-<td>MCP tool domain <code>workflow_templates</code> — Action-routed dynamic tool registration</td>
+<td>System</td>
+<td><code>SYSTEMTOOL</code></td>
+<td><code>get_ansible_version</code>, <code>get_dashboard_stats</code>, <code>get_metrics</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="cross-project-references-from-agent-utilities">Cross-Project References (from agent-utilities)<a class="headerlink" href="#cross-project-references-from-agent-utilities" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Concept ID</th>
-<th>Name</th>
-<th>Origin</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>CONCEPT:ECO-4.0</code></td>
-<td>Unified Toolkit Ingestion</td>
-<td>agent-utilities</td>
-</tr>
-<tr>
-<td><code>CONCEPT:ORCH-1.2</code></td>
-<td>Confidence-Gated Router</td>
-<td>agent-utilities</td>
-</tr>
-<tr>
-<td><code>CONCEPT:OS-5.1</code></td>
-<td>Prompt Injection Defense</td>
-<td>agent-utilities</td>
-</tr>
-<tr>
-<td><code>CONCEPT:OS-5.2</code></td>
-<td>Cognitive Scheduler</td>
-<td>agent-utilities</td>
-</tr>
-<tr>
-<td><code>CONCEPT:OS-5.3</code></td>
-<td>Guardrail Engine</td>
-<td>agent-utilities</td>
-</tr>
-<tr>
-<td><code>CONCEPT:OS-5.4</code></td>
-<td>Audit Logging</td>
-<td>agent-utilities</td>
-</tr>
-<tr>
-<td><code>CONCEPT:KG-2.0</code></td>
-<td>Knowledge Graph Core</td>
-<td>agent-utilities</td>
-</tr>
-</tbody>
-</table>
-<h2 id="synergy-with-agent-utilities">Synergy with agent-utilities<a class="headerlink" href="#synergy-with-agent-utilities" title="Permanent link">&para;</a></h2>
-<p>This project integrates with <code>agent-utilities</code> via <code>CONCEPT:ECO-4.0</code> (Unified Toolkit Ingestion). The <code>ansible_tower_mcp</code> MCP server registers its tools with the agent-utilities FastMCP middleware, enabling automatic discovery, telemetry, and Knowledge Graph ingestion of all ANSIBLE-* concepts.</p>
+<p>Example agent prompts that map onto these tools:</p>
+<ul>
+<li><em>"List the job templates in Tower"</em> → Job Templates → <code>list_job_templates</code></li>
+<li><em>"Launch job template 42 and show me the output"</em> → Job Templates → <code>launch_job</code>, then Jobs → <code>get_job_stdout</code></li>
+<li><em>"What hosts are in the production inventory?"</em> → Hosts → <code>list_hosts</code></li>
+</ul>
+<h2 id="as-a-python-api">As a Python API<a class="headerlink" href="#as-a-python-api" title="Permanent link">&para;</a></h2>
+<p><code>Api</code> is a <code>requests</code>-based facade over the Tower / AWX <code>/api/v2/</code> REST surface.
+It resolves authentication from a token, a username / password pair, or an OAuth
+client id / secret pair.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ansible_tower_mcp.api_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">Api</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">api</span> <span class="o">=</span> <span class="n">Api</span><span class="p">(</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://your-tower.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># Reads</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">version</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_ansible_version</span><span class="p">()</span>            <span class="c1"># controller version</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">stats</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_dashboard_stats</span><span class="p">()</span>              <span class="c1"># dashboard counters</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">inventories</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">list_inventories</span><span class="p">()</span>           <span class="c1"># paginated records</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">templates</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">list_job_templates</span><span class="p">()</span>           <span class="c1"># job templates</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">jobs</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">list_jobs</span><span class="p">()</span>                          <span class="c1"># recent jobs</span>
+</span></code></pre></div>
+<p>Build a client straight from the environment (resolves OIDC delegation, OAuth,
+or username / password automatically):</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ansible_tower_mcp.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_client</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">api</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>        <span class="c1"># reads ANSIBLE_* from the environment / .env</span>
+</span></code></pre></div>
+<h3 id="launching-work">Launching work<a class="headerlink" href="#launching-work" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Launch a job template and follow its output</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">launched</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">launch_job</span><span class="p">(</span><span class="n">template_id</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">job_id</span> <span class="o">=</span> <span class="n">launched</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">events</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_job_events</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">stdout</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_job_stdout</span><span class="p">(</span><span class="n">job_id</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;txt&quot;</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Cancel a running job</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">api</span><span class="o">.</span><span class="n">cancel_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="as-a-cli">As a CLI<a class="headerlink" href="#as-a-cli" title="Permanent link">&para;</a></h2>
+<p>The package installs two console scripts:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># The MCP server (stdio by default; see Deployment for transports)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ansible-tower-mcp<span class="w"> </span>--transport<span class="w"> </span>streamable-http<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># The A2A agent server (graph-routed Pydantic-AI agent)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>ansible-tower-agent<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">9012</span><span class="w"> </span>--mcp-url<span class="w"> </span>http://localhost:8000/mcp
+</span></code></pre></div>
+<p>Both scripts accept <code>--help</code> to list every flag. The agent server reads
+<code>PROVIDER</code> / <code>MODEL_ID</code> (and the provider's API key) to select its language
+model; see <a href="../deployment/#run-the-agent-server">Deployment</a>.</p>
 
 
 
@@ -896,7 +912,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../usage/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Usage (API / CLI / MCP)">
+          <a href="../deployment/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Deployment">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -906,11 +922,27 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Usage (API / CLI / MCP)
+                Deployment
               </div>
             </div>
           </a>
         
+        
+          
+          <a href="../concepts/" class="md-footer__link md-footer__link--next" aria-label="Next: Concepts">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Concepts
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
         
       </nav>
     
