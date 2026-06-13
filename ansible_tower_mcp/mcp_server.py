@@ -1,5 +1,5 @@
 # Thin delegation wrapper for backward compatibility with external scripts, pyproject.toml scripts, and eager imports.
-__version__ = "1.33.0"
+__version__ = "1.34.0"
 
 from ansible_tower_mcp.mcp.mcp_server import (
     get_mcp_instance,

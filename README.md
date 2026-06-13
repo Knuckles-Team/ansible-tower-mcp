@@ -20,7 +20,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/ansible-tower-mcp)
 ![PyPI - Implementation](https://img.shields.io/pypi/implementation/ansible-tower-mcp)
 
-*Version: 1.33.0*
+*Version: 1.34.0*
 
 > **Documentation** — Installation, deployment, and usage across the API, CLI,
 > MCP, and A2A agent interfaces are maintained in the
