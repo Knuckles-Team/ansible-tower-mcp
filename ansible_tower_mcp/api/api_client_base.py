@@ -123,7 +123,7 @@ class BaseApiClient:
         }
 
         if "csrftoken" in self._session.cookies:
-            token_headers["X-CSRFToken"] = self._session.cookies["csrftoken"]
+            token_headers["X-CSRFToken"] = str(self._session.cookies["csrftoken"])
 
         token_data = {
             "description": "MCP Server Token",
