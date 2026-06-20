@@ -16,10 +16,10 @@ Authentication priority:
 See ``docs/guides/oauth_sso.md`` in agent-utilities for full details.
 """
 
-import os
 import threading
 
 from agent_utilities.base_utilities import get_logger, to_boolean
+from agent_utilities.core.config import setting
 
 local = threading.local()
 from ansible_tower_mcp.api_client import Api
@@ -41,15 +41,15 @@ def get_client():
         is_delegation_enabled,
     )
 
-    base_url = os.environ.get("ANSIBLE_BASE_URL")
-    verify = to_boolean(os.environ.get("ANSIBLE_VERIFY", "False"))
+    base_url = setting("ANSIBLE_BASE_URL")
+    verify = to_boolean(setting("ANSIBLE_VERIFY", False))
 
     # --- Path 1: OIDC Delegation (RFC 8693 Token Exchange) ---
     if is_delegation_enabled():
         try:
             delegated_token = get_delegated_token(
-                audience=os.getenv("AUDIENCE", base_url),
-                scopes=os.getenv("DELEGATED_SCOPES", "api"),
+                audience=setting("AUDIENCE", base_url),
+                scopes=setting("DELEGATED_SCOPES", "api"),
                 verify=verify,
             )
             identity = get_user_identity()
@@ -69,8 +69,8 @@ def get_client():
             logger.warning(f"OIDC delegation failed, falling back to credentials: {e}")
 
     # --- Path 2: OAuth Client Credentials ---
-    client_id = os.environ.get("ANSIBLE_CLIENT_ID")
-    client_secret = os.environ.get("ANSIBLE_CLIENT_SECRET")
+    client_id = setting("ANSIBLE_CLIENT_ID")
+    client_secret = setting("ANSIBLE_CLIENT_SECRET")
     if client_id and client_secret:
         logger.info("Using OAuth client credentials for Ansible Tower API")
         return Api(
@@ -81,8 +81,8 @@ def get_client():
         )
 
     # --- Path 3: Username / Password ---
-    username = os.environ.get("ANSIBLE_USERNAME")
-    password = os.environ.get("ANSIBLE_PASSWORD")
+    username = setting("ANSIBLE_USERNAME")
+    password = setting("ANSIBLE_PASSWORD")
     logger.info("Using username/password credentials for Ansible Tower API")
     return Api(
         base_url=base_url,

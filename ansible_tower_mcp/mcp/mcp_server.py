@@ -19,16 +19,19 @@ warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
 import logging
-import os
 import sys
 from typing import Any
 
-from agent_utilities.base_utilities import to_boolean
-from agent_utilities.mcp_utilities import create_mcp_server
-from dotenv import find_dotenv, load_dotenv
+from agent_utilities.mcp_utilities import (
+    create_mcp_server,
+    load_config,
+    register_tool_surface,
+)
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from ansible_tower_mcp.api_client import Api
+from ansible_tower_mcp.auth import get_client
 from ansible_tower_mcp.mcp import tools
 from ansible_tower_mcp.mcp.tools import (
     register_ad_hoc_commands_tools,
@@ -80,7 +83,7 @@ def get_mcp_instance() -> tuple[Any, ...]:
 
     Bootstraps FastMCP instance, custom routes, and conditionally registers tools.
     """
-    load_dotenv(find_dotenv())
+    load_config()
     args, mcp, middlewares = create_mcp_server(
         name="ansible-tower-mcp MCP",
         version=__version__,
@@ -92,29 +95,13 @@ def get_mcp_instance() -> tuple[Any, ...]:
         """Standard Starlette endpoint for health status checking."""
         return JSONResponse({"status": "OK"})
 
-    # Map environment variable toggles to registration functions
-    tool_registrations = [
-        ("INVENTORYTOOL", tools.register_inventory_tools),
-        ("HOSTSTOOL", tools.register_hosts_tools),
-        ("GROUPSTOOL", tools.register_groups_tools),
-        ("JOB_TEMPLATESTOOL", tools.register_job_templates_tools),
-        ("JOBSTOOL", tools.register_jobs_tools),
-        ("PROJECTSTOOL", tools.register_projects_tools),
-        ("CREDENTIALSTOOL", tools.register_credentials_tools),
-        ("ORGANIZATIONSTOOL", tools.register_organizations_tools),
-        ("TEAMSTOOL", tools.register_teams_tools),
-        ("USERSTOOL", tools.register_users_tools),
-        ("AD_HOC_COMMANDSTOOL", tools.register_ad_hoc_commands_tools),
-        ("WORKFLOW_TEMPLATESTOOL", tools.register_workflow_templates_tools),
-        ("WORKFLOW_JOBSTOOL", tools.register_workflow_jobs_tools),
-        ("SCHEDULESTOOL", tools.register_schedules_tools),
-        ("SYSTEMTOOL", tools.register_system_tools),
-    ]
-
-    # Modular iteration to register active tools with FastMCP (CC=2)
-    for env_var, register_func in tool_registrations:
-        if to_boolean(os.getenv(env_var, "True")):
-            register_func(mcp)
+    register_tool_surface(
+        mcp,
+        client_cls=Api,
+        get_client=get_client,
+        service="ansible-tower-mcp",
+        tools_module=tools,
+    )
 
     for mw in middlewares:
         mcp.add_middleware(mw)
