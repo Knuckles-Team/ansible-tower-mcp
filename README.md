@@ -56,23 +56,31 @@ Detailed instructions on how to use the underlying API wrappers, extended schema
 This server utilizes dynamic Action-Routed tools to optimize token overhead and maximize IDE compatibility.
 
 ### Available MCP Tools
-| Tool Module | Toggle Env Var | Enabled by Default | Description & Nested Methods |
-|-------------|----------------|--------------------|------------------------------|
-| **Inventory** | `INVENTORY_TOOL` | `True` | Manage ansible tower inventory operations. Action-routed methods: `create_inventory`, `delete_inventory`, `get_inventory`, `list_inventories`, `update_inventory`. |
-| **Hosts** | `HOSTS_TOOL` | `True` | Manage ansible tower hosts operations. Action-routed methods: `create_host`, `delete_host`, `get_host`, `list_hosts`, `update_host`. |
-| **Groups** | `GROUPS_TOOL` | `True` | Manage ansible tower groups operations. Action-routed methods: `add_host_to_group`, `create_group`, `delete_group`, `get_group`, `list_groups`, `remove_host_from_group`, `update_group`. |
-| **Job Templates** | `JOB_TEMPLATES_TOOL` | `True` | Manage ansible tower job templates operations. Action-routed methods: `create_job_template`, `delete_job_template`, `get_job_template`, `launch_job`, `list_job_templates`, `update_job_template`. |
-| **Jobs** | `JOBS_TOOL` | `True` | Manage ansible tower jobs operations. Action-routed methods: `cancel_job`, `get_job`, `get_job_events`, `get_job_stdout`, `list_jobs`, `relaunch_job`. |
-| **Projects** | `PROJECTS_TOOL` | `True` | Manage ansible tower projects operations. Action-routed methods: `create_project`, `delete_project`, `get_project`, `list_projects`, `sync_project`, `update_project`. |
-| **Credentials** | `CREDENTIALS_TOOL` | `True` | Manage ansible tower credentials operations. Action-routed methods: `create_credential`, `delete_credential`, `get_credential`, `list_credential_types`, `list_credentials`, `update_credential`. |
-| **Organizations** | `ORGANIZATIONS_TOOL` | `True` | Manage ansible tower organizations operations. Action-routed methods: `create_organization`, `delete_organization`, `get_organization`, `list_organizations`, `update_organization`. |
-| **Teams** | `TEAMS_TOOL` | `True` | Manage ansible tower teams operations. Action-routed methods: `create_team`, `delete_team`, `get_team`, `list_teams`, `update_team`. |
-| **Users** | `USERS_TOOL` | `True` | Manage ansible tower users operations. Action-routed methods: `create_user`, `delete_user`, `get_user`, `list_users`, `update_user`. |
-| **Ad Hoc Commands** | `AD_HOC_COMMANDS_TOOL` | `True` | Manage ansible tower ad hoc commands operations. Action-routed methods: `cancel_ad_hoc_command`, `get_ad_hoc_command`, `run_ad_hoc_command`. |
-| **Workflow Templates** | `WORKFLOW_TEMPLATES_TOOL` | `True` | Manage ansible tower workflow templates operations. Action-routed methods: `get_workflow_template`, `launch_workflow`, `list_workflow_templates`. |
-| **Workflow Jobs** | `WORKFLOW_JOBS_TOOL` | `True` | Manage ansible tower workflow jobs operations. Action-routed methods: `cancel_workflow_job`, `get_workflow_job`, `list_workflow_jobs`. |
-| **Schedules** | `SCHEDULES_TOOL` | `True` | Manage ansible tower schedules operations. Action-routed methods: `create_schedule`, `delete_schedule`, `get_schedule`, `list_schedules`, `update_schedule`. |
-| **System** | `SYSTEM_TOOL` | `True` | Manage ansible tower system operations. Action-routed methods: `get_ansible_version`, `get_dashboard_stats`, `get_metrics`. |
+
+The table below is auto-generated from the live server — do not edit by hand.
+
+<!-- MCP-TOOLS-TABLE:START -->
+
+| MCP Tool | Toggle Env Var | Description |
+|----------|----------------|-------------|
+| `ansible_tower_ad_hoc_commands` | `AD_HOC_COMMANDSTOOL` | Manage ansible tower ad hoc commands operations. |
+| `ansible_tower_credentials` | `CREDENTIALSTOOL` | Manage ansible tower credentials operations. |
+| `ansible_tower_groups` | `GROUPSTOOL` | Manage ansible tower groups operations. |
+| `ansible_tower_hosts` | `HOSTSTOOL` | Manage ansible tower hosts operations. |
+| `ansible_tower_inventory` | `INVENTORYTOOL` | Manage ansible tower inventory operations. |
+| `ansible_tower_job_templates` | `JOB-TEMPLATESTOOL` | Manage ansible tower job templates operations. |
+| `ansible_tower_jobs` | `JOBSTOOL` | Manage ansible tower jobs operations. |
+| `ansible_tower_organizations` | `ORGANIZATIONSTOOL` | Manage ansible tower organizations operations. |
+| `ansible_tower_projects` | `PROJECTSTOOL` | Manage ansible tower projects operations. |
+| `ansible_tower_schedules` | `SCHEDULESTOOL` | Manage ansible tower schedules operations. |
+| `ansible_tower_system` | `SYSTEMTOOL` | Manage ansible tower system operations. |
+| `ansible_tower_teams` | `TEAMSTOOL` | Manage ansible tower teams operations. |
+| `ansible_tower_users` | `USERSTOOL` | Manage ansible tower users operations. |
+| `ansible_tower_workflow_jobs` | `WORKFLOW_JOBSTOOL` | Manage ansible tower workflow jobs operations. |
+| `ansible_tower_workflow_templates` | `WORKFLOW_TEMPLATESTOOL` | Manage ansible tower workflow templates operations. |
+
+_15 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
+<!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
 
