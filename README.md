@@ -68,7 +68,7 @@ The table below is auto-generated from the live server — do not edit by hand.
 | `ansible_tower_groups` | `GROUPSTOOL` | Manage ansible tower groups operations. |
 | `ansible_tower_hosts` | `HOSTSTOOL` | Manage ansible tower hosts operations. |
 | `ansible_tower_inventory` | `INVENTORYTOOL` | Manage ansible tower inventory operations. |
-| `ansible_tower_job_templates` | `JOB-TEMPLATESTOOL` | Manage ansible tower job templates operations. |
+| `ansible_tower_job_templates` | `JOB_TEMPLATESTOOL` | Manage ansible tower job templates operations. |
 | `ansible_tower_jobs` | `JOBSTOOL` | Manage ansible tower jobs operations. |
 | `ansible_tower_organizations` | `ORGANIZATIONSTOOL` | Manage ansible tower organizations operations. |
 | `ansible_tower_projects` | `PROJECTSTOOL` | Manage ansible tower projects operations. |
