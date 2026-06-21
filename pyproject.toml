@@ -28,6 +28,12 @@ test = [
 ansible-tower-mcp = "ansible_tower_mcp.mcp.mcp_server:mcp_server"
 ansible-tower-agent = "ansible_tower_mcp.agent_server:agent_server"
 
+[project.entry-points."agent_utilities.skill_providers"]
+ansible-tower-mcp = "ansible_tower_mcp.skills"
+
+[project.entry-points."agent_utilities.prompt_providers"]
+ansible-tower-mcp = "ansible_tower_mcp.prompts"
+
 [tool.setuptools]
 include-package-data = true
 
@@ -46,7 +52,7 @@ dev = [
 ]
 
 [tool.setuptools.package-data]
-ansible_tower_mcp = [ "mcp_config.json", "agent_data/**",]
+ansible_tower_mcp = [ "mcp_config.json", "agent_data/**", "prompts/**", "skills/**",]
 
 [tool.ruff.lint]
 select = [ "E", "F", "I", "UP", "B",]
