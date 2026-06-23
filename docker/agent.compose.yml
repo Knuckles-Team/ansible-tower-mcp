@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   ansible-tower-mcp-mcp:
-    image: knucklessg1/ansible-tower-mcp:latest
+    image: knucklessg1/ansible-tower-mcp:mcp
     container_name: ansible-tower-mcp-mcp
     hostname: ansible-tower-mcp-mcp
     restart: always
