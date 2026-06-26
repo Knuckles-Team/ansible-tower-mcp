@@ -61,6 +61,8 @@ The table below is auto-generated from the live server — do not edit by hand.
 
 <!-- MCP-TOOLS-TABLE:START -->
 
+#### Condensed action-routed tools (default — `MCP_TOOL_MODE=condensed`)
+
 | MCP Tool | Toggle Env Var | Description |
 |----------|----------------|-------------|
 | `ansible_tower_ad_hoc_commands` | `AD_HOC_COMMANDSTOOL` | Manage ansible tower ad hoc commands operations. |
@@ -79,7 +81,93 @@ The table below is auto-generated from the live server — do not edit by hand.
 | `ansible_tower_workflow_jobs` | `WORKFLOW_JOBSTOOL` | Manage ansible tower workflow jobs operations. |
 | `ansible_tower_workflow_templates` | `WORKFLOW_TEMPLATESTOOL` | Manage ansible tower workflow templates operations. |
 
-_15 action-routed tools (default `MCP_TOOL_MODE=condensed`). Each is enabled unless its toggle is set false; set `MCP_TOOL_MODE=verbose` (or `both`) for the 1:1 per-operation surface. Auto-generated — do not edit._
+#### Verbose 1:1 API-mapped tools (`MCP_TOOL_MODE=verbose` or `both`)
+
+<details>
+<summary>76 per-operation tools — one per public API method (click to expand)</summary>
+
+| MCP Tool | Toggle Env Var | Description |
+|----------|----------------|-------------|
+| `ansible_tower_add_host_to_group` | `APITOOL` | Invoke the add_host_to_group operation. |
+| `ansible_tower_cancel_ad_hoc_command` | `APITOOL` | Invoke the cancel_ad_hoc_command operation. |
+| `ansible_tower_cancel_job` | `APITOOL` | Invoke the cancel_job operation. |
+| `ansible_tower_cancel_workflow_job` | `APITOOL` | Invoke the cancel_workflow_job operation. |
+| `ansible_tower_create_credential` | `APITOOL` | Invoke the create_credential operation. |
+| `ansible_tower_create_group` | `APITOOL` | Invoke the create_group operation. |
+| `ansible_tower_create_host` | `APITOOL` | Invoke the create_host operation. |
+| `ansible_tower_create_inventory` | `APITOOL` | Invoke the create_inventory operation. |
+| `ansible_tower_create_job_template` | `APITOOL` | Invoke the create_job_template operation. |
+| `ansible_tower_create_organization` | `APITOOL` | Invoke the create_organization operation. |
+| `ansible_tower_create_project` | `APITOOL` | Invoke the create_project operation. |
+| `ansible_tower_create_schedule` | `APITOOL` | Invoke the create_schedule operation. |
+| `ansible_tower_create_team` | `APITOOL` | Invoke the create_team operation. |
+| `ansible_tower_create_user` | `APITOOL` | Invoke the create_user operation. |
+| `ansible_tower_delete_credential` | `APITOOL` | Invoke the delete_credential operation. |
+| `ansible_tower_delete_group` | `APITOOL` | Invoke the delete_group operation. |
+| `ansible_tower_delete_host` | `APITOOL` | Invoke the delete_host operation. |
+| `ansible_tower_delete_inventory` | `APITOOL` | Invoke the delete_inventory operation. |
+| `ansible_tower_delete_job_template` | `APITOOL` | Invoke the delete_job_template operation. |
+| `ansible_tower_delete_organization` | `APITOOL` | Invoke the delete_organization operation. |
+| `ansible_tower_delete_project` | `APITOOL` | Invoke the delete_project operation. |
+| `ansible_tower_delete_schedule` | `APITOOL` | Invoke the delete_schedule operation. |
+| `ansible_tower_delete_team` | `APITOOL` | Invoke the delete_team operation. |
+| `ansible_tower_delete_user` | `APITOOL` | Invoke the delete_user operation. |
+| `ansible_tower_get_ad_hoc_command` | `APITOOL` | Invoke the get_ad_hoc_command operation. |
+| `ansible_tower_get_ansible_version` | `APITOOL` | Invoke the get_ansible_version operation. |
+| `ansible_tower_get_credential` | `APITOOL` | Invoke the get_credential operation. |
+| `ansible_tower_get_dashboard_stats` | `APITOOL` | Invoke the get_dashboard_stats operation. |
+| `ansible_tower_get_group` | `APITOOL` | Invoke the get_group operation. |
+| `ansible_tower_get_headers` | `BASE_API_CLIENTTOOL` | Get request headers with authorization. |
+| `ansible_tower_get_host` | `APITOOL` | Invoke the get_host operation. |
+| `ansible_tower_get_inventory` | `APITOOL` | Invoke the get_inventory operation. |
+| `ansible_tower_get_job` | `APITOOL` | Invoke the get_job operation. |
+| `ansible_tower_get_job_events` | `APITOOL` | Invoke the get_job_events operation. |
+| `ansible_tower_get_job_stdout` | `APITOOL` | Invoke the get_job_stdout operation. |
+| `ansible_tower_get_job_template` | `APITOOL` | Invoke the get_job_template operation. |
+| `ansible_tower_get_metrics` | `APITOOL` | Invoke the get_metrics operation. |
+| `ansible_tower_get_organization` | `APITOOL` | Invoke the get_organization operation. |
+| `ansible_tower_get_project` | `APITOOL` | Invoke the get_project operation. |
+| `ansible_tower_get_schedule` | `APITOOL` | Invoke the get_schedule operation. |
+| `ansible_tower_get_team` | `APITOOL` | Invoke the get_team operation. |
+| `ansible_tower_get_token` | `BASE_API_CLIENTTOOL` | Authenticate and get token using web session approach. |
+| `ansible_tower_get_user` | `APITOOL` | Invoke the get_user operation. |
+| `ansible_tower_get_workflow_job` | `APITOOL` | Invoke the get_workflow_job operation. |
+| `ansible_tower_get_workflow_template` | `APITOOL` | Invoke the get_workflow_template operation. |
+| `ansible_tower_handle_pagination` | `BASE_API_CLIENTTOOL` | Handle paginated results from Ansible API. |
+| `ansible_tower_launch_job` | `APITOOL` | Invoke the launch_job operation. |
+| `ansible_tower_launch_workflow` | `APITOOL` | Invoke the launch_workflow operation. |
+| `ansible_tower_list_credential_types` | `APITOOL` | Invoke the list_credential_types operation. |
+| `ansible_tower_list_credentials` | `APITOOL` | Invoke the list_credentials operation. |
+| `ansible_tower_list_groups` | `APITOOL` | Invoke the list_groups operation. |
+| `ansible_tower_list_hosts` | `APITOOL` | Invoke the list_hosts operation. |
+| `ansible_tower_list_inventories` | `APITOOL` | Invoke the list_inventories operation. |
+| `ansible_tower_list_job_templates` | `APITOOL` | Invoke the list_job_templates operation. |
+| `ansible_tower_list_jobs` | `APITOOL` | Invoke the list_jobs operation. |
+| `ansible_tower_list_organizations` | `APITOOL` | Invoke the list_organizations operation. |
+| `ansible_tower_list_projects` | `APITOOL` | Invoke the list_projects operation. |
+| `ansible_tower_list_schedules` | `APITOOL` | Invoke the list_schedules operation. |
+| `ansible_tower_list_teams` | `APITOOL` | Invoke the list_teams operation. |
+| `ansible_tower_list_users` | `APITOOL` | Invoke the list_users operation. |
+| `ansible_tower_list_workflow_jobs` | `APITOOL` | Invoke the list_workflow_jobs operation. |
+| `ansible_tower_list_workflow_templates` | `APITOOL` | Invoke the list_workflow_templates operation. |
+| `ansible_tower_remove_host_from_group` | `APITOOL` | Invoke the remove_host_from_group operation. |
+| `ansible_tower_request` | `BASE_API_CLIENTTOOL` | Make a request to the Ansible API. |
+| `ansible_tower_run_ad_hoc_command` | `APITOOL` | Invoke the run_ad_hoc_command operation. |
+| `ansible_tower_sync_project` | `APITOOL` | Invoke the sync_project operation. |
+| `ansible_tower_update_credential` | `APITOOL` | Invoke the update_credential operation. |
+| `ansible_tower_update_group` | `APITOOL` | Invoke the update_group operation. |
+| `ansible_tower_update_host` | `APITOOL` | Invoke the update_host operation. |
+| `ansible_tower_update_inventory` | `APITOOL` | Invoke the update_inventory operation. |
+| `ansible_tower_update_job_template` | `APITOOL` | Invoke the update_job_template operation. |
+| `ansible_tower_update_organization` | `APITOOL` | Invoke the update_organization operation. |
+| `ansible_tower_update_project` | `APITOOL` | Invoke the update_project operation. |
+| `ansible_tower_update_schedule` | `APITOOL` | Invoke the update_schedule operation. |
+| `ansible_tower_update_team` | `APITOOL` | Invoke the update_team operation. |
+| `ansible_tower_update_user` | `APITOOL` | Invoke the update_user operation. |
+
+</details>
+
+_15 action-routed tool(s) (default) · 76 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
 Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
@@ -218,6 +306,14 @@ consumed from a **remote deployment**. The
 | `HOST` | `0.0.0.0` |  |
 | `PORT` | `8000` |  |
 | `TRANSPORT` | `stdio` | options: stdio, streamable-http, sse |
+| `ANSIBLE_BASE_URL` | `https://ansible.example.com` | Ansible Tower / AWX base URL |
+| `ANSIBLE_VERIFY` | `False` | verify TLS certificates (True/False) |
+| `ANSIBLE_USERNAME` | `<YOUR_ANSIBLE_USERNAME>` | Path 3: username / password auth |
+| `ANSIBLE_PASSWORD` | `<YOUR_ANSIBLE_PASSWORD>` |  |
+| `ANSIBLE_CLIENT_ID` | `<YOUR_ANSIBLE_CLIENT_ID>` | Path 2: OAuth client-credentials auth |
+| `ANSIBLE_CLIENT_SECRET` | `<YOUR_ANSIBLE_CLIENT_SECRET>` |  |
+| `AUDIENCE` | — | token-exchange audience (defaults to ANSIBLE_BASE_URL) |
+| `DELEGATED_SCOPES` | `api` | space-delimited delegated scopes |
 | `ENABLE_OTEL` | `True` |  |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:8080/api/public/otel` |  |
 | `OTEL_EXPORTER_OTLP_PUBLIC_KEY` | `pk-...` |  |
@@ -261,7 +357,7 @@ consumed from a **remote deployment**. The
 | `MODEL_ID` | `gpt-4o` | Model id for the agent |
 | `ENABLE_WEB_UI` | `True` | Serve the AG-UI web interface |
 
-_26 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
+_34 package + 14 inherited variable(s). Auto-generated from `.env.example` + the shared agent-utilities set — do not edit._
 <!-- ENV-VARS-TABLE:END -->
 
 
@@ -272,7 +368,6 @@ Every variable the server reads, grouped by concern.
 |----------|-------------|---------|
 | `ANSIBLE_BASE_URL` | Base URL of the Ansible Tower / AWX instance | — |
 | `ANSIBLE_VERIFY` | TLS certificate verification | `False` |
-| `ANSIBLE_TOKEN` | Pre-issued Ansible Tower API token (bearer) | — |
 | `ANSIBLE_CLIENT_ID` | OAuth application client id | — |
 | `ANSIBLE_CLIENT_SECRET` | OAuth application client secret | — |
 | `ANSIBLE_USERNAME` | Username (username/password fallback auth) | — |
