@@ -195,16 +195,15 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 
 ### MCP Configuration Examples
 
-> **Install the slim `[mcp]` extra.** All examples below install
-> `ansible-tower-mcp[mcp]` — the MCP-server extra that pulls only the FastMCP /
-> FastAPI tooling (`agent-utilities[mcp]`). It deliberately **excludes** the heavy
-> agent runtime (the epistemic-graph engine, `pydantic-ai`, `dspy`, `llama-index`,
-> `tree-sitter`), so `uvx`/container installs are dramatically smaller and faster.
-> Use the full `[agent]` extra only when you need the integrated Pydantic AI agent
-> (see [Installation](#installation)).
+<!-- MCP-CONFIG-EXAMPLES:START -->
 
-#### stdio Transport (Recommended for local IDEs e.g., Cursor, Claude Desktop)
-Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
+> **Install the slim `[mcp]` extra.** All examples install `ansible-tower-mcp[mcp]` — the
+> MCP-server extra that pulls only the FastMCP / FastAPI tooling (`agent-utilities[mcp]`).
+> It deliberately **excludes** the heavy agent runtime (`pydantic-ai`, the epistemic-graph
+> engine, `dspy`, `llama-index`), so `uvx` / container installs are far smaller. Use the
+> full `[agent]` extra only when you need the integrated Pydantic AI agent.
+
+#### stdio Transport (local IDEs — Cursor, Claude Desktop, VS Code)
 
 ```json
 {
@@ -217,14 +216,37 @@ Configure your IDE's `mcp.json` to launch the MCP server via `uvx`:
         "ansible-tower-mcp"
       ],
       "env": {
+        "MCP_TOOL_MODE": "condensed",
+        "AD_HOC_COMMANDSTOOL": "True",
+        "ANSIBLE_BASE_URL": "https://ansible.example.com",
+        "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
+        "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
+        "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
+        "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
+        "ANSIBLE_VERIFY": "False",
+        "AUDIENCE": "",
+        "CREDENTIALSTOOL": "True",
+        "DELEGATED_SCOPES": "api",
+        "GROUPSTOOL": "True",
+        "HOSTSTOOL": "True",
+        "INVENTORYTOOL": "True",
+        "JOBSTOOL": "True",
+        "JOB_TEMPLATESTOOL": "True",
+        "ORGANIZATIONSTOOL": "True",
+        "PROJECTSTOOL": "True",
+        "SCHEDULESTOOL": "True",
+        "SYSTEMTOOL": "True",
+        "TEAMSTOOL": "True",
+        "USERSTOOL": "True",
+        "WORKFLOW_JOBSTOOL": "True",
+        "WORKFLOW_TEMPLATESTOOL": "True"
       }
     }
   }
 }
 ```
 
-#### Streamable-HTTP Transport (Recommended for production deployments)
-Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx` with explicit host and port definition:
+#### Streamable-HTTP Transport (networked / production)
 
 ```json
 {
@@ -234,19 +256,47 @@ Configure your client's `mcp.json` to launch the Streamable-HTTP server via `uvx
       "args": [
         "--from",
         "ansible-tower-mcp[mcp]",
-        "ansible-tower-mcp"
+        "ansible-tower-mcp",
+        "--transport",
+        "streamable-http",
+        "--port",
+        "8000"
       ],
       "env": {
         "TRANSPORT": "streamable-http",
         "HOST": "0.0.0.0",
-        "PORT": "8000"
+        "PORT": "8000",
+        "MCP_TOOL_MODE": "condensed",
+        "AD_HOC_COMMANDSTOOL": "True",
+        "ANSIBLE_BASE_URL": "https://ansible.example.com",
+        "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
+        "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
+        "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
+        "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
+        "ANSIBLE_VERIFY": "False",
+        "AUDIENCE": "",
+        "CREDENTIALSTOOL": "True",
+        "DELEGATED_SCOPES": "api",
+        "GROUPSTOOL": "True",
+        "HOSTSTOOL": "True",
+        "INVENTORYTOOL": "True",
+        "JOBSTOOL": "True",
+        "JOB_TEMPLATESTOOL": "True",
+        "ORGANIZATIONSTOOL": "True",
+        "PROJECTSTOOL": "True",
+        "SCHEDULESTOOL": "True",
+        "SYSTEMTOOL": "True",
+        "TEAMSTOOL": "True",
+        "USERSTOOL": "True",
+        "WORKFLOW_JOBSTOOL": "True",
+        "WORKFLOW_TEMPLATESTOOL": "True"
       }
     }
   }
 }
 ```
 
-Alternatively, connect to a pre-deployed remote or local Streamable-HTTP instance:
+Alternatively, connect to a pre-deployed Streamable-HTTP instance by `url`:
 
 ```json
 {
@@ -265,18 +315,37 @@ docker run -d \
   --name ansible-tower-mcp-mcp \
   -p 8000:8000 \
   -e TRANSPORT=streamable-http \
+  -e HOST=0.0.0.0 \
   -e PORT=8000 \
+  -e MCP_TOOL_MODE=condensed \
+  -e AD_HOC_COMMANDSTOOL=True \
+  -e ANSIBLE_BASE_URL=https://ansible.example.com \
+  -e ANSIBLE_CLIENT_ID="<YOUR_ANSIBLE_CLIENT_ID>" \
+  -e ANSIBLE_CLIENT_SECRET="<YOUR_ANSIBLE_CLIENT_SECRET>" \
+  -e ANSIBLE_PASSWORD="<YOUR_ANSIBLE_PASSWORD>" \
+  -e ANSIBLE_USERNAME="<YOUR_ANSIBLE_USERNAME>" \
+  -e ANSIBLE_VERIFY=False \
+  -e AUDIENCE="" \
+  -e CREDENTIALSTOOL=True \
+  -e DELEGATED_SCOPES=api \
+  -e GROUPSTOOL=True \
+  -e HOSTSTOOL=True \
+  -e INVENTORYTOOL=True \
+  -e JOBSTOOL=True \
+  -e JOB_TEMPLATESTOOL=True \
+  -e ORGANIZATIONSTOOL=True \
+  -e PROJECTSTOOL=True \
+  -e SCHEDULESTOOL=True \
+  -e SYSTEMTOOL=True \
+  -e TEAMSTOOL=True \
+  -e USERSTOOL=True \
+  -e WORKFLOW_JOBSTOOL=True \
+  -e WORKFLOW_TEMPLATESTOOL=True \
   knucklessg1/ansible-tower-mcp:mcp
 ```
 
-> The `:mcp` tag is the **slim MCP-server image** (built from
-> `docker/Dockerfile --target mcp`, installing `ansible-tower-mcp[mcp]`). The default
-> `:latest` tag is the **full agent image** (`--target agent`, `ansible-tower-mcp[agent]`)
-> which also bundles the Pydantic AI agent and the epistemic-graph engine — use it
-> when you run `ansible-tower-agent` (the agent), not just the MCP server. See
-> [Container images](#container-images-mcp-vs-agent).
-
----
+_Auto-generated from the code-read env surface (`MCP_TOOL_MODE` + package vars) — do not edit._
+<!-- MCP-CONFIG-EXAMPLES:END -->
 
 <!-- BEGIN GENERATED: additional-deployment-options -->
 ### Additional Deployment Options

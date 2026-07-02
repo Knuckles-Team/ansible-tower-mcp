@@ -8,12 +8,29 @@
       ],
       "env": {
         "MCP_TOOL_MODE": "condensed",
-        "ANSIBLE_BASE_URL": "<YOUR_ANSIBLE_BASE_URL>",
-        "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
-        "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
+        "AD_HOC_COMMANDSTOOL": "True",
+        "ANSIBLE_BASE_URL": "https://ansible.example.com",
         "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
         "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
-        "ANSIBLE_VERIFY": "<YOUR_ANSIBLE_VERIFY>"
+        "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
+        "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
+        "ANSIBLE_VERIFY": "False",
+        "AUDIENCE": "",
+        "CREDENTIALSTOOL": "True",
+        "DELEGATED_SCOPES": "api",
+        "GROUPSTOOL": "True",
+        "HOSTSTOOL": "True",
+        "INVENTORYTOOL": "True",
+        "JOBSTOOL": "True",
+        "JOB_TEMPLATESTOOL": "True",
+        "ORGANIZATIONSTOOL": "True",
+        "PROJECTSTOOL": "True",
+        "SCHEDULESTOOL": "True",
+        "SYSTEMTOOL": "True",
+        "TEAMSTOOL": "True",
+        "USERSTOOL": "True",
+        "WORKFLOW_JOBSTOOL": "True",
+        "WORKFLOW_TEMPLATESTOOL": "True"
       }
     }
   }
