@@ -1,0 +1,25 @@
+{
+  "_comment": "Tier-1 mcp_tool source presets for ansible-tower-mcp (AU-KG.ingest.mcp-tool-connector). Sync Ansible Tower job templates / jobs into the KG as automation documents via the ansible-tower-mcp MCP server. Contributed presets win over the central MCP_TOOL_PRESETS. For typed-node + blob ingestion prefer the native ansible_ingest_resources / ansible_ingest_job_log tools.",
+  "ansible-job-templates": {
+    "server": "ansible-tower-mcp",
+    "tool": "ansible_tower_job_templates",
+    "action": "list_job_templates",
+    "records_path": "results",
+    "id_field": "id",
+    "title_field": "name",
+    "text_field": "description",
+    "updated_field": "modified",
+    "doc_type": "ansible_job_template"
+  },
+  "ansible-jobs": {
+    "server": "ansible-tower-mcp",
+    "tool": "ansible_tower_jobs",
+    "action": "list_jobs",
+    "records_path": "results",
+    "id_field": "id",
+    "title_field": "name",
+    "text_field": "status",
+    "updated_field": "finished",
+    "doc_type": "ansible_job"
+  }
+}

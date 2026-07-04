@@ -1,0 +1,173 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix : <http://knuckles.team/kg#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Ansible Tower / AWX automation ontology — organizations, inventories, hosts,
+# projects, job templates, and their job executions. All classes and properties live
+# in the shared `:` (kg#) namespace; only the owl:Ontology node gets the per-package
+# IRI. Backs the ansible-tower-mcp tool surface (ansible_tower_job_templates /
+# ansible_tower_jobs / ansible_tower_inventory / ansible_tower_hosts / …). Reuses the
+# shared :Document (job stdout) and :Blob (raw job logs via MediaStore) classes.
+
+:AnsibleOrganization a owl:Class ;
+    rdfs:label "Ansible Organization" ;
+    rdfs:comment "A top-level tenant that owns inventories, projects, teams and templates (ansible_tower_organizations)." .
+
+:Inventory a owl:Class ;
+    rdfs:label "Inventory" ;
+    rdfs:comment "A collection of managed hosts and groups a job runs against (ansible_tower_inventory)." .
+
+:InventoryGroup a owl:Class ;
+    rdfs:label "Inventory Group" ;
+    rdfs:comment "A named group of hosts within an Inventory (ansible_tower_groups)." .
+
+:Host a owl:Class ;
+    rdfs:label "Host" ;
+    rdfs:comment "A managed node targeted by automation, belonging to an Inventory (ansible_tower_hosts)." .
+
+:AnsibleProject a owl:Class ;
+    rdfs:label "Ansible Project" ;
+    rdfs:comment "An SCM-backed source of playbooks (git/hg/svn/manual) synced into Tower (ansible_tower_projects)." .
+
+:JobTemplate a owl:Class ;
+    rdfs:label "Job Template" ;
+    rdfs:comment "A reusable definition binding a project playbook, inventory and credential, launchable as a Job (ansible_tower_job_templates)." .
+
+:WorkflowJobTemplate a owl:Class ;
+    rdfs:label "Workflow Job Template" ;
+    rdfs:comment "A graph of job templates run as a coordinated workflow (ansible_tower_workflow_templates)." .
+
+:Job a owl:Class ;
+    rdfs:label "Job" ;
+    rdfs:comment "A single execution (run) of a Job Template against an Inventory, with a status and stdout log (ansible_tower_jobs)." .
+
+:WorkflowJob a owl:Class ;
+    rdfs:label "Workflow Job" ;
+    rdfs:comment "A single execution of a Workflow Job Template (ansible_tower_workflow_jobs)." .
+
+:AdHocCommand a owl:Class ;
+    rdfs:label "Ad Hoc Command" ;
+    rdfs:comment "A one-off module command run directly against an Inventory (ansible_tower_ad_hoc_commands)." .
+
+:Credential a owl:Class ;
+    rdfs:label "Credential" ;
+    rdfs:comment "A stored secret (machine, SCM, cloud) a job uses to authenticate (ansible_tower_credentials)." .
+
+:Schedule a owl:Class ;
+    rdfs:label "Schedule" ;
+    rdfs:comment "An rrule-based recurring trigger for a job or workflow template (ansible_tower_schedules)." .
+
+:Team a owl:Class ;
+    rdfs:label "Team" ;
+    rdfs:comment "A group of users within an organization used for RBAC (ansible_tower_teams)." .
+
+# --- links (owl:ObjectProperty) ---
+
+:inOrganization a owl:ObjectProperty ;
+    rdfs:label "in organization" ;
+    rdfs:comment "Links an Inventory, Project, Team or Job Template to its owning Ansible Organization." ;
+    rdfs:range :AnsibleOrganization .
+
+:belongsToInventory a owl:ObjectProperty ;
+    rdfs:label "belongs to inventory" ;
+    rdfs:comment "Links a Host or Inventory Group to its Inventory." ;
+    rdfs:range :Inventory .
+
+:inGroup a owl:ObjectProperty ;
+    rdfs:label "in group" ;
+    rdfs:comment "Links a Host to an Inventory Group it is a member of." ;
+    rdfs:domain :Host ;
+    rdfs:range :InventoryGroup .
+
+:usesProject a owl:ObjectProperty ;
+    rdfs:label "uses project" ;
+    rdfs:comment "Links a Job Template to the Ansible Project supplying its playbook." ;
+    rdfs:domain :JobTemplate ;
+    rdfs:range :AnsibleProject .
+
+:usesInventory a owl:ObjectProperty ;
+    rdfs:label "uses inventory" ;
+    rdfs:comment "Links a Job Template or Job to the Inventory it targets." ;
+    rdfs:range :Inventory .
+
+:usesCredential a owl:ObjectProperty ;
+    rdfs:label "uses credential" ;
+    rdfs:comment "Links a Job Template, Job or Ad Hoc Command to a Credential it authenticates with." ;
+    rdfs:range :Credential .
+
+:launchedFrom a owl:ObjectProperty ;
+    rdfs:label "launched from" ;
+    rdfs:comment "Links a Job to the Job Template it was launched from." ;
+    rdfs:domain :Job ;
+    rdfs:range :JobTemplate .
+
+:workflowLaunchedFrom a owl:ObjectProperty ;
+    rdfs:label "workflow launched from" ;
+    rdfs:comment "Links a Workflow Job to the Workflow Job Template it was launched from." ;
+    rdfs:domain :WorkflowJob ;
+    rdfs:range :WorkflowJobTemplate .
+
+:hasStdout a owl:ObjectProperty ;
+    rdfs:label "has stdout" ;
+    rdfs:comment "Links a Job to its captured stdout :Document (semantic-search text) or raw :Blob log." ;
+    rdfs:domain :Job .
+
+:triggersTemplate a owl:ObjectProperty ;
+    rdfs:label "triggers template" ;
+    rdfs:comment "Links a Schedule to the Job Template or Workflow Job Template it triggers." ;
+    rdfs:domain :Schedule .
+
+# --- fields (owl:DatatypeProperty) ---
+
+:jobStatus a owl:DatatypeProperty ;
+    rdfs:label "job status" ;
+    rdfs:comment "Execution status of a Job, Workflow Job or Ad Hoc Command (successful, failed, running, pending, canceled)." ;
+    rdfs:range xsd:string .
+
+:elapsed a owl:DatatypeProperty ;
+    rdfs:label "elapsed" ;
+    rdfs:comment "Wall-clock run time of a Job in seconds." ;
+    rdfs:range xsd:decimal .
+
+:playbook a owl:DatatypeProperty ;
+    rdfs:label "playbook" ;
+    rdfs:comment "Playbook file a Job Template or Job runs (e.g. site.yml)." ;
+    rdfs:range xsd:string .
+
+:scmType a owl:DatatypeProperty ;
+    rdfs:label "scm type" ;
+    rdfs:comment "Source-control type of an Ansible Project (git, hg, svn, manual)." ;
+    rdfs:range xsd:string .
+
+:scmUrl a owl:DatatypeProperty ;
+    rdfs:label "scm url" ;
+    rdfs:comment "Source-control URL an Ansible Project is synced from." ;
+    rdfs:range xsd:string .
+
+:rrule a owl:DatatypeProperty ;
+    rdfs:label "rrule" ;
+    rdfs:comment "iCal RFC 5545 recurrence rule defining when a Schedule fires." ;
+    rdfs:range xsd:string .
+
+:credentialKind a owl:DatatypeProperty ;
+    rdfs:label "credential kind" ;
+    rdfs:comment "Type of a Credential (ssh, scm, vault, aws, gce, …)." ;
+    rdfs:range xsd:string .
+
+:finished a owl:DatatypeProperty ;
+    rdfs:label "finished" ;
+    rdfs:comment "Timestamp a Job or Workflow Job completed." ;
+    rdfs:range xsd:dateTime .
+
+<http://knuckles.team/kg/ansible> a owl:Ontology ;
+    rdfs:label "Ansible Tower Automation Ontology" ;
+    rdfs:comment """Ansible Tower / AWX automation model — organizations, inventories,
+    groups, hosts, SCM-backed projects, job and workflow templates, their job
+    executions (with status, elapsed, and captured stdout logs), ad hoc commands,
+    credentials and schedules — federated into the agent-utilities knowledge-graph
+    hub. Reuses the shared :Document and :Blob classes for job output.""" ;
+    owl:imports <http://knuckles.team/kg> .
