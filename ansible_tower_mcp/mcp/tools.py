@@ -7,11 +7,11 @@ from pydantic import Field
 
 from ansible_tower_mcp.auth import get_client
 
-# CONCEPT:ANSIBLE-04: Ansible Tower Resource API Adapters
+# CONCEPT:AT-OS.config.route-workflow-templates-operations: Ansible Tower Resource API Adapters
 
 
 def register_inventory_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register inventory tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register inventory tools with FastMCP."""
 
     @mcp.tool(tags={"inventory"})
     async def ansible_tower_inventory(
@@ -28,7 +28,7 @@ def register_inventory_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower inventory operations.
 
-        CONCEPT:ANSIBLE-04: Route inventory operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route inventory operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -54,7 +54,7 @@ def register_inventory_tools(mcp: FastMCP):
 
 
 def register_hosts_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register host tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register host tools with FastMCP."""
 
     @mcp.tool(tags={"hosts"})
     async def ansible_tower_hosts(
@@ -71,7 +71,7 @@ def register_hosts_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower hosts operations.
 
-        CONCEPT:ANSIBLE-04: Route host operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route host operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -97,7 +97,7 @@ def register_hosts_tools(mcp: FastMCP):
 
 
 def register_groups_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register group tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register group tools with FastMCP."""
 
     @mcp.tool(tags={"groups"})
     async def ansible_tower_groups(
@@ -114,7 +114,7 @@ def register_groups_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower groups operations.
 
-        CONCEPT:ANSIBLE-04: Route group operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route group operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -144,7 +144,7 @@ def register_groups_tools(mcp: FastMCP):
 
 
 def register_job_templates_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register job templates tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register job templates tools with FastMCP."""
 
     @mcp.tool(tags={"job-templates"})
     async def ansible_tower_job_templates(
@@ -161,7 +161,7 @@ def register_job_templates_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower job templates operations.
 
-        CONCEPT:ANSIBLE-04: Route job templates operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route job templates operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -189,7 +189,7 @@ def register_job_templates_tools(mcp: FastMCP):
 
 
 def register_jobs_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register jobs tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register jobs tools with FastMCP."""
 
     @mcp.tool(tags={"jobs"})
     async def ansible_tower_jobs(
@@ -206,7 +206,7 @@ def register_jobs_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower jobs operations.
 
-        CONCEPT:ANSIBLE-04: Route jobs operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route jobs operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -234,7 +234,7 @@ def register_jobs_tools(mcp: FastMCP):
 
 
 def register_projects_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register projects tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register projects tools with FastMCP."""
 
     @mcp.tool(tags={"projects"})
     async def ansible_tower_projects(
@@ -251,7 +251,7 @@ def register_projects_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower projects operations.
 
-        CONCEPT:ANSIBLE-04: Route projects operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route projects operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -279,7 +279,7 @@ def register_projects_tools(mcp: FastMCP):
 
 
 def register_credentials_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register credentials tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register credentials tools with FastMCP."""
 
     @mcp.tool(tags={"credentials"})
     async def ansible_tower_credentials(
@@ -296,7 +296,7 @@ def register_credentials_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower credentials operations.
 
-        CONCEPT:ANSIBLE-04: Route credentials operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route credentials operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -324,7 +324,7 @@ def register_credentials_tools(mcp: FastMCP):
 
 
 def register_organizations_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register organizations tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register organizations tools with FastMCP."""
 
     @mcp.tool(tags={"organizations"})
     async def ansible_tower_organizations(
@@ -341,7 +341,7 @@ def register_organizations_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower organizations operations.
 
-        CONCEPT:ANSIBLE-04: Route organizations operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route organizations operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -367,7 +367,7 @@ def register_organizations_tools(mcp: FastMCP):
 
 
 def register_teams_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register teams tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register teams tools with FastMCP."""
 
     @mcp.tool(tags={"teams"})
     async def ansible_tower_teams(
@@ -384,7 +384,7 @@ def register_teams_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower teams operations.
 
-        CONCEPT:ANSIBLE-04: Route teams operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route teams operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -410,7 +410,7 @@ def register_teams_tools(mcp: FastMCP):
 
 
 def register_users_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register users tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register users tools with FastMCP."""
 
     @mcp.tool(tags={"users"})
     async def ansible_tower_users(
@@ -427,7 +427,7 @@ def register_users_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower users operations.
 
-        CONCEPT:ANSIBLE-04: Route users operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route users operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -453,7 +453,7 @@ def register_users_tools(mcp: FastMCP):
 
 
 def register_ad_hoc_commands_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register ad-hoc commands tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register ad-hoc commands tools with FastMCP."""
 
     @mcp.tool(tags={"ad_hoc_commands"})
     async def ansible_tower_ad_hoc_commands(
@@ -470,7 +470,7 @@ def register_ad_hoc_commands_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower ad hoc commands operations.
 
-        CONCEPT:ANSIBLE-04: Route ad-hoc commands operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route ad-hoc commands operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -492,7 +492,7 @@ def register_ad_hoc_commands_tools(mcp: FastMCP):
 
 
 def register_workflow_templates_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register workflow templates tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register workflow templates tools with FastMCP."""
 
     @mcp.tool(tags={"workflow_templates"})
     async def ansible_tower_workflow_templates(
@@ -509,7 +509,7 @@ def register_workflow_templates_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower workflow templates operations.
 
-        CONCEPT:ANSIBLE-04: Route workflow templates operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route workflow templates operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -531,7 +531,7 @@ def register_workflow_templates_tools(mcp: FastMCP):
 
 
 def register_workflow_jobs_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register workflow jobs tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register workflow jobs tools with FastMCP."""
 
     @mcp.tool(tags={"workflow_jobs"})
     async def ansible_tower_workflow_jobs(
@@ -548,7 +548,7 @@ def register_workflow_jobs_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower workflow jobs operations.
 
-        CONCEPT:ANSIBLE-04: Route workflow jobs operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route workflow jobs operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -570,7 +570,7 @@ def register_workflow_jobs_tools(mcp: FastMCP):
 
 
 def register_schedules_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register schedules tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register schedules tools with FastMCP."""
 
     @mcp.tool(tags={"schedules"})
     async def ansible_tower_schedules(
@@ -587,7 +587,7 @@ def register_schedules_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower schedules operations.
 
-        CONCEPT:ANSIBLE-04: Route schedules operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route schedules operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")
@@ -613,7 +613,7 @@ def register_schedules_tools(mcp: FastMCP):
 
 
 def register_system_tools(mcp: FastMCP):
-    """CONCEPT:ANSIBLE-04: Register system tools with FastMCP."""
+    """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register system tools with FastMCP."""
 
     @mcp.tool(tags={"system"})
     async def ansible_tower_system(
@@ -630,7 +630,7 @@ def register_system_tools(mcp: FastMCP):
     ) -> dict:
         """Manage ansible tower system operations.
 
-        CONCEPT:ANSIBLE-04: Route system operations to standard API client methods.
+        CONCEPT:AT-OS.config.route-workflow-templates-operations: Route system operations to standard API client methods.
         """
         if ctx:
             await ctx.info("Executing tool...")

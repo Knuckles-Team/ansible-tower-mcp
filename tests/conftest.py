@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import MagicMock
 
-# CONCEPT:ANSIBLE-05: Standardized Test Fixtures and Mocks
+# CONCEPT:AT-OS.config.standardized-test-fixtures-mocks: Standardized Test Fixtures and Mocks
 
 
 @pytest.fixture

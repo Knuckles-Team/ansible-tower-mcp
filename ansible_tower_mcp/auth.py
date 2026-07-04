@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """Ansible Tower Authentication Module.
 
-CONCEPT:ANSIBLE-02: Authentication Layer (OIDC, OAuth, Username/Password).
+CONCEPT:AT-OS.identity.resolve-best-authentication-client: Authentication Layer (OIDC, OAuth, Username/Password).
 
 Authentication priority:
 1. **OIDC Delegation** — If ``ENABLE_DELEGATION`` is active, exchanges
@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 def get_client():
     """Create an Ansible Tower API client with the best available auth method.
 
-    CONCEPT:ANSIBLE-02: Resolve the best authentication client based on OIDC, OAuth, or username/password credentials.
+    CONCEPT:AT-OS.identity.resolve-best-authentication-client: Resolve the best authentication client based on OIDC, OAuth, or username/password credentials.
 
     Returns a new client on each call (no singleton) because Ansible Tower
     sessions may expire and tools run in independent request contexts.
