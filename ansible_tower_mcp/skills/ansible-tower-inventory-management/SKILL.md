@@ -1,5 +1,6 @@
 ---
 name: ansible-tower-inventory-management
+skill_type: skill
 description: >-
   Manage Ansible Tower / AWX inventories, groups, and managed hosts via the
   ansible-tower-mcp MCP server — create and update inventories, add/remove hosts,

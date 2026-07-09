@@ -1,5 +1,6 @@
 ---
 name: ansible-tower-project-scm
+skill_type: skill
 description: >-
   Manage Ansible Tower / AWX projects (SCM-backed playbook sources) and their
   recurring schedules via the ansible-tower-mcp MCP server — create git/hg/svn/manual

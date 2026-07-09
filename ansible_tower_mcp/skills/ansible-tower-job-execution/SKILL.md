@@ -1,5 +1,6 @@
 ---
 name: ansible-tower-job-execution
+skill_type: skill
 description: >-
   Launch and monitor Ansible Tower / AWX automation via the ansible-tower-mcp MCP
   server — run job templates and workflows, watch job status, stream stdout, cancel
