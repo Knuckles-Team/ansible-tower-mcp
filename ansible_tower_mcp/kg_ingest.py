@@ -3,120 +3,25 @@
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. The package natively pushes its
 Ansible Tower / AWX data into the ONE epistemic-graph knowledge graph as **typed OWL
 nodes** (`:JobTemplate`, `:Job`, `:Inventory`, `:Host`, `:AnsibleProject`, …) + links,
-using the lightweight engine client (``GraphComputeEngine()._client`` + ``txn``) — the
-same fast client the blob ``MediaStore`` uses, NOT the heavy in-process engine.
-
-This is a thin mapper over the shared primitive
-``agent_utilities.knowledge_graph.memory.native_ingest``. The import is GUARDED: when
-that primitive (or any KG stack / reachable engine) is absent, a self-contained txn
-fallback is used, and if even that is unavailable every entry point **no-ops**
-(returns ``None``), so the connector keeps working with zero KG infrastructure. Node
-ids follow ``ansible:<class>:<extId>``; ``type`` matches the classes federated by
+through the required
+``agent_utilities.knowledge_graph.memory.native_ingest`` authority. Node ids follow
+``ansible:<class>:<extId>``; ``node_type`` matches the classes federated by
 ``ansible_tower_mcp.ontology`` (``ansible.ttl``).
 """
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
-logger = logging.getLogger("ansible_tower_mcp.kg")
+from agent_utilities.knowledge_graph.memory.native_ingest import (
+    ingest_documents as _native_ingest_documents,
+)
+from agent_utilities.knowledge_graph.memory.native_ingest import (
+    ingest_entities as _native_ingest_entities,
+)
 
 _SOURCE = "ansible-tower-mcp"
 _DOMAIN = "ansible"
-
-
-# --------------------------------------------------------------------------- #
-# Shared-primitive delegation (guarded) with a self-contained txn fallback.
-# --------------------------------------------------------------------------- #
-def _shared_ingest_entities(
-    entities: list[dict[str, Any]],
-    relationships: list[dict[str, Any]] | None,
-    *,
-    client: Any | None,
-    graph: str | None,
-) -> dict[str, int] | None:
-    """Delegate to the shared native_ingest primitive if importable."""
-    try:
-        from agent_utilities.knowledge_graph.memory.native_ingest import (
-            ingest_entities as _ingest,
-        )
-    except Exception:  # noqa: BLE001 — primitive not in installed agent_utilities
-        return _fallback_ingest_entities(
-            entities, relationships, client=client, graph=graph
-        )
-    return _ingest(
-        entities,
-        relationships,
-        source=_SOURCE,
-        domain=_DOMAIN,
-        client=client,
-        graph=graph,
-    )
-
-
-def _fallback_client() -> tuple[Any | None, str]:
-    """Return ``(engine_client, graph_name)`` or ``(None, "")`` when unavailable."""
-    try:
-        from agent_utilities.knowledge_graph.core.graph_compute import (
-            GraphComputeEngine,
-        )
-    except Exception as e:  # noqa: BLE001 — KG stack absent
-        logger.debug("KG ingest unavailable (import): %s", e)
-        return None, ""
-    try:
-        engine = GraphComputeEngine()
-        client = getattr(engine, "_client", None)
-        if client is None:
-            return None, ""
-        graph = getattr(engine, "graph_name", None) or "__commons__"
-        return client, graph
-    except Exception as e:  # noqa: BLE001 — engine unreachable
-        logger.debug("KG ingest: engine unreachable: %s", e)
-        return None, ""
-
-
-def _fallback_ingest_entities(
-    entities: list[dict[str, Any]],
-    relationships: list[dict[str, Any]] | None = None,
-    *,
-    client: Any | None = None,
-    graph: str | None = None,
-) -> dict[str, int] | None:
-    """Self-contained txn write path (used only if the shared primitive is absent)."""
-    entities = [e for e in (entities or []) if e.get("id")]
-    if not entities:
-        return None
-    if client is None:
-        client, graph = _fallback_client()
-    if client is None:
-        return None
-    graph = graph or "__commons__"
-    try:
-        txn = client.txn.begin(graph=graph)
-        for ent in entities:
-            props = {k: v for k, v in ent.items() if k != "id" and v is not None}
-            props.setdefault("source", _SOURCE)
-            props.setdefault("domain", _DOMAIN)
-            client.txn.add_node(txn, ent["id"], props)
-        committed = client.txn.commit(txn)
-    except Exception as e:  # noqa: BLE001 — engine/txn failure is non-fatal
-        logger.warning("KG ingest: txn failed: %s", e)
-        return None
-    if not committed:
-        logger.warning("KG ingest: txn not committed (conflict)")
-        return None
-    edges = 0
-    for rel in relationships or []:
-        try:
-            client.edges.add(
-                rel["source"], rel["target"], {"type": rel.get("type", "RELATED")}
-            )
-            edges += 1
-        except Exception as e:  # noqa: BLE001 — pure edge link, best-effort
-            logger.debug("KG ingest: edge skipped: %s", e)
-    logger.info("KG ingest: wrote %d nodes, %d edges", len(entities), edges)
-    return {"nodes": len(entities), "edges": edges}
 
 
 # --------------------------------------------------------------------------- #
@@ -130,15 +35,20 @@ def ingest_entities(
     domain: str = _DOMAIN,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Write typed nodes (+ edges) into epistemic-graph via the shared primitive.
 
-    ``entities``: ``[{"id":..., "type":<owl:Class>, ...props}]``.
-    ``relationships``: ``[{"source":id, "target":id, "type":rel}]``.
-    Returns ``{"nodes":n, "edges":m}`` or ``None`` (no engine / failure; never raises).
-    ``client``/``graph`` may be injected (tests); otherwise resolved on demand.
+    ``entities`` use canonical ``node_type`` and relationships use canonical
+    ``relationship``. Engine and validation failures raise ``NativeIngestError``.
     """
-    return _shared_ingest_entities(entities, relationships, client=client, graph=graph)
+    return _native_ingest_entities(
+        entities,
+        relationships,
+        source=source,
+        domain=domain,
+        client=client,
+        graph=graph,
+    )
 
 
 def ingest_documents(
@@ -148,31 +58,15 @@ def ingest_documents(
     domain: str = _DOMAIN,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Write text records (e.g. job stdout) as ``:Document`` nodes for semantic search.
 
     Each doc: ``{"id":..., "text":..., "title"?:..., "source_uri"?:..., ...props}``.
-    Delegates to the shared ``native_ingest.ingest_documents``; if that primitive is
-    absent, falls back to writing ``:Document`` typed nodes via the local txn path.
+    Delegates directly to the required native ingestion authority.
     """
-    try:
-        from agent_utilities.knowledge_graph.memory.native_ingest import (
-            ingest_documents as _ingest_docs,
-        )
-    except Exception:  # noqa: BLE001 — primitive absent, map to typed nodes locally
-        nodes: list[dict[str, Any]] = []
-        for doc in docs or []:
-            did = doc.get("id")
-            text = doc.get("text") or doc.get("content")
-            if not did or not text:
-                continue
-            node = {k: v for k, v in doc.items() if k != "content" and v is not None}
-            node["id"] = did
-            node["type"] = "Document"
-            node["text"] = text
-            nodes.append(node)
-        return _fallback_ingest_entities(nodes, None, client=client, graph=graph)
-    return _ingest_docs(docs, source=source, domain=domain, client=client, graph=graph)
+    return _native_ingest_documents(
+        docs, source=source, domain=domain, client=client, graph=graph
+    )
 
 
 def _clean(props: dict[str, Any]) -> dict[str, Any]:
@@ -184,7 +78,7 @@ def ingest_job_templates(
     *,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Map Ansible Tower job-template records → ``:JobTemplate`` nodes (+ links)."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
@@ -197,7 +91,7 @@ def ingest_job_templates(
             _clean(
                 {
                     "id": tpl_id,
-                    "type": "JobTemplate",
+                    "node_type": "JobTemplate",
                     "name": tpl.get("name"),
                     "description": tpl.get("description"),
                     "playbook": tpl.get("playbook"),
@@ -212,7 +106,7 @@ def ingest_job_templates(
                 {
                     "source": tpl_id,
                     "target": f"ansible:inventory:{inv}",
-                    "type": "usesInventory",
+                    "relationship": "usesInventory",
                 }
             )
         proj = tpl.get("project")
@@ -221,7 +115,7 @@ def ingest_job_templates(
                 {
                     "source": tpl_id,
                     "target": f"ansible:project:{proj}",
-                    "type": "usesProject",
+                    "relationship": "usesProject",
                 }
             )
     return ingest_entities(entities, relationships, client=client, graph=graph)
@@ -232,7 +126,7 @@ def ingest_jobs(
     *,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Map Ansible Tower job records → ``:Job`` nodes (+ launchedFrom/usesInventory)."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
@@ -245,7 +139,7 @@ def ingest_jobs(
             _clean(
                 {
                     "id": job_id,
-                    "type": "Job",
+                    "node_type": "Job",
                     "name": job.get("name"),
                     "jobStatus": job.get("status"),
                     "elapsed": job.get("elapsed"),
@@ -262,7 +156,7 @@ def ingest_jobs(
                 {
                     "source": job_id,
                     "target": f"ansible:jobtemplate:{tpl}",
-                    "type": "launchedFrom",
+                    "relationship": "launchedFrom",
                 }
             )
         inv = job.get("inventory")
@@ -271,7 +165,7 @@ def ingest_jobs(
                 {
                     "source": job_id,
                     "target": f"ansible:inventory:{inv}",
-                    "type": "usesInventory",
+                    "relationship": "usesInventory",
                 }
             )
     return ingest_entities(entities, relationships, client=client, graph=graph)
@@ -282,7 +176,7 @@ def ingest_inventories(
     *,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Map Ansible Tower inventory records → ``:Inventory`` nodes (+ inOrganization)."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
@@ -295,7 +189,7 @@ def ingest_inventories(
             _clean(
                 {
                     "id": inv_id,
-                    "type": "Inventory",
+                    "node_type": "Inventory",
                     "name": inv.get("name"),
                     "description": inv.get("description"),
                     "total_hosts": inv.get("total_hosts"),
@@ -309,7 +203,7 @@ def ingest_inventories(
                 {
                     "source": inv_id,
                     "target": f"ansible:organization:{org}",
-                    "type": "inOrganization",
+                    "relationship": "inOrganization",
                 }
             )
     return ingest_entities(entities, relationships, client=client, graph=graph)
@@ -320,7 +214,7 @@ def ingest_hosts(
     *,
     client: Any | None = None,
     graph: str | None = None,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Map Ansible Tower host records → ``:Host`` nodes (+ belongsToInventory)."""
     entities: list[dict[str, Any]] = []
     relationships: list[dict[str, Any]] = []
@@ -333,7 +227,7 @@ def ingest_hosts(
             _clean(
                 {
                     "id": host_id,
-                    "type": "Host",
+                    "node_type": "Host",
                     "name": host.get("name"),
                     "description": host.get("description"),
                     "enabled": host.get("enabled"),
@@ -347,7 +241,7 @@ def ingest_hosts(
                 {
                     "source": host_id,
                     "target": f"ansible:inventory:{inv}",
-                    "type": "belongsToInventory",
+                    "relationship": "belongsToInventory",
                 }
             )
     return ingest_entities(entities, relationships, client=client, graph=graph)

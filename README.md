@@ -170,7 +170,7 @@ The table below is auto-generated from the live server — do not edit by hand.
 _15 action-routed tool(s) (default) · 76 verbose 1:1 tool(s). Each is enabled unless its `<DOMAIN>TOOL` toggle is set false; `MCP_TOOL_MODE` selects the surface (`condensed` default · `verbose` 1:1 · `both`). Auto-generated — do not edit._
 <!-- MCP-TOOLS-TABLE:END -->
 
-Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/mcp.md](docs/mcp.md).
+Detailed tool schemas, parameter shapes, and validation constraints are preserved in [docs/usage.md](docs/usage.md).
 
 ### Dynamic Tool Selection & Visibility
 
@@ -197,11 +197,10 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 
 <!-- MCP-CONFIG-EXAMPLES:START -->
 
-> **Install the slim `[mcp]` extra.** All examples install `ansible-tower-mcp[mcp]` — the
-> MCP-server extra that pulls only the FastMCP / FastAPI tooling (`agent-utilities[mcp]`).
-> It deliberately **excludes** the heavy agent runtime (`pydantic-ai`, the epistemic-graph
-> engine, `dspy`, `llama-index`), so `uvx` / container installs are far smaller. Use the
-> full `[agent]` extra only when you need the integrated Pydantic AI agent.
+> **Install the connector-focused `[mcp]` extra.** Examples use `ansible-tower-mcp[mcp]` to add
+> FastMCP / FastAPI through `agent-utilities[mcp]`; the required Agent Utilities core
+> still carries `epistemic-graph[full]`. The `[agent-runtime]` extra additionally
+> enables model orchestration.
 
 #### stdio Transport (local IDEs — Cursor, Claude Desktop, VS Code)
 
@@ -216,15 +215,13 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
         "ansible-tower-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "AD_HOC_COMMANDSTOOL": "True",
         "ANSIBLE_BASE_URL": "https://ansible.example.com",
         "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
         "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
         "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
         "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
-        "ANSIBLE_VERIFY": "False",
-        "AUDIENCE": "",
         "CREDENTIALSTOOL": "True",
         "DELEGATED_SCOPES": "api",
         "GROUPSTOOL": "True",
@@ -246,6 +243,10 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
 }
 ```
 
+Runtime references require an alias-aware launcher such as GraphOS. Other
+launchers must omit those entries and inject the resolved values through their
+own runtime secret boundary.
+
 #### Streamable-HTTP Transport (networked / production)
 
 ```json
@@ -264,17 +265,15 @@ When query strings or parameters are supplied, an LLM-free **Knowledge Graph res
       ],
       "env": {
         "TRANSPORT": "streamable-http",
-        "HOST": "0.0.0.0",
+        "HOST": "127.0.0.1",
         "PORT": "8000",
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "AD_HOC_COMMANDSTOOL": "True",
         "ANSIBLE_BASE_URL": "https://ansible.example.com",
         "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
         "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
         "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
         "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
-        "ANSIBLE_VERIFY": "False",
-        "AUDIENCE": "",
         "CREDENTIALSTOOL": "True",
         "DELEGATED_SCOPES": "api",
         "GROUPSTOOL": "True",
@@ -308,24 +307,24 @@ Alternatively, connect to a pre-deployed Streamable-HTTP instance by `url`:
 }
 ```
 
-Deploying the Streamable-HTTP server via Docker:
+Run a reviewed container image as a least-privilege stdio child (no
+listener or published port):
 
 ```bash
-docker run -d \
-  --name ansible-tower-mcp-mcp \
-  -p 8000:8000 \
-  -e TRANSPORT=streamable-http \
-  -e HOST=0.0.0.0 \
-  -e PORT=8000 \
-  -e MCP_TOOL_MODE=condensed \
+docker run -i --rm \
+  --read-only \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges \
+  --pids-limit=256 \
+  --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m \
+  -e TRANSPORT=stdio \
+  -e MCP_TOOL_MODE=intent \
   -e AD_HOC_COMMANDSTOOL=True \
   -e ANSIBLE_BASE_URL=https://ansible.example.com \
   -e ANSIBLE_CLIENT_ID="<YOUR_ANSIBLE_CLIENT_ID>" \
   -e ANSIBLE_CLIENT_SECRET="<YOUR_ANSIBLE_CLIENT_SECRET>" \
   -e ANSIBLE_PASSWORD="<YOUR_ANSIBLE_PASSWORD>" \
   -e ANSIBLE_USERNAME="<YOUR_ANSIBLE_USERNAME>" \
-  -e ANSIBLE_VERIFY=False \
-  -e AUDIENCE="" \
   -e CREDENTIALSTOOL=True \
   -e DELEGATED_SCOPES=api \
   -e GROUPSTOOL=True \
@@ -341,8 +340,13 @@ docker run -d \
   -e USERSTOOL=True \
   -e WORKFLOW_JOBSTOOL=True \
   -e WORKFLOW_TEMPLATESTOOL=True \
-  knucklessg1/ansible-tower-mcp:mcp
+  registry.example.invalid/ansible-tower-mcp@sha256:<digest> ansible-tower-mcp
 ```
+
+For containerized network HTTP, supply an authenticated TLS ingress (or
+direct server TLS), exact `MCP_ALLOWED_HOSTS`, and an exact trusted-proxy
+CIDR policy through the operator-owned deployment profile. The generator
+does not emit an unauthenticated non-loopback listener.
 
 _Auto-generated from the code-read env surface (`MCP_TOOL_MODE` + package vars) — do not edit._
 <!-- MCP-CONFIG-EXAMPLES:END -->
@@ -350,16 +354,16 @@ _Auto-generated from the code-read env surface (`MCP_TOOL_MODE` + package vars) 
 <!-- BEGIN GENERATED: additional-deployment-options -->
 ### Additional Deployment Options
 
-`ansible-tower-mcp` can also run as a **local container** (Docker / Podman / `uv`) or be
-consumed from a **remote deployment**. The
-[Deployment guide](https://knuckles-team.github.io/ansible-tower-mcp/deployment/) has full, copy-paste
-`mcp_config.json` for all four transports — **stdio**, **streamable-http**,
-**local container / uv**, and **remote URL**:
+`ansible-tower-mcp` can run as a local stdio process or container, or behind a remote
+network boundary. The
+[Deployment guide](https://knuckles-team.github.io/ansible-tower-mcp/deployment/) carries
+the detailed transport contract.
 
-- **Local container / uv** — launch the server from `mcp_config.json` via `uvx`,
-  `docker run`, or `podman run`, or point at a local streamable-http container by `url`.
-- **Remote URL** — connect to a server deployed behind Caddy at
-  `http://ansible-tower-mcp.arpa/mcp` using the `"url"` key.
+- **Local container** — launch a reviewed immutable image as a least-privilege
+  stdio child with no listener or published port.
+- **Remote URL** — connect through an operator-supplied authenticated HTTPS
+  ingress. Keep its URL, outbound identity references, trust profile, and exact
+  `MCP_ALLOWED_HOSTS` in `AgentConfig`.
 <!-- END GENERATED: additional-deployment-options -->
 
 ---
@@ -376,7 +380,7 @@ consumed from a **remote deployment**. The
 | `PORT` | `8000` |  |
 | `TRANSPORT` | `stdio` | options: stdio, streamable-http, sse |
 | `ANSIBLE_BASE_URL` | `https://ansible.example.com` | Ansible Tower / AWX base URL |
-| `ANSIBLE_VERIFY` | `False` | verify TLS certificates (True/False) |
+| `ANSIBLE_TOWER_TLS_PROFILE` | _(unset)_ | Optional runtime TLS profile selector; verification is mandatory |
 | `ANSIBLE_USERNAME` | `<YOUR_ANSIBLE_USERNAME>` | Path 3: username / password auth |
 | `ANSIBLE_PASSWORD` | `<YOUR_ANSIBLE_PASSWORD>` |  |
 | `ANSIBLE_CLIENT_ID` | `<YOUR_ANSIBLE_CLIENT_ID>` | Path 2: OAuth client-credentials auth |
@@ -436,7 +440,7 @@ Every variable the server reads, grouped by concern.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ANSIBLE_BASE_URL` | Base URL of the Ansible Tower / AWX instance | — |
-| `ANSIBLE_VERIFY` | TLS certificate verification | `False` |
+| `ANSIBLE_TOWER_TLS_PROFILE` | Optional runtime TLS profile selector | _(unset)_ |
 | `ANSIBLE_CLIENT_ID` | OAuth application client id | — |
 | `ANSIBLE_CLIENT_SECRET` | OAuth application client secret | — |
 | `ANSIBLE_USERNAME` | Username (username/password fallback auth) | — |
@@ -514,7 +518,7 @@ version: '3.8'
 
 services:
   ansible-tower-mcp-mcp:
-    image: knucklessg1/ansible-tower-mcp:mcp
+    image: example/ansible-tower-mcp:mcp
     container_name: ansible-tower-mcp-mcp
     hostname: ansible-tower-mcp-mcp
     restart: always
@@ -540,7 +544,7 @@ services:
         max-file: "3"
 
   ansible-tower-mcp-agent:
-    image: knucklessg1/ansible-tower-mcp:latest
+    image: example/ansible-tower-mcp@sha256:<digest>
     container_name: ansible-tower-mcp-agent
     hostname: ansible-tower-mcp-agent
     restart: always
@@ -574,7 +578,7 @@ services:
 
 ```
 
-Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/agent.md](docs/agent.md).
+Detailed graph node architecture explanations, custom skill configurations, and agentic trace guides are available in [docs/deployment.md](docs/deployment.md).
 
 ---
 
@@ -602,15 +606,15 @@ Pick the extra that matches what you want to run:
 
 | Extra | Installs | Use when |
 |-------|----------|----------|
-| `ansible-tower-mcp[mcp]` | Slim MCP server only (`agent-utilities[mcp]` — FastMCP/FastAPI) | You only run the **MCP server** (smallest install / image) |
-| `ansible-tower-mcp[agent]` | Full agent runtime (`agent-utilities[agent,logfire]` — Pydantic AI + the epistemic-graph engine) | You run the **integrated agent** |
+| `ansible-tower-mcp[mcp]` | Connector-focused MCP server (`agent-utilities[mcp]` — FastMCP/FastAPI + `epistemic-graph[full]`) | You only run the **MCP server** (smallest install / image) |
+| `ansible-tower-mcp[agent]` | Agent runtime (`agent-utilities[agent-runtime,logfire]` — model orchestration + `epistemic-graph[full]`) | You run the **integrated agent** |
 | `ansible-tower-mcp[all]` | Everything (`mcp` + `agent` + `logfire`) | Development / both surfaces |
 
 ```bash
-# MCP server only (recommended for tool hosting — slim deps)
+# Connector-focused MCP server (includes the shared graph engine)
 uv pip install "ansible-tower-mcp[mcp]"
 
-# Full agent runtime (Pydantic AI + epistemic-graph engine)
+# Agent runtime (adds model orchestration to the shared graph engine)
 uv pip install "ansible-tower-mcp[agent]"
 
 # Everything (development)
@@ -623,26 +627,27 @@ One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `
 
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
-| `knucklessg1/ansible-tower-mcp:mcp` | `--target mcp` | `ansible-tower-mcp[mcp]` — **slim**, no engine/`pydantic-ai`/`dspy`/`llama-index`/`tree-sitter` | `ansible-tower-mcp` |
-| `knucklessg1/ansible-tower-mcp:latest` | `--target agent` (default) | `ansible-tower-mcp[agent]` — **full** agent runtime + epistemic-graph engine | `ansible-tower-agent` |
+| `example/ansible-tower-mcp:mcp` | `--target mcp` | `ansible-tower-mcp[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `ansible-tower-mcp` |
+| `example/ansible-tower-mcp@sha256:<digest>` | `--target agent` (default) | `ansible-tower-mcp[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `ansible-tower-agent` |
 
 ```bash
-docker build --target mcp   -t knucklessg1/ansible-tower-mcp:mcp    docker/   # slim MCP server
-docker build --target agent -t knucklessg1/ansible-tower-mcp:latest docker/   # full agent
+docker build --target mcp   -t example/ansible-tower-mcp:mcp    docker/   # connector-focused MCP server
+docker build --target agent -t example/ansible-tower-mcp:agent-local docker/   # agent runtime
 ```
 
-`docker/mcp.compose.yml` runs the slim `:mcp` server; `docker/agent.compose.yml` runs the
-agent (`:latest`) with a co-located `:mcp` sidecar.
+`docker/mcp.compose.yml` runs the connector-focused `:mcp` server; `docker/agent.compose.yml` runs the
+agent (`immutable agent digest`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
-The **full agent** (`[agent]` / `:latest`) embeds the **epistemic-graph** engine (pulled in
-transitively via `agent-utilities[agent]`). For production — or to share one knowledge graph
-across multiple agents — run **epistemic-graph as its own database container** and point the
-agent at it instead of embedding it. Deployment recipes (single-node + Raft HA), connection
-config, and the full database architecture (with diagrams) are documented in the
+Both `[mcp]` and `[agent]` carry the **epistemic-graph** engine through the required
+Agent Utilities core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
+the server connector-focused; `[agent]` additionally enables model orchestration. Local
+deployments can use the bundled engine. For production or shared state, run
+**epistemic-graph as a dedicated database service** and configure the runtime to use it.
+Deployment recipes (single-node + Raft HA), connection configuration, and architecture
+diagrams are documented in the
 [epistemic-graph deployment guide](https://knuckles-team.github.io/epistemic-graph/deployment/).
-The slim `[mcp]` server does **not** require the database.
 
 ---
 
@@ -665,10 +670,10 @@ operation.
 
 ## Repository Owners
 
-<img width="100%" height="180em" src="https://github-readme-stats.vercel.app/api?username=Knucklessg1&show_icons=true&hide_border=true&&count_private=true&include_all_commits=true" />
+<img width="100%" height="180em" src="https://github-readme-stats.vercel.app/api?username=example&show_icons=true&hide_border=true&&count_private=true&include_all_commits=true" />
 
-![GitHub followers](https://img.shields.io/github/followers/Knucklessg1)
-![GitHub User's stars](https://img.shields.io/github/stars/Knucklessg1)
+![GitHub followers](https://img.shields.io/github/followers/example)
+![GitHub User's stars](https://img.shields.io/github/stars/example)
 
 ---
 
@@ -681,23 +686,40 @@ Contributions are welcome! Please ensure code quality by executing local checks 
 - Execute test suites using `pytest`
 
 
-<!-- BEGIN agent-os-genesis-deploy (generated; do not edit between markers) -->
+<!-- BEGIN agent-utilities-deployment (generated; do not edit between markers) -->
 
-## Deploy with `agent-os-genesis`
+## Deploy with `agent-utilities-deployment`
 
-This package can be provisioned for you — skill-guided — by the **`agent-os-genesis`**
-universal skill (its *single-package deploy mode*): it picks your install method, seeds
-secrets to OpenBao/Vault (or `.env`), trusts your enterprise CA, registers the MCP
-server, and verifies it — the same machinery that stands up the whole Agent OS, narrowed
-to just this package. Ask your agent to **"deploy `ansible-tower-mcp` with agent-os-genesis"**.
+Provision this package with the consolidated **`agent-utilities-deployment`**
+workflow. It selects an installed-package, editable-source, or immutable-container
+path; records only runtime secret and TLS-profile references in `AgentConfig`; and
+runs doctor, registration, policy, observability, and rollback gates. Ask your agent
+to **"deploy `ansible-tower-mcp` with agent-utilities-deployment"**.
 
 | Install mode | Command |
 |------|---------|
-| Bare-metal, prod (PyPI) | `uvx ansible-tower-mcp` · or `uv tool install ansible-tower-mcp` |
-| Bare-metal, dev (editable) | `uv pip install -e ".[all]"` · or `pip install -e ".[all]"` |
-| Container, prod | deploy `knucklessg1/ansible-tower-mcp:latest` via docker-compose / swarm / podman / podman-compose / kubernetes |
-| Container, dev (editable) | deploy `docker/compose.dev.yml` (source-mounted at `/src`; edits live on restart) |
+| Installed package | `uv tool install "ansible-tower-mcp[mcp]"`, then run `ansible-tower-mcp` |
+| Editable source | `uv pip install -e ".[agent]"`, then run `ansible-tower-mcp` |
+| Immutable container | deploy `registry.example.invalid/ansible-tower-mcp@sha256:<digest>` through the operator-selected orchestrator |
 
-Secrets are read-existing + seeded via `vault_sync` — you are only prompted for what's missing.
+The repository embeds no deployment profile, credential value, certificate path, or
+environment-specific endpoint. Supply those at runtime through `AgentConfig` and the
+configured secret provider.
 
-<!-- END agent-os-genesis-deploy -->
+<!-- END agent-utilities-deployment -->
+
+<!-- GOVERNED-CAPABILITY:START -->
+## Governed capability contract
+
+This package ships a compact canonical skill surface with specialist procedures
+kept as referenced workflows. The current MCP tools, skill metadata,
+`connector_manifest.yml`, ontology, mappings, shapes, fixtures, migrations,
+tool-schema fingerprints, and certification metadata form one versioned
+capability contract. Validate them together; do not rely on stale tool names or
+historical per-task skill wrappers.
+
+Runtime endpoints, credentials, certificate trust, tenant identity, retention,
+and observability policy are deployment inputs and are never packaged values.
+See [Configuration, trust, and privacy](docs/configuration.md) before enabling a
+network transport, connector ingestion, GraphOS delegation, or trace export.
+<!-- GOVERNED-CAPABILITY:END -->

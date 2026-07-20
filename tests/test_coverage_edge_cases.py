@@ -1,13 +1,13 @@
 import asyncio
-import importlib
 import inspect
 import json
 import os
 import re
-import sys
 import runpy
+import sys
+from unittest.mock import ANY, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch
 
 import ansible_tower_mcp
 from ansible_tower_mcp.api_client import Api
@@ -37,7 +37,7 @@ def test_lazy_imports():
     ansible_tower_mcp.__dict__.pop("mcp_server", None)
 
     # Lazy load and retrieve an optional module member to cover return getattr(module, name) (line 69)
-    mcp_server_fn = getattr(ansible_tower_mcp, "register_inventory_tools")
+    mcp_server_fn = ansible_tower_mcp.register_inventory_tools
     assert mcp_server_fn is not None
 
     # Test AttributeError
@@ -108,7 +108,7 @@ def test_auth_flows():
                 mock_api_class.assert_called_once_with(
                     base_url="http://test",
                     token="delegated_token_abc", # sanitizer:ignore
-                    verify=False,
+                    tls_profile=ANY,
                 )
 
         # Path 1 Failure Fallback to Username/Password
@@ -132,7 +132,7 @@ def test_auth_flows():
                     base_url="http://test",
                     username="test_user",
                     password="test_password",
-                    verify=False,
+                    tls_profile=ANY,
                 )
 
         # Path 2: OAuth Client Credentials
@@ -152,7 +152,7 @@ def test_auth_flows():
                     base_url="http://test",
                     client_id="client_id_123",
                     client_secret="client_secret_456", # sanitizer:ignore
-                    verify=False,
+                    tls_profile=ANY,
                 )
 
         # Path 3: Username / Password Fallback
@@ -172,7 +172,7 @@ def test_auth_flows():
                     base_url="http://test",
                     username="test_user",
                     password="test_password",
-                    verify=False,
+                    tls_profile=ANY,
                 )
     finally:
         if orig_delegated_auth is not None:
@@ -193,11 +193,15 @@ def test_api_client_base_edge_cases():
     with pytest.raises(ValueError, match="base_url is required"):
         BaseApiClient(base_url=None)
 
-    # 2. Proxy support check
-    client_proxy = BaseApiClient(
-        base_url="http://test", token="abc", proxies={"http": "http://proxy"}
+    # 2. Runtime transport profile is applied to the session.
+    tls_profile = MagicMock()
+    client_profile = BaseApiClient(
+        base_url="http://test", token="abc", tls_profile=tls_profile
     )
-    assert client_proxy.proxies == {"http": "http://proxy"}
+    assert client_profile.tls_profile is tls_profile
+    tls_profile.configure_requests_session.assert_called_once_with(
+        client_profile._session
+    )
 
     # 3. Missing auth credentials validation
     with pytest.raises(ValueError, match="Must provide either a token"):
@@ -535,24 +539,25 @@ def test_api_client_validation_edge_cases():
 
 def test_mcp_server_tools_all_actions():
     from fastmcp import FastMCP
+
     from ansible_tower_mcp.mcp.mcp_server import (
-        register_inventory_tools,
-        register_hosts_tools,
-        register_groups_tools,
-        register_job_templates_tools,
-        register_jobs_tools,
-        register_projects_tools,
-        register_credentials_tools,
-        register_organizations_tools,
-        register_teams_tools,
-        register_users_tools,
-        register_ad_hoc_commands_tools,
-        register_workflow_templates_tools,
-        register_workflow_jobs_tools,
-        register_schedules_tools,
-        register_system_tools,
         get_mcp_instance,
         mcp_server,
+        register_ad_hoc_commands_tools,
+        register_credentials_tools,
+        register_groups_tools,
+        register_hosts_tools,
+        register_inventory_tools,
+        register_job_templates_tools,
+        register_jobs_tools,
+        register_organizations_tools,
+        register_projects_tools,
+        register_schedules_tools,
+        register_system_tools,
+        register_teams_tools,
+        register_users_tools,
+        register_workflow_jobs_tools,
+        register_workflow_templates_tools,
     )
 
     mcp = FastMCP("test_coverage_mcp")
@@ -731,11 +736,12 @@ def test_mcp_server_main():
 def test_mcp_server_import_warning_fallback():
     import importlib
     import sys
+
     import requests.exceptions
 
     has_warning = hasattr(requests.exceptions, "RequestsDependencyWarning")
     if has_warning:
-        orig_warning = getattr(requests.exceptions, "RequestsDependencyWarning")
+        orig_warning = requests.exceptions.RequestsDependencyWarning
         delattr(requests.exceptions, "RequestsDependencyWarning")
     try:
         mcp_module = sys.modules.get("ansible_tower_mcp.mcp.mcp_server")
@@ -743,4 +749,4 @@ def test_mcp_server_import_warning_fallback():
             importlib.reload(mcp_module)
     finally:
         if has_warning:
-            setattr(requests.exceptions, "RequestsDependencyWarning", orig_warning)
+            requests.exceptions.RequestsDependencyWarning = orig_warning

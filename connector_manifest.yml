@@ -259,6 +259,7 @@ sync:
   updated_field: modified
   pagination: null
   doc_type: ansible_job_template
+  tool_schema_sha256: 7c7beacd5edd983e6767f649beb2940e10c2f475965f1a4597b3029f3065d375
   raw:
     server: ansible-tower-mcp
     tool: ansible_tower_job_templates
@@ -280,6 +281,7 @@ sync:
   updated_field: finished
   pagination: null
   doc_type: ansible_job
+  tool_schema_sha256: 6210cf31d32395035041aa4b482dc623429b1d11a54ca39214f5c8cd6c41bac4
   raw:
     server: ansible-tower-mcp
     tool: ansible_tower_jobs
@@ -292,16 +294,19 @@ sync:
     doc_type: ansible_job
 provenance:
   generated_by: scripts/generate_connector_manifests.py
-  generated_at: '2026-07-09T00:00:00Z'
+  generated_at: '2026-07-18T00:00:00Z'
   source_artifacts:
   - ansible_tower_mcp/connectors/mcp_source_presets.json
+  - ansible_tower_mcp/connectors/tool_schema_fingerprints.json
   - ansible_tower_mcp/ontology/ansible.ttl
   integrity:
     algorithm: urdna2015-sha256
     hash: 993ad9429e6ba971145ddeb6a3e6cd4189196179f21ebd2824a8fe4fee4a0369
     triple_count: 100
   signer: ontology-manifest-generator
-  signature: d6fcf9c86afc86149d37d1eed9818d78c81c155698fa9ce4f0db9441ddbfa274
+  signature_algorithm: ed25519
+  signing_public_key: q0Cp7bmQMqJhbofGKKw8xXC6KbFzukBDDke0UYVi8y4
+  signature: vK3FTawFsYQ6Jy0Rhi_5UfVJ2HbQM-cv1AADboKUACLU5qySGyO4JX3gROtae23dXZVwq2q6_cXlBNqSlMK4CQ
 policy:
   pii_fields: {}
   tenant_boundary: null

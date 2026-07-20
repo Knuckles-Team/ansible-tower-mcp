@@ -1,0 +1,31 @@
+schema_version: '1'
+connector: ansible-tower-mcp
+ontology_source: ansible
+sync:
+- preset: ansible-job-templates
+  server: ansible-tower-mcp
+  tool: ansible_tower_job_templates
+  action: list_job_templates
+  records_path: results
+  id_field: id
+  title_field: name
+  text_field: description
+  updated_field: modified
+  doc_type: ansible_job_template
+  tool_schema_sha256: 7c7beacd5edd983e6767f649beb2940e10c2f475965f1a4597b3029f3065d375
+- preset: ansible-jobs
+  server: ansible-tower-mcp
+  tool: ansible_tower_jobs
+  action: list_jobs
+  records_path: results
+  id_field: id
+  title_field: name
+  text_field: status
+  updated_field: finished
+  doc_type: ansible_job
+  tool_schema_sha256: 6210cf31d32395035041aa4b482dc623429b1d11a54ca39214f5c8cd6c41bac4
+governance:
+  default_acl: quarantine
+  identity: opaque-reference
+  tenant: required-at-materialization
+  provenance: required-at-materialization

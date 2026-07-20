@@ -6,7 +6,10 @@ from typing import Any
 from urllib.parse import urljoin
 
 import requests
-import urllib3
+from agent_utilities.core.transport_security import (
+    ResolvedTLSProfile,
+    resolve_tls_profile,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +23,7 @@ class BaseApiClient:
         token: str | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
-        verify: bool = False,
-        proxies: dict[str, str] | None = None,
+        tls_profile: ResolvedTLSProfile | None = None,
     ):
         if not base_url:
             raise ValueError("base_url is required")
@@ -32,14 +34,8 @@ class BaseApiClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self._session = requests.Session()
-        self._session.verify = verify
-        self.proxies = proxies
-
-        if proxies:
-            self._session.proxies = proxies
-
-        if not verify:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        self.tls_profile = tls_profile or resolve_tls_profile("ANSIBLE_TOWER")
+        self.tls_profile.configure_requests_session(self._session)
 
         if (
             not token
@@ -74,9 +70,7 @@ class BaseApiClient:
         )
 
         if response.status_code != 200:
-            raise Exception(
-                f"OAuth authentication failed: {response.status_code} - {response.text}"
-            )
+            raise Exception(f"OAuth authentication failed with HTTP {response.status_code}")
 
         token_info = response.json()
         self.token = token_info.get("access_token")
@@ -113,9 +107,7 @@ class BaseApiClient:
         )
 
         if login_response.status_code >= 400:
-            raise Exception(
-                f"Login failed: {login_response.status_code} - {login_response.text}"
-            )
+            raise Exception(f"Login failed with HTTP {login_response.status_code}")
 
         token_headers = {
             "Content-Type": "application/json",
@@ -179,7 +171,7 @@ class BaseApiClient:
 
         if response.status_code >= 400:
             error_message = (
-                f"Ansible API error: {response.status_code} - {response.text}"
+                f"Ansible API error: {response.status_code}"
             )
             raise Exception(error_message)
 

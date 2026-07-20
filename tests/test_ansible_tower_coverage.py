@@ -103,7 +103,7 @@ def test_api_brute_force(mock_session):
                         del kwargs[param.name]
             method(*pos_args, **kwargs)
         except Exception as e:
-            print(f"Failed calling {name}: {e}")
+            print(f"Operation failed: {type(e).__name__}")
 
 
 def test_mcp_server_coverage(mock_session):
@@ -175,7 +175,7 @@ def test_mcp_server_coverage(mock_session):
 
                         await mcp.call_tool(tool_name, target_params)
                     except Exception as e:
-                        print(f"Tool {tool_name} failed: {e}")
+                        print(f"Operation failed: {type(e).__name__}")
 
             loop = asyncio.new_event_loop()
             loop.run_until_complete(run_tools())

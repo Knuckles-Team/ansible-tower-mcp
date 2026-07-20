@@ -7,6 +7,10 @@ CONCEPT:AU-KG.ingest.list-durable-media.
 
 from __future__ import annotations
 
+import pytest
+from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+
+import ansible_tower_mcp.kg_media as kg_media
 from ansible_tower_mcp.kg_media import ingest_job_log
 
 
@@ -66,6 +70,10 @@ def test_ingest_job_log_noops_on_empty():
     assert store.calls == []
 
 
-def test_ingest_job_log_noops_without_engine():
-    # No injected store + no reachable engine -> clean no-op.
-    assert ingest_job_log(1, "some log") is None
+def test_ingest_job_log_propagates_native_failure(monkeypatch):
+    def fail():
+        raise NativeIngestError("native media store is unavailable")
+
+    monkeypatch.setattr(kg_media, "_native_media_store", fail)
+    with pytest.raises(NativeIngestError, match="unavailable"):
+        ingest_job_log(1, "some log")

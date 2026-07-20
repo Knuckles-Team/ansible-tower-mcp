@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ansible Tower MCP Operations"
+  short_description: "Help with Ansible Tower MCP Operations tasks"
+  default_prompt: "Use $ansible-tower-mcp-operations to complete a governed provider workflow."

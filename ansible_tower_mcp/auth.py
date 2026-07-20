@@ -18,8 +18,9 @@ See ``docs/guides/oauth_sso.md`` in agent-utilities for full details.
 
 import threading
 
-from agent_utilities.base_utilities import get_logger, to_boolean
+from agent_utilities.base_utilities import get_logger
 from agent_utilities.core.config import setting
+from agent_utilities.core.transport_security import resolve_configured_tls_profile
 
 local = threading.local()
 from ansible_tower_mcp.api_client import Api
@@ -37,12 +38,14 @@ def get_client():
     """
     from agent_utilities.mcp.delegated_auth import (
         get_delegated_token,
-        get_user_identity,
         is_delegation_enabled,
     )
 
     base_url = setting("ANSIBLE_BASE_URL")
-    verify = to_boolean(setting("ANSIBLE_VERIFY", False))
+    tls_profile = resolve_configured_tls_profile(
+        "ANSIBLE_TOWER",
+        profile_name=setting("ANSIBLE_TOWER_TLS_PROFILE"),
+    )
 
     # --- Path 1: OIDC Delegation (RFC 8693 Token Exchange) ---
     if is_delegation_enabled():
@@ -50,23 +53,17 @@ def get_client():
             delegated_token = get_delegated_token(
                 audience=setting("AUDIENCE", base_url),
                 scopes=setting("DELEGATED_SCOPES", "api"),
-                verify=verify,
             )
-            identity = get_user_identity()
-            logger.info(
-                "Using OIDC delegated token for Ansible Tower API",
-                extra={
-                    "user_email": identity.get("email"),
-                    "base_url": base_url,
-                },
-            )
+            logger.info("Using OIDC delegated token for Ansible Tower API")
             return Api(
                 base_url=base_url,
                 token=delegated_token,
-                verify=verify,
+                tls_profile=tls_profile,
             )
-        except Exception as e:
-            logger.warning(f"OIDC delegation failed, falling back to credentials: {e}")
+        except Exception:
+            logger.warning(
+                "OIDC delegation failed; trying the configured credential fallback"
+            )
 
     # --- Path 2: OAuth Client Credentials ---
     client_id = setting("ANSIBLE_CLIENT_ID")
@@ -77,7 +74,7 @@ def get_client():
             base_url=base_url,
             client_id=client_id,
             client_secret=client_secret,
-            verify=verify,
+            tls_profile=tls_profile,
         )
 
     # --- Path 3: Username / Password ---
@@ -88,5 +85,5 @@ def get_client():
         base_url=base_url,
         username=username,
         password=password,
-        verify=verify,
+        tls_profile=tls_profile,
     )

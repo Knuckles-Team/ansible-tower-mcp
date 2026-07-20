@@ -1,0 +1,6 @@
+{
+  "connector": "ansible-tower-mcp",
+  "current_ontology_source": "ansible",
+  "migrations": [],
+  "schema_version": "1"
+}

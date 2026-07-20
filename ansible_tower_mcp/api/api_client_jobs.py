@@ -95,7 +95,7 @@ class Api(BaseApiClient):
                     raise ValueError(f"Cannot cancel command in status: {status}")
             except Exception as inner_e:
                 raise Exception(
-                    f"Failed both cancel methods: {e}, then: {inner_e}"
+                    f"Failed both cancel methods: {type(e).__name__}, then: {inner_e}"
                 ) from None
 
     def launch_workflow(

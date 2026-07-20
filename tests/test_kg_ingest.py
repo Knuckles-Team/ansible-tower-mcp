@@ -8,6 +8,9 @@ required), asserting the txn add_node/commit + edge calls and the Ansible Tower 
 
 from __future__ import annotations
 
+import pytest
+from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+
 from ansible_tower_mcp.kg_ingest import (
     ingest_entities,
     ingest_hosts,
@@ -20,6 +23,7 @@ from ansible_tower_mcp.kg_ingest import (
 class _FakeTxn:
     def __init__(self):
         self.nodes = {}
+        self.edges = []
         self.committed = False
 
     def begin(self, graph=None):
@@ -29,33 +33,28 @@ class _FakeTxn:
     def add_node(self, txn, node_id, props):
         self.nodes[node_id] = props
 
+    def add_edge(self, txn, src, dst, props):
+        self.edges.append((src, dst, props))
+
     def commit(self, txn):
         self.committed = True
         return True
 
 
-class _FakeEdges:
-    def __init__(self):
-        self.edges = []
-
-    def add(self, src, dst, props):
-        self.edges.append((src, dst, props))
-
 
 class _FakeClient:
     def __init__(self):
         self.txn = _FakeTxn()
-        self.edges = _FakeEdges()
 
 
 def test_ingest_entities_writes_nodes_and_edges():
     c = _FakeClient()
     res = ingest_entities(
         [
-            {"id": "a", "type": "Job", "name": "j"},
-            {"id": "b", "type": "JobTemplate"},
+            {"id": "a", "node_type": "Job", "name": "j"},
+            {"id": "b", "node_type": "JobTemplate"},
         ],
-        [{"source": "a", "target": "b", "type": "launchedFrom"}],
+        [{"source": "a", "target": "b", "relationship": "launchedFrom"}],
         client=c,
         graph="__commons__",
     )
@@ -65,7 +64,7 @@ def test_ingest_entities_writes_nodes_and_edges():
     # provenance is stamped
     assert c.txn.nodes["a"]["source"] == "ansible-tower-mcp"
     assert c.txn.nodes["a"]["domain"] == "ansible"
-    assert c.edges.edges == [("a", "b", {"type": "launchedFrom"})]
+    assert c.txn.edges == [("a", "b", {"relationship": "launchedFrom"})]
 
 
 def test_ingest_jobs_maps_job_and_links():
@@ -86,19 +85,19 @@ def test_ingest_jobs_maps_job_and_links():
     )
     assert res == {"nodes": 1, "edges": 2}
     node = c.txn.nodes["ansible:job:512"]
-    assert node["type"] == "Job"
+    assert node["node_type"] == "Job"
     assert node["jobStatus"] == "successful"
     assert node["externalToolId"] == "512"
     assert (
         "ansible:job:512",
         "ansible:jobtemplate:7",
-        {"type": "launchedFrom"},
-    ) in c.edges.edges
+        {"relationship": "launchedFrom"},
+    ) in c.txn.edges
     assert (
         "ansible:job:512",
         "ansible:inventory:4",
-        {"type": "usesInventory"},
-    ) in c.edges.edges
+        {"relationship": "usesInventory"},
+    ) in c.txn.edges
 
 
 def test_ingest_job_templates_maps_template_and_project():
@@ -118,13 +117,13 @@ def test_ingest_job_templates_maps_template_and_project():
     )
     assert res == {"nodes": 1, "edges": 2}
     node = c.txn.nodes["ansible:jobtemplate:7"]
-    assert node["type"] == "JobTemplate"
+    assert node["node_type"] == "JobTemplate"
     assert node["playbook"] == "site.yml"
     assert (
         "ansible:jobtemplate:7",
         "ansible:project:5",
-        {"type": "usesProject"},
-    ) in c.edges.edges
+        {"relationship": "usesProject"},
+    ) in c.txn.edges
 
 
 def test_ingest_inventories_and_hosts():
@@ -135,12 +134,12 @@ def test_ingest_inventories_and_hosts():
         graph="__commons__",
     )
     assert inv == {"nodes": 1, "edges": 1}
-    assert c.txn.nodes["ansible:inventory:4"]["type"] == "Inventory"
+    assert c.txn.nodes["ansible:inventory:4"]["node_type"] == "Inventory"
     assert (
         "ansible:inventory:4",
         "ansible:organization:1",
-        {"type": "inOrganization"},
-    ) in c.edges.edges
+        {"relationship": "inOrganization"},
+    ) in c.txn.edges
 
     c2 = _FakeClient()
     hosts = ingest_hosts(
@@ -149,20 +148,18 @@ def test_ingest_inventories_and_hosts():
         graph="__commons__",
     )
     assert hosts == {"nodes": 1, "edges": 1}
-    assert c2.txn.nodes["ansible:host:22"]["type"] == "Host"
+    assert c2.txn.nodes["ansible:host:22"]["node_type"] == "Host"
     assert (
         "ansible:host:22",
         "ansible:inventory:4",
-        {"type": "belongsToInventory"},
-    ) in c2.edges.edges
+        {"relationship": "belongsToInventory"},
+    ) in c2.txn.edges
 
 
-def test_ingest_noops_without_engine():
-    # No injected client + no reachable engine -> clean no-op.
-    assert ingest_entities([{"id": "a", "type": "Job"}]) is None
+def test_ingest_rejects_legacy_structural_fields():
+    with pytest.raises(NativeIngestError, match="canonical node_type"):
+        ingest_entities([{"id": "legacy", "type": "Legacy"}], client=_FakeClient())
 
-
-def test_ingest_empty_is_noop():
-    assert ingest_entities([], client=_FakeClient()) is None
-    assert ingest_jobs([], client=_FakeClient()) is None
-    assert ingest_hosts([], client=_FakeClient()) is None
+def test_ingest_empty_is_rejected():
+    with pytest.raises(NativeIngestError, match="at least one entity"):
+        ingest_entities([], client=_FakeClient())

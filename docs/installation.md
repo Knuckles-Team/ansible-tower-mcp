@@ -49,17 +49,17 @@ uv run ansible-tower-mcp
 
 ## Prebuilt Docker image
 
-A multi-stage, slim image is published on every release (entrypoint
+A multi-stage runtime image is published on every release (entrypoint
 `ansible-tower-mcp`):
 
 ```bash
-docker pull knucklessg1/ansible-tower-mcp:latest
+docker pull example/ansible-tower-mcp@sha256:<digest>
 
 docker run --rm -i \
   -e ANSIBLE_BASE_URL=https://your-tower.example.com \
   -e ANSIBLE_USERNAME=admin \
   -e ANSIBLE_PASSWORD=secret \
-  knucklessg1/ansible-tower-mcp:latest        # stdio transport (default)
+  example/ansible-tower-mcp@sha256:<digest>        # stdio transport (default)
 ```
 
 For an HTTP server with a published port and the agent server, see

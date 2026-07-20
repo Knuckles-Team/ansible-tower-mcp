@@ -48,13 +48,13 @@ xychart-beta
 |-----------|--------|----------|-----------|
 | has_pyproject | 10 | `pyproject.toml and requirements.txt` | Both pyproject.toml and requirements.txt exist, fulfilling mandatory Python proj |
 | project_type_detected | 10 | `Agent-Utilities Ecosystem` | Identified 1 ecosystem marker(s) in dependencies |
-| externalized_prompts | 0 | `/home/apps/workspace/agent-packages/agents/ansible-tower-mcp` | No prompts/ directory found. Prompts may be hardcoded in source. |
+| externalized_prompts | 0 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | No prompts/ directory found. Prompts may be hardcoded in source. |
 | observability | 0 | `dependency list` | No observability tools (logfire, sentry, opentelemetry) found |
 | testing_suite | 10 | `tests dir: True, pytest dep: True` | Tests directory exists, pytest in dependencies |
-| agents_md | 10 | `/home/apps/workspace/agent-packages/agents/ansible-tower-mcp` | AGENTS.md exists with comprehensive content |
-| pre_commit_hooks | 10 | `/home/apps/workspace/agent-packages/agents/ansible-tower-mcp` | Pre-commit configuration found for automated code quality checks |
-| gitignore | 10 | `/home/apps/workspace/agent-packages/agents/ansible-tower-mcp` | .gitignore exists to prevent committing build artifacts and secrets |
-| env_template | 10 | `/home/apps/workspace/agent-packages/agents/ansible-tower-mcp` | Environment template exists for onboarding and secret management |
+| agents_md | 10 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | AGENTS.md exists with comprehensive content |
+| pre_commit_hooks | 10 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | Pre-commit configuration found for automated code quality checks |
+| gitignore | 10 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | .gitignore exists to prevent committing build artifacts and secrets |
+| env_template | 10 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | Environment template exists for onboarding and secret management |
 | protocol_support | 4 | `MCP` | 1 communication protocol(s) detected |
 
 **Findings:**
@@ -71,7 +71,7 @@ xychart-beta
 
 | Criterion | Points | Evidence | Reasoning |
 |-----------|--------|----------|-----------|
-| dependency_freshness | 94 | `source=/home/apps/workspace/agent-packages/agents/ansible-to` | Audited 5 deps (3 installed, 2 constraint-only). 0 major, 2 minor, 0 patch updates |
+| dependency_freshness | 94 | `source=${WORKSPACE_ROOT}/agent-packages/agents/ansible-to` | Audited 5 deps (3 installed, 2 constraint-only). 0 major, 2 minor, 0 patch updates |
 
 **Findings:**
 - Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
@@ -220,7 +220,7 @@ xychart-beta
 
 | Criterion | Points | Evidence | Reasoning |
 |-----------|--------|----------|-----------|
-| ui_detection | -1 | `/home/apps/workspace/agent-packages/agents/ansible-tower-mcp` | No web or terminal UI framework detected. Domain skipped. |
+| ui_detection | -1 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | No web or terminal UI framework detected. Domain skipped. |
 
 ---
 
@@ -233,7 +233,7 @@ xychart-beta
 
 | Criterion | Points | Evidence | Reasoning |
 |-----------|--------|----------|-----------|
-| bumpversion_exists | 20 | `/home/apps/workspace/agent-packages/agents/ansible-tower-mcp` | .bumpversion.cfg found |
+| bumpversion_exists | 20 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | .bumpversion.cfg found |
 | current_version_defined | 20 | `1.16.0` | Current version tracked is 1.16.0 |
 | files_tracked | 20 | `6 files tracked` | Found 6 files tracked in .bumpversion.cfg |
 | version_drift_check | 40 | `0 drifted files` | No version drift detected in codebase files |
@@ -288,7 +288,7 @@ xychart-beta
 | env_var_documentation | 60 | `{"total_vars": 31, "python_vars": 23, "dockerfile_vars": 4, ` | Found 31 unique env vars across 82 occurrences. README documents 4/31. Has .env. |
 
 **Findings:**
-- Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME, ANSIBLE_VERIFY, AUDIENCE, AUTH_TYPE, CREDENTIALSTOOL
+- Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME, ANSIBLE_TOWER_TLS_PROFILE, AUDIENCE, AUTH_TYPE, CREDENTIALSTOOL
 - 8 Python env vars not in .env.example: ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME
 
 ---

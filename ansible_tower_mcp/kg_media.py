@@ -7,9 +7,7 @@ ANSI-coloured playbook output — is stored as a content-addressed **blob** with
 the raw log bytes durable, deduped, and queryable inside the knowledge graph, not just
 a transient API response.
 
-Entirely best-effort and dependency-/engine-guarded: with no agent-utilities KG stack
-or no reachable engine, every entry point **no-ops** (returns ``None``), so the
-connector keeps working with zero KG infrastructure.
+The required native media authority surfaces engine failures explicitly.
 """
 
 from __future__ import annotations
@@ -17,27 +15,18 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from agent_utilities.knowledge_graph.memory.native_ingest import (
+    media_store as _native_media_store,
+)
+
 logger = logging.getLogger("ansible_tower_mcp.kg_media")
 
 _SOURCE = "ansible-tower-mcp"
 
 
-def _media_store(media_store: Any | None = None) -> Any | None:
-    """Return a ``MediaStore`` over a live engine, or ``None`` when unavailable."""
-    if media_store is not None:
-        return media_store
-    try:
-        from agent_utilities.knowledge_graph.memory.native_ingest import (
-            media_store as _ms,
-        )
-    except Exception as e:  # noqa: BLE001 — shared primitive absent
-        logger.debug("KG blob ingest unavailable (import): %s", e)
-        return None
-    try:
-        return _ms()
-    except Exception as e:  # noqa: BLE001 — engine unreachable
-        logger.debug("KG blob ingest: engine unreachable: %s", e)
-        return None
+def _media_store(media_store: Any | None = None) -> Any:
+    """Return the injected store or the required native media authority."""
+    return media_store if media_store is not None else _native_media_store()
 
 
 def ingest_job_log(
@@ -51,16 +40,12 @@ def ingest_job_log(
 ) -> dict[str, Any] | None:
     """Store a job's stdout log as a ``:Blob`` in the knowledge graph.
 
-    Returns ``{asset_id, digest, size_bytes}`` on success, or ``None`` when there is
-    no engine, no log, or the store failed (never raises). ``media_store`` may be
-    injected (tests); otherwise one is built on demand.
+    Returns ``{asset_id, digest, size_bytes}`` on success. Invalid input returns
+    ``None``; engine/store failures propagate.
     """
     if job_id is None or not stdout:
         return None
     store = _media_store(media_store)
-    if store is None:
-        return None
-
     data = stdout.encode("utf-8", "replace") if isinstance(stdout, str) else stdout
     if not data:
         return None
@@ -70,18 +55,14 @@ def ingest_job_log(
         extra["status"] = job_status
     blob_name = name or f"ansible-job-{job_id}.log"
 
-    try:
-        stored = store.store_media(
-            data,
-            media_type="file",
-            mime_type="text/plain",
-            source=source,
-            name=blob_name,
-            extra=extra,
-        )
-    except Exception as e:  # noqa: BLE001 — engine/store failure is non-fatal
-        logger.warning("KG blob ingest: store_media failed: %s", e)
-        return None
+    stored = store.store_media(
+        data,
+        media_type="file",
+        mime_type="text/plain",
+        source=source,
+        name=blob_name,
+        extra=extra,
+    )
     if stored is None:
         return None
 
