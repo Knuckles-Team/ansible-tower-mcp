@@ -23,7 +23,7 @@
       {
         "criterion": "externalized_prompts",
         "points": 0,
-        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp",
+        "evidence": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp",
         "reasoning": "No prompts/ directory found. Prompts may be hardcoded in source."
       },
       {
@@ -41,25 +41,25 @@
       {
         "criterion": "agents_md",
         "points": 10,
-        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/AGENTS.md (5265 bytes)",
+        "evidence": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/AGENTS.md (5265 bytes)",
         "reasoning": "AGENTS.md exists with comprehensive content"
       },
       {
         "criterion": "pre_commit_hooks",
         "points": 10,
-        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.pre-commit-config.yaml",
+        "evidence": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/.pre-commit-config.yaml",
         "reasoning": "Pre-commit configuration found for automated code quality checks"
       },
       {
         "criterion": "gitignore",
         "points": 10,
-        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.gitignore",
+        "evidence": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/.gitignore",
         "reasoning": ".gitignore exists to prevent committing build artifacts and secrets"
       },
       {
         "criterion": "env_template",
         "points": 10,
-        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.env.example",
+        "evidence": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/.env.example",
         "reasoning": "Environment template exists for onboarding and secret management"
       },
       {
@@ -91,7 +91,7 @@
       {
         "criterion": "dependency_freshness",
         "points": 94,
-        "evidence": "source=/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/pyproject.toml total=5 major=0 minor=2 patch=0 not_installed=2",
+        "evidence": "source=${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/pyproject.toml total=5 major=0 minor=2 patch=0 not_installed=2",
         "reasoning": "Audited 5 deps (3 installed, 2 constraint-only). 0 major, 2 minor, 0 patch updates."
       }
     ],
@@ -183,7 +183,7 @@
         "length": 125,
         "complexity": 23,
         "nesting_depth": 15,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py"
       },
       {
         "name": "test_api_brute_force",
@@ -191,7 +191,7 @@
         "length": 71,
         "complexity": 22,
         "nesting_depth": 7,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py"
       },
       {
         "name": "main",
@@ -199,7 +199,7 @@
         "length": 99,
         "complexity": 19,
         "nesting_depth": 4,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py"
       },
       {
         "name": "test_mcp_server_tools_all_actions",
@@ -207,7 +207,7 @@
         "length": 138,
         "complexity": 19,
         "nesting_depth": 3,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
       },
       {
         "name": "get_mcp_instance",
@@ -215,7 +215,7 @@
         "length": 64,
         "complexity": 17,
         "nesting_depth": 1,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py"
       }
     ],
     "top_long": [
@@ -225,7 +225,7 @@
         "length": 167,
         "complexity": 13,
         "nesting_depth": 2,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
       },
       {
         "name": "test_mcp_server_tools_all_actions",
@@ -233,7 +233,7 @@
         "length": 138,
         "complexity": 19,
         "nesting_depth": 3,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
       },
       {
         "name": "main",
@@ -241,7 +241,7 @@
         "length": 125,
         "complexity": 23,
         "nesting_depth": 15,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py"
       },
       {
         "name": "test_api_client_validation_edge_cases",
@@ -249,7 +249,7 @@
         "length": 122,
         "complexity": 3,
         "nesting_depth": 2,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py"
       },
       {
         "name": "main",
@@ -257,13 +257,13 @@
         "length": 99,
         "complexity": 19,
         "nesting_depth": 4,
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py"
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py"
       }
     ],
     "structural_issues": [
       {
         "file": "mcp_server.py",
-        "path": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "path": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "lines": 707,
         "issues": [
           "1 functions with high complexity (worst: get_mcp_instance at 64L, CC=17)",
@@ -337,7 +337,7 @@
     "tests": [
       {
         "name": "test_server_startup",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_startup.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_startup.py",
         "line": 1,
         "length": 12,
         "intent": "unit",
@@ -347,7 +347,7 @@
       },
       {
         "name": "test_api_brute_force",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
         "line": 36,
         "length": 71,
         "intent": "unit",
@@ -357,7 +357,7 @@
       },
       {
         "name": "test_mcp_server_coverage",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
         "line": 109,
         "length": 74,
         "intent": "unit",
@@ -367,7 +367,7 @@
       },
       {
         "name": "test_lazy_imports",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 19,
         "length": 33,
         "intent": "unit",
@@ -377,7 +377,7 @@
       },
       {
         "name": "test_agent_server_cli",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 58,
         "length": 13,
         "intent": "unit",
@@ -387,7 +387,7 @@
       },
       {
         "name": "test_auth_flows",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 77,
         "length": 79,
         "intent": "unit",
@@ -397,7 +397,7 @@
       },
       {
         "name": "test_api_client_base_edge_cases",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 162,
         "length": 167,
         "intent": "unit",
@@ -407,7 +407,7 @@
       },
       {
         "name": "test_api_client_validation_edge_cases",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 335,
         "length": 122,
         "intent": "unit",
@@ -417,7 +417,7 @@
       },
       {
         "name": "test_mcp_server_tools_all_actions",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 463,
         "length": 138,
         "intent": "unit",
@@ -427,7 +427,7 @@
       },
       {
         "name": "test_mcp_server_main",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 607,
         "length": 11,
         "intent": "unit",
@@ -437,7 +437,7 @@
       },
       {
         "name": "test_mcp_server_import_warning_fallback",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 620,
         "length": 18,
         "intent": "integration",
@@ -447,7 +447,7 @@
       },
       {
         "name": "test_api_init",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_basic.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_basic.py",
         "line": 4,
         "length": 4,
         "intent": "unit",
@@ -457,7 +457,7 @@
       },
       {
         "name": "test_ansible_tower_api_brute_force",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
         "line": 32,
         "length": 58,
         "intent": "unit",
@@ -467,7 +467,7 @@
       },
       {
         "name": "test_mcp_server_coverage",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
         "line": 92,
         "length": 75,
         "intent": "unit",
@@ -477,7 +477,7 @@
       },
       {
         "name": "test_agent_server_coverage",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
         "line": 169,
         "length": 11,
         "intent": "unit",
@@ -487,7 +487,7 @@
       },
       {
         "name": "test_concept_parity",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_concept_parity.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_concept_parity.py",
         "line": 58,
         "length": 30,
         "intent": "unit",
@@ -762,11 +762,11 @@
           "detail": "2 modules exceed 500 lines (god modules)",
           "items": [
             {
-              "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+              "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
               "lines": 637
             },
             {
-              "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+              "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
               "lines": 707
             }
           ]
@@ -917,203 +917,203 @@
     "tests_missing_markers": [
       {
         "test_name": "test_server_startup",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_startup.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_startup.py",
         "line": 1
       },
       {
         "test_name": "test_api_brute_force",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
         "line": 36
       },
       {
         "test_name": "test_mcp_server_coverage",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_coverage.py",
         "line": 109
       },
       {
         "test_name": "test_lazy_imports",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 19
       },
       {
         "test_name": "test_agent_server_cli",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 58
       },
       {
         "test_name": "test_auth_flows",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 77
       },
       {
         "test_name": "test_api_client_base_edge_cases",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 162
       },
       {
         "test_name": "test_api_client_validation_edge_cases",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 335
       },
       {
         "test_name": "test_mcp_server_tools_all_actions",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 463
       },
       {
         "test_name": "test_mcp_server_main",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 607
       },
       {
         "test_name": "test_mcp_server_import_warning_fallback",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_coverage_edge_cases.py",
         "line": 620
       },
       {
         "test_name": "test_api_init",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_basic.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_basic.py",
         "line": 4
       },
       {
         "test_name": "test_ansible_tower_api_brute_force",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
         "line": 32
       },
       {
         "test_name": "test_mcp_server_coverage",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
         "line": 92
       },
       {
         "test_name": "test_agent_server_coverage",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_ansible_tower_mcp_brute_force_coverage.py",
         "line": 169
       },
       {
         "test_name": "test_concept_parity",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/tests/test_concept_parity.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/tests/test_concept_parity.py",
         "line": 58
       }
     ],
     "functions_missing_docstrings": [
       {
         "function": "parse_api_client",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
         "line": 33,
         "length": 26
       },
       {
         "function": "parse_mcp_server",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
         "line": 94,
         "length": 41
       },
       {
         "function": "verify_agent",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
         "line": 137,
         "length": 38
       },
       {
         "function": "main",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/verify_api_integration.py",
         "line": 177,
         "length": 99
       },
       {
         "function": "main",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/scripts/validate_a2a_agent.py",
         "line": 11,
         "length": 125
       },
       {
         "function": "register_inventory_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 41,
         "length": 37
       },
       {
         "function": "register_hosts_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 80,
         "length": 37
       },
       {
         "function": "register_groups_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 119,
         "length": 41
       },
       {
         "function": "register_job_templates_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 162,
         "length": 39
       },
       {
         "function": "register_jobs_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 203,
         "length": 39
       },
       {
         "function": "register_projects_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 244,
         "length": 39
       },
       {
         "function": "register_credentials_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 285,
         "length": 39
       },
       {
         "function": "register_organizations_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 326,
         "length": 37
       },
       {
         "function": "register_teams_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 365,
         "length": 37
       },
       {
         "function": "register_users_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 404,
         "length": 37
       },
       {
         "function": "register_ad_hoc_commands_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 443,
         "length": 33
       },
       {
         "function": "register_workflow_templates_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 478,
         "length": 33
       },
       {
         "function": "register_workflow_jobs_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 513,
         "length": 33
       },
       {
         "function": "register_schedules_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 548,
         "length": 37
       },
       {
         "function": "register_system_tools",
-        "file": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
+        "file": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/ansible_tower_mcp/mcp_server.py",
         "line": 587,
         "length": 33
       }
@@ -1261,7 +1261,7 @@
       {
         "criterion": "ui_detection",
         "points": -1,
-        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp",
+        "evidence": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp",
         "reasoning": "No web or terminal UI framework detected. Domain skipped."
       }
     ],
@@ -1279,7 +1279,7 @@
       {
         "criterion": "bumpversion_exists",
         "points": 20,
-        "evidence": "/home/apps/workspace/agent-packages/agents/ansible-tower-mcp/.bumpversion.cfg",
+        "evidence": "${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp/.bumpversion.cfg",
         "reasoning": ".bumpversion.cfg found"
       },
       {
