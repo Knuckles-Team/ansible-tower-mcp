@@ -1,5 +1,6 @@
 ---
 name: ansible-tower-mcp-operations
+skill_type: skill
 description: >-
   Operate ansible-tower-mcp through its governed MCP and GraphOS capabilities, including ansible tower inventory management, ansible tower job execution, ansible tower project scm. Use when a request requires this provider's read, change, automation, ingestion, troubleshooting, or evidence workflows.
 ---
