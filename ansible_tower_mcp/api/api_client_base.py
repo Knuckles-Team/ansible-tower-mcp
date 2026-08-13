@@ -70,7 +70,9 @@ class BaseApiClient:
         )
 
         if response.status_code != 200:
-            raise Exception(f"OAuth authentication failed with HTTP {response.status_code}")
+            raise Exception(
+                f"OAuth authentication failed with HTTP {response.status_code}"
+            )
 
         token_info = response.json()
         self.token = token_info.get("access_token")
@@ -170,9 +172,7 @@ class BaseApiClient:
         )
 
         if response.status_code >= 400:
-            error_message = (
-                f"Ansible API error: {response.status_code}"
-            )
+            error_message = f"Ansible API error: {response.status_code}"
             raise Exception(error_message)
 
         if response.status_code == 204:

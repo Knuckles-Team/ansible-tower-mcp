@@ -35,7 +35,7 @@ def register_inventory_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -78,7 +78,7 @@ def register_hosts_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -121,7 +121,7 @@ def register_groups_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -168,7 +168,7 @@ def register_job_templates_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -213,7 +213,7 @@ def register_jobs_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -258,7 +258,7 @@ def register_projects_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -303,7 +303,7 @@ def register_credentials_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -348,7 +348,7 @@ def register_organizations_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -391,7 +391,7 @@ def register_teams_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -434,7 +434,7 @@ def register_users_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -477,7 +477,7 @@ def register_ad_hoc_commands_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -516,7 +516,7 @@ def register_workflow_templates_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -555,7 +555,7 @@ def register_workflow_jobs_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -594,7 +594,7 @@ def register_schedules_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -637,7 +637,7 @@ def register_system_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
 
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -694,7 +694,7 @@ def register_kg_ingest_tools(mcp: FastMCP):
 
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -702,7 +702,11 @@ def register_kg_ingest_tools(mcp: FastMCP):
         if isinstance(records, dict):
             records = records.get("results", [records])
         result = ingestor(records)
-        return {"resource_type": resource_type, "listed": len(records), "ingested": result}
+        return {
+            "resource_type": resource_type,
+            "listed": len(records),
+            "ingested": result,
+        }
 
     @mcp.tool(tags={"kg_ingest", "kg"})
     async def ansible_ingest_job_log(
@@ -723,7 +727,7 @@ def register_kg_ingest_tools(mcp: FastMCP):
         """
         try:
             kwargs = json.loads(params_json)
-        except Exception as e:
+        except Exception:
             return {"error": "Operation failed"}
         job_id = kwargs.get("job_id")
         if job_id is None:
@@ -736,11 +740,11 @@ def register_kg_ingest_tools(mcp: FastMCP):
         job = client.get_job(job_id)
         stdout_resp = client.get_job_stdout(job_id, format="txt")
         stdout = (
-            stdout_resp.get("stdout")
-            if isinstance(stdout_resp, dict)
-            else stdout_resp
+            stdout_resp.get("stdout") if isinstance(stdout_resp, dict) else stdout_resp
         )
         stored = ingest_job_log(
-            job_id, stdout, job_status=job.get("status") if isinstance(job, dict) else None
+            job_id,
+            stdout,
+            job_status=job.get("status") if isinstance(job, dict) else None,
         )
         return {"job_id": job_id, "stored": stored}
