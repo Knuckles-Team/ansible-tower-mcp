@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ansible-tower-mcp-mcp:
     init: true
@@ -19,7 +17,10 @@ services:
     hostname: ansible-tower-mcp-mcp
     restart: always
     env_file:
-      - ../.env
+      - path: ../.env.example
+        required: true
+      - path: ../.env
+        required: false
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=0.0.0.0

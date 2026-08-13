@@ -8,7 +8,7 @@
     "ansible_tower_mcp/ontology/mappings/source.yaml": "5835e5281fc5edde46ab73d273d48739437872a30c5b60fb61be28b14d011f39",
     "ansible_tower_mcp/ontology/migrations/manifest.json": "95dafbc5f19d2c0ee08e9ecd3bde25d3ad0e5f651438b63ccef4102e013ca052",
     "ansible_tower_mcp/ontology/shapes/connector.shacl.ttl": "40768186c7b784160084f168fdba837c3b8d86099a4930d86bdec97308523569",
-    "connector_manifest.yml": "b1523a9ba49cc9aedf61d6a4b9399b14905a23302b658cf10c8e1fd96c4dc3ec"
+    "connector_manifest.yml": "c67b40d447bcee478f39852284f35d0f2f850f6948f90ede79de2ef5916ee7ca"
   },
   "checks": {
     "declared_tool_schema": "passed",
@@ -18,7 +18,7 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=1.27.1,<2",
+    "agent_utilities": ">=2.1.0,<3",
     "bundle_schema": "2",
     "epistemic_graph": ">=2.23.1,<3"
   },
@@ -27,10 +27,10 @@
   "live_certified": false,
   "mode": "offline-source",
   "schema_version": "2",
-  "signature": "xMUyfffNf0WrLhugiN7iepjA8UCSPkF7NoxfsIrEK2zHah1Kc9oJcyCuFv4HEqXKVEjkxuMVME_he1N6L639Cw",
+  "signature": "kNfDiBuPz0_JZ3EGAxyEJxNQfPEhZJ4UZg4Va-vNBYeaLtY_ktEfug5zXgY0i7excU7y2sCk9xP2Bug0Ru5zCw",
   "signature_algorithm": "ed25519",
   "signer": "ontology-manifest-generator",
-  "signing_public_key": "q0Cp7bmQMqJhbofGKKw8xXC6KbFzukBDDke0UYVi8y4",
+  "signing_public_key": "QkigdPNpcUU7x7NcSkwCsUXIQpaFncMQbYSoiSgI2SY",
   "status": "source-validated",
-  "validated_at": "2026-07-18T00:00:00Z"
+  "validated_at": "2026-07-28T10:14:00Z"
 }

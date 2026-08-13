@@ -97,7 +97,7 @@ def test_auth_flows():
 
         # Path 1: OIDC Delegation
         mock_delegated_auth.is_delegation_enabled.return_value = True
-        mock_delegated_auth.get_delegated_token.return_value = "delegated_token_abc"
+        mock_delegated_auth.get_delegated_token.return_value = "example_delegated_token"
         mock_delegated_auth.get_user_identity.return_value = {"email": "user@test.com"}
 
         with patch.dict(
@@ -107,7 +107,7 @@ def test_auth_flows():
                 _ = get_client()
                 mock_api_class.assert_called_once_with(
                     base_url="http://test",
-                    token="delegated_token_abc", # sanitizer:ignore
+                    token="example_delegated_token",
                     tls_profile=ANY,
                 )
 
@@ -143,7 +143,7 @@ def test_auth_flows():
             {
                 "ANSIBLE_BASE_URL": "http://test",
                 "ANSIBLE_CLIENT_ID": "client_id_123",
-                "ANSIBLE_CLIENT_SECRET": "client_secret_456",
+                "ANSIBLE_CLIENT_SECRET": "example_client_secret",
             },
         ):
             with patch("ansible_tower_mcp.auth.Api") as mock_api_class:
@@ -151,7 +151,7 @@ def test_auth_flows():
                 mock_api_class.assert_called_once_with(
                     base_url="http://test",
                     client_id="client_id_123",
-                    client_secret="client_secret_456", # sanitizer:ignore
+                    client_secret="example_client_secret",
                     tls_profile=ANY,
                 )
 
@@ -749,4 +749,4 @@ def test_mcp_server_import_warning_fallback():
             importlib.reload(mcp_module)
     finally:
         if has_warning:
-            requests.exceptions.RequestsDependencyWarning = orig_warning
+            setattr(requests.exceptions, "RequestsDependencyWarning", orig_warning)

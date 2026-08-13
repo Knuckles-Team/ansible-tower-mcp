@@ -59,6 +59,7 @@ def test_ingest_job_log_stores_blob():
 def test_ingest_job_log_accepts_bytes():
     store = _FakeStore()
     res = ingest_job_log(9, b"raw-bytes", media_store=store)
+    assert res is not None
     assert res["size_bytes"] == len(b"raw-bytes")
     assert store.calls[0]["data"] == b"raw-bytes"
 
