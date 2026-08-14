@@ -8,8 +8,14 @@ required), asserting the txn add_node/commit + edge calls and the Ansible Tower 
 
 from __future__ import annotations
 
+from typing import Any
+
+import msgpack
 import pytest
 from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+from agent_utilities.security.brain_context import ActorContext, use_actor
+from agent_utilities.models.company_brain import ActorType
+from agent_utilities.knowledge_graph.core.session import GraphSession, use_session
 
 from ansible_tower_mcp.kg_ingest import (
     ingest_entities,
@@ -20,31 +26,92 @@ from ansible_tower_mcp.kg_ingest import (
 )
 
 
-class _FakeTxn:
-    def __init__(self):
-        self.nodes = {}
-        self.edges = []
-        self.committed = False
+@pytest.fixture(autouse=True)
+def _governed_session():
+    actor = ActorContext(
+        actor_id="subject:opaque:synthetic",
+        actor_type=ActorType.AUTOMATED_SERVICE,
+        roles=(),
+        tenant_id="tenant:opaque:synthetic",
+        authenticated=True,
+    )
+    session = GraphSession(
+        actor=actor,
+        tenant=actor.tenant_id,
+        scopes=frozenset({"kg:write"}),
+        graph="graph:opaque:synthetic",
+        policy_version="policy:opaque:synthetic",
+        audience="epistemic-graph",
+    )
+    with use_actor(actor), use_session(session):
+        yield
 
-    def begin(self, graph=None):
-        self.graph = graph
-        return "txn-1"
 
-    def add_node(self, txn, node_id, props):
-        self.nodes[node_id] = props
+class _FakeNodes:
+    def __init__(self) -> None:
+        self.values: dict[str, dict[str, Any]] = {}
 
-    def add_edge(self, txn, src, dst, props):
-        self.edges.append((src, dst, props))
+    def properties(self, node_id: str) -> dict[str, Any] | None:
+        return self.values.get(node_id)
 
-    def commit(self, txn):
-        self.committed = True
-        return True
+    def list(self) -> list[tuple[str, dict[str, Any]]]:
+        return list(self.values.items())
 
+
+class _FakeChanges:
+    def __init__(self, nodes: _FakeNodes) -> None:
+        self.nodes = nodes
+        self.edges: list[tuple[str, str, dict[str, Any]]] = []
+        self.applied: list[dict[str, Any]] = []
+        self.records: dict[str, dict[str, Any]] = {}
+        self.versions: dict[str, dict[str, Any]] = {}
+
+    def get(self, envelope_id: str) -> dict[str, Any] | None:
+        return self.records.get(envelope_id)
+
+    def content_version(self, object_id: str) -> dict[str, Any] | None:
+        return self.versions.get(object_id)
+
+    def cursor(self, _source: str, _partition: str = "") -> None:
+        return None
+
+    def apply(self, envelope: dict[str, Any]) -> dict[str, Any]:
+        self.applied.append(envelope)
+        mutation = envelope["mutation"]
+        for operation in mutation["operations"]:
+            method = operation["method"]
+            params = method["params"]
+            properties = msgpack.unpackb(params["properties_msgpack"], raw=False)
+            if method["method"] == "AddNode":
+                self.nodes.values[params["node_id"]] = properties
+            elif method["method"] == "AddEdge":
+                self.edges.append(
+                    (params["source_id"], params["target_id"], properties)
+                )
+        version = envelope["content_version"]
+        self.versions[version["object_id"]] = version
+        self.records[envelope["envelope_id"]] = envelope
+        return {
+            "batch_id": mutation["batch_id"],
+            "replayed": False,
+            "projection_pending": False,
+        }
+
+
+class _FakeRdf:
+    def validate_shacl(self, _shapes: str, _data_graph: str) -> dict[str, Any]:
+        return {"conforms": True, "results": []}
 
 
 class _FakeClient:
-    def __init__(self):
-        self.txn = _FakeTxn()
+    def __init__(self) -> None:
+        self.nodes = _FakeNodes()
+        self.changes = _FakeChanges(self.nodes)
+        self.rdf = _FakeRdf()
+
+    @staticmethod
+    def supports(operation: str) -> bool:
+        return operation == "ApplyChangeEnvelope"
 
 
 def test_ingest_entities_writes_nodes_and_edges():
@@ -56,15 +123,14 @@ def test_ingest_entities_writes_nodes_and_edges():
         ],
         [{"source": "a", "target": "b", "relationship": "launchedFrom"}],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 2, "edges": 1}
-    assert c.txn.committed is True
-    assert set(c.txn.nodes) == {"a", "b"}
+    assert len(c.changes.applied) == 1
+    assert set(c.nodes.values) == {"a", "b"}
     # provenance is stamped
-    assert c.txn.nodes["a"]["source"] == "ansible-tower-mcp"
-    assert c.txn.nodes["a"]["domain"] == "ansible"
-    assert c.txn.edges == [("a", "b", {"relationship": "launchedFrom"})]
+    assert c.nodes.values["a"]["source"] == "ansible-tower-mcp"
+    assert c.nodes.values["a"]["domain"] == "ansible"
+    assert c.changes.edges == [("a", "b", {"relationship": "launchedFrom"})]
 
 
 def test_ingest_jobs_maps_job_and_links():
@@ -81,10 +147,9 @@ def test_ingest_jobs_maps_job_and_links():
             }
         ],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 1, "edges": 2}
-    node = c.txn.nodes["ansible:job:512"]
+    node = c.nodes.values["ansible:job:512"]
     assert node["node_type"] == "Job"
     assert node["jobStatus"] == "successful"
     assert node["externalToolId"] == "512"
@@ -92,12 +157,12 @@ def test_ingest_jobs_maps_job_and_links():
         "ansible:job:512",
         "ansible:jobtemplate:7",
         {"relationship": "launchedFrom"},
-    ) in c.txn.edges
+    ) in c.changes.edges
     assert (
         "ansible:job:512",
         "ansible:inventory:4",
         {"relationship": "usesInventory"},
-    ) in c.txn.edges
+    ) in c.changes.edges
 
 
 def test_ingest_job_templates_maps_template_and_project():
@@ -113,17 +178,16 @@ def test_ingest_job_templates_maps_template_and_project():
             }
         ],
         client=c,
-        graph="__commons__",
     )
     assert res == {"nodes": 1, "edges": 2}
-    node = c.txn.nodes["ansible:jobtemplate:7"]
+    node = c.nodes.values["ansible:jobtemplate:7"]
     assert node["node_type"] == "JobTemplate"
     assert node["playbook"] == "site.yml"
     assert (
         "ansible:jobtemplate:7",
         "ansible:project:5",
         {"relationship": "usesProject"},
-    ) in c.txn.edges
+    ) in c.changes.edges
 
 
 def test_ingest_inventories_and_hosts():
@@ -131,29 +195,27 @@ def test_ingest_inventories_and_hosts():
     inv = ingest_inventories(
         [{"id": 4, "name": "prod", "organization": 1, "total_hosts": 3}],
         client=c,
-        graph="__commons__",
     )
     assert inv == {"nodes": 1, "edges": 1}
-    assert c.txn.nodes["ansible:inventory:4"]["node_type"] == "Inventory"
+    assert c.nodes.values["ansible:inventory:4"]["node_type"] == "Inventory"
     assert (
         "ansible:inventory:4",
         "ansible:organization:1",
         {"relationship": "inOrganization"},
-    ) in c.txn.edges
+    ) in c.changes.edges
 
     c2 = _FakeClient()
     hosts = ingest_hosts(
         [{"id": 22, "name": "web01", "inventory": 4, "enabled": True}],
         client=c2,
-        graph="__commons__",
     )
     assert hosts == {"nodes": 1, "edges": 1}
-    assert c2.txn.nodes["ansible:host:22"]["node_type"] == "Host"
+    assert c2.nodes.values["ansible:host:22"]["node_type"] == "Host"
     assert (
         "ansible:host:22",
         "ansible:inventory:4",
         {"relationship": "belongsToInventory"},
-    ) in c2.txn.edges
+    ) in c2.changes.edges
 
 
 def test_ingest_rejects_legacy_structural_fields():
