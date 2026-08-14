@@ -7,14 +7,13 @@
         "ansible-tower-mcp"
       ],
       "env": {
-        "MCP_TOOL_MODE": "condensed",
+        "MCP_TOOL_MODE": "intent",
         "AD_HOC_COMMANDSTOOL": "True",
         "ANSIBLE_BASE_URL": "https://ansible.example.com",
         "ANSIBLE_CLIENT_ID": "<YOUR_ANSIBLE_CLIENT_ID>",
         "ANSIBLE_CLIENT_SECRET": "<YOUR_ANSIBLE_CLIENT_SECRET>",
         "ANSIBLE_PASSWORD": "<YOUR_ANSIBLE_PASSWORD>",
         "ANSIBLE_USERNAME": "<YOUR_ANSIBLE_USERNAME>",
-        "AUDIENCE": "",
         "CREDENTIALSTOOL": "True",
         "DELEGATED_SCOPES": "api",
         "GROUPSTOOL": "True",
