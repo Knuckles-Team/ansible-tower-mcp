@@ -1,7 +1,6 @@
 {
   "api_version": "graphos.io/v1",
   "artifacts": {
-    "a2a.json": "ad24d48314f642ffb0275883ab2027e66ce082a2da8b38cf378781a1a0e54d17",
     "ansible_tower_mcp/connectors/mcp_source_presets.json": "8fb4ce14eff06664ed76e419654a9603d15f3945b42655afa2cd84db38126b08",
     "ansible_tower_mcp/connectors/tool_schema_fingerprints.json": "2a501c5108f15b8fb04bb18f403a727a3b333dbe6b4f5edde2f1df7b1813f0bc",
     "ansible_tower_mcp/ontology/ansible.ttl": "4adbc6232045fc12eadf3e728d9d2ee10058f7fc8f5d0227d7164db4d4e70a26",
@@ -9,7 +8,7 @@
     "ansible_tower_mcp/ontology/mappings/source.yaml": "5835e5281fc5edde46ab73d273d48739437872a30c5b60fb61be28b14d011f39",
     "ansible_tower_mcp/ontology/migrations/manifest.json": "95dafbc5f19d2c0ee08e9ecd3bde25d3ad0e5f651438b63ccef4102e013ca052",
     "ansible_tower_mcp/ontology/shapes/connector.shacl.ttl": "40768186c7b784160084f168fdba837c3b8d86099a4930d86bdec97308523569",
-    "connector_manifest.yml": "7ad51e077e826df1eed70fd744a85158b31d9af277fd23e5340ae3fe64295550"
+    "connector_manifest.yml": "f54c993a5821a4d2bdfc57adc11bc73b07981b15a136f89b4fa4572d88f1cdcf"
   },
   "checks": {
     "declared_tool_schema": "passed",
@@ -19,19 +18,19 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.1.0,<3",
+    "agent_utilities": ">=2.4.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.23.0,<3"
+    "epistemic_graph": ">=2.26.0,<3"
   },
   "connector": "ansible-tower-mcp",
   "kind": "ConnectorSourceAttestation",
   "live_certified": false,
   "mode": "offline-source",
   "schema_version": "2",
-  "signature": "M1ivs7bMRn3a7BGC7NMBNEuYuY1Neodxo6QlPGJxURwfweUIfRQSMyB4QxLOf7c_lznK4QVyaBxIgPHCmR_-AA",
-  "signature_algorithm": "ed25519",
-  "signer": "ontology-manifest-generator",
-  "signing_public_key": "QkigdPNpcUU7x7NcSkwCsUXIQpaFncMQbYSoiSgI2SY",
+  "signature": null,
+  "signature_algorithm": "none",
+  "signer": "UNSIGNED-PREVIEW",
+  "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-07-31T04:00:00Z"
+  "validated_at": "2026-08-21T04:30:39Z"
 }
