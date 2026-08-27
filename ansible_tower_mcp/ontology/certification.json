@@ -8,7 +8,7 @@
     "ansible_tower_mcp/ontology/mappings/source.yaml": "5835e5281fc5edde46ab73d273d48739437872a30c5b60fb61be28b14d011f39",
     "ansible_tower_mcp/ontology/migrations/manifest.json": "95dafbc5f19d2c0ee08e9ecd3bde25d3ad0e5f651438b63ccef4102e013ca052",
     "ansible_tower_mcp/ontology/shapes/connector.shacl.ttl": "40768186c7b784160084f168fdba837c3b8d86099a4930d86bdec97308523569",
-    "connector_manifest.yml": "f54c993a5821a4d2bdfc57adc11bc73b07981b15a136f89b4fa4572d88f1cdcf"
+    "connector_manifest.yml": "3039fa473e5e27e6f84c96ab889c5d93729562dd70d71ef651993bb1ead5a705"
   },
   "checks": {
     "declared_tool_schema": "passed",
@@ -18,9 +18,9 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.4.0,<3",
+    "agent_utilities": ">=2.5.0,<3",
     "bundle_schema": "2",
-    "epistemic_graph": ">=2.26.0,<3"
+    "epistemic_graph": ">=2.27.0,<3"
   },
   "connector": "ansible-tower-mcp",
   "kind": "ConnectorSourceAttestation",
@@ -32,5 +32,5 @@
   "signer": "UNSIGNED-PREVIEW",
   "signing_public_key": "",
   "status": "source-validated",
-  "validated_at": "2026-08-21T04:30:39Z"
+  "validated_at": "2026-08-26T13:42:55Z"
 }
