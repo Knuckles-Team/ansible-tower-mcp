@@ -9,6 +9,35 @@ from ansible_tower_mcp.auth import get_client
 
 # CONCEPT:AT-OS.config.route-workflow-templates-operations: Ansible Tower Resource API Adapters
 
+# Sentinel distinguishing "params_json was invalid JSON" from a legitimate {}.
+_INVALID_PARAMS_JSON = object()
+
+
+def _parse_action_kwargs(params_json: str):
+    """Parse a tool's `params_json` field into kwargs, dropping `None` values.
+
+    Returns `_INVALID_PARAMS_JSON` if `params_json` is not valid JSON, so
+    callers can distinguish that from a legitimately empty `{}`.
+    """
+    try:
+        kwargs = json.loads(params_json)
+    except Exception:
+        return _INVALID_PARAMS_JSON
+    return {k: v for k, v in kwargs.items() if v is not None}
+
+
+def _run_client_action(client, action: str, kwargs: dict, allowed_actions: frozenset):
+    """Call `client.<action>(**kwargs)` if `action` is on the resource's allow-list.
+
+    Every action name in this API is, by convention, exactly the client
+    method name -- an allow-list (not a raw `getattr`) keeps the dispatch
+    scoped to the resource's own documented operations rather than any
+    attribute the client object happens to expose.
+    """
+    if action not in allowed_actions:
+        raise ValueError(f"Unknown action: {action}")
+    return getattr(client, action)(**kwargs)
+
 
 def register_inventory_tools(mcp: FastMCP):
     """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register inventory tools with FastMCP."""
@@ -96,6 +125,19 @@ def register_hosts_tools(mcp: FastMCP):
         raise ValueError(f"Unknown action: {action}")
 
 
+_GROUPS_ACTIONS = frozenset(
+    {
+        "list_groups",
+        "get_group",
+        "create_group",
+        "update_group",
+        "delete_group",
+        "add_host_to_group",
+        "remove_host_from_group",
+    }
+)
+
+
 def register_groups_tools(mcp: FastMCP):
     """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register group tools with FastMCP."""
 
@@ -119,28 +161,23 @@ def register_groups_tools(mcp: FastMCP):
         if ctx:
             await ctx.info("Executing tool...")
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
+        kwargs = _parse_action_kwargs(params_json)
+        if kwargs is _INVALID_PARAMS_JSON:
             return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        return _run_client_action(client, action, kwargs, _GROUPS_ACTIONS)
 
-        if action == "list_groups":
-            return client.list_groups(**kwargs)
-        if action == "get_group":
-            return client.get_group(**kwargs)
-        if action == "create_group":
-            return client.create_group(**kwargs)
-        if action == "update_group":
-            return client.update_group(**kwargs)
-        if action == "delete_group":
-            return client.delete_group(**kwargs)
-        if action == "add_host_to_group":
-            return client.add_host_to_group(**kwargs)
-        if action == "remove_host_from_group":
-            return client.remove_host_from_group(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+
+_JOB_TEMPLATES_ACTIONS = frozenset(
+    {
+        "list_job_templates",
+        "get_job_template",
+        "create_job_template",
+        "update_job_template",
+        "delete_job_template",
+        "launch_job",
+    }
+)
 
 
 def register_job_templates_tools(mcp: FastMCP):
@@ -166,26 +203,23 @@ def register_job_templates_tools(mcp: FastMCP):
         if ctx:
             await ctx.info("Executing tool...")
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
+        kwargs = _parse_action_kwargs(params_json)
+        if kwargs is _INVALID_PARAMS_JSON:
             return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        return _run_client_action(client, action, kwargs, _JOB_TEMPLATES_ACTIONS)
 
-        if action == "list_job_templates":
-            return client.list_job_templates(**kwargs)
-        if action == "get_job_template":
-            return client.get_job_template(**kwargs)
-        if action == "create_job_template":
-            return client.create_job_template(**kwargs)
-        if action == "update_job_template":
-            return client.update_job_template(**kwargs)
-        if action == "delete_job_template":
-            return client.delete_job_template(**kwargs)
-        if action == "launch_job":
-            return client.launch_job(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+
+_JOBS_ACTIONS = frozenset(
+    {
+        "list_jobs",
+        "get_job",
+        "cancel_job",
+        "relaunch_job",
+        "get_job_events",
+        "get_job_stdout",
+    }
+)
 
 
 def register_jobs_tools(mcp: FastMCP):
@@ -211,26 +245,23 @@ def register_jobs_tools(mcp: FastMCP):
         if ctx:
             await ctx.info("Executing tool...")
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
+        kwargs = _parse_action_kwargs(params_json)
+        if kwargs is _INVALID_PARAMS_JSON:
             return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        return _run_client_action(client, action, kwargs, _JOBS_ACTIONS)
 
-        if action == "list_jobs":
-            return client.list_jobs(**kwargs)
-        if action == "get_job":
-            return client.get_job(**kwargs)
-        if action == "cancel_job":
-            return client.cancel_job(**kwargs)
-        if action == "relaunch_job":
-            return client.relaunch_job(**kwargs)
-        if action == "get_job_events":
-            return client.get_job_events(**kwargs)
-        if action == "get_job_stdout":
-            return client.get_job_stdout(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+
+_PROJECTS_ACTIONS = frozenset(
+    {
+        "list_projects",
+        "get_project",
+        "create_project",
+        "update_project",
+        "delete_project",
+        "sync_project",
+    }
+)
 
 
 def register_projects_tools(mcp: FastMCP):
@@ -256,26 +287,23 @@ def register_projects_tools(mcp: FastMCP):
         if ctx:
             await ctx.info("Executing tool...")
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
+        kwargs = _parse_action_kwargs(params_json)
+        if kwargs is _INVALID_PARAMS_JSON:
             return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        return _run_client_action(client, action, kwargs, _PROJECTS_ACTIONS)
 
-        if action == "list_projects":
-            return client.list_projects(**kwargs)
-        if action == "get_project":
-            return client.get_project(**kwargs)
-        if action == "create_project":
-            return client.create_project(**kwargs)
-        if action == "update_project":
-            return client.update_project(**kwargs)
-        if action == "delete_project":
-            return client.delete_project(**kwargs)
-        if action == "sync_project":
-            return client.sync_project(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+
+_CREDENTIALS_ACTIONS = frozenset(
+    {
+        "list_credentials",
+        "get_credential",
+        "list_credential_types",
+        "create_credential",
+        "update_credential",
+        "delete_credential",
+    }
+)
 
 
 def register_credentials_tools(mcp: FastMCP):
@@ -301,26 +329,11 @@ def register_credentials_tools(mcp: FastMCP):
         if ctx:
             await ctx.info("Executing tool...")
 
-        try:
-            kwargs = json.loads(params_json)
-        except Exception:
+        kwargs = _parse_action_kwargs(params_json)
+        if kwargs is _INVALID_PARAMS_JSON:
             return {"error": "Operation failed"}
 
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-
-        if action == "list_credentials":
-            return client.list_credentials(**kwargs)
-        if action == "get_credential":
-            return client.get_credential(**kwargs)
-        if action == "list_credential_types":
-            return client.list_credential_types(**kwargs)
-        if action == "create_credential":
-            return client.create_credential(**kwargs)
-        if action == "update_credential":
-            return client.update_credential(**kwargs)
-        if action == "delete_credential":
-            return client.delete_credential(**kwargs)
-        raise ValueError(f"Unknown action: {action}")
+        return _run_client_action(client, action, kwargs, _CREDENTIALS_ACTIONS)
 
 
 def register_organizations_tools(mcp: FastMCP):
