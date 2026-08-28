@@ -33,77 +33,109 @@ def mock_session():
         yield session
 
 
+# Each variant is a distinct constructor-kwarg combination that exercises one
+# of Api's supported auth paths (token / username+password / client creds).
+_AUTH_KWARGS_VARIANTS: list[dict[str, str]] = [
+    {"token": "token"},
+    {"username": "u", "password": "p"},
+    {"client_id": "id", "client_secret": "secret"},
+]
+
+# Methods that are infrastructure (auth/pagination), not resource operations,
+# so brute-forcing them with guessed args would not exercise anything new.
+_SKIPPED_API_METHOD_NAMES = frozenset(
+    {"request", "get_token", "get_headers", "handle_pagination"}
+)
+
+
+def _exercise_auth_construction_paths() -> None:
+    """Construct `Api` with each supported auth combo and call get_headers().
+
+    Failures are expected and swallowed -- this only exists to cover the
+    constructor/get_headers branches for each auth path.
+    """
+    for auth_kwargs in _AUTH_KWARGS_VARIANTS:
+        try:
+            client = Api(base_url="http://test.com", **auth_kwargs)
+            client.get_headers()
+        except Exception:
+            pass
+
+
+def _is_introspectable_api_method(name: str) -> bool:
+    """True for a public `Api` method worth brute-force calling for coverage."""
+    return not name.startswith("_") and name not in _SKIPPED_API_METHOD_NAMES
+
+
+def _guess_kwarg_value(param: inspect.Parameter) -> Any:
+    """Guess a plausible test value for one method parameter, by name/annotation."""
+    if "id" in param.name or param.annotation == int:
+        return 123
+    if any(
+        token in param.name for token in ("variables", "extra_vars", "inputs")
+    ):
+        return "{}"
+    if "scm_type" in param.name:
+        return "git"
+    if "enabled" in param.name:
+        return True
+    if param.annotation == dict:
+        return {}
+    return "test"
+
+
+def _guess_kwargs(sig: inspect.Signature) -> dict[str, Any]:
+    """Guess a kwargs dict covering every parameter in `sig` (except **kwargs)."""
+    return {
+        param.name: _guess_kwarg_value(param)
+        for param in sig.parameters.values()
+        if param.name != "kwargs"
+    }
+
+
+def _is_required_positional(param: inspect.Parameter) -> bool:
+    return param.default == inspect.Parameter.empty and param.kind in (
+        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        inspect.Parameter.POSITIONAL_ONLY,
+    )
+
+
+def _split_positional_args(
+    sig: inspect.Signature, kwargs: dict[str, Any]
+) -> list[Any]:
+    """Pull `sig`'s required positional params out of `kwargs` (in place)."""
+    pos_args = []
+    for param in sig.parameters.values():
+        if _is_required_positional(param):
+            pos_args.append(kwargs.get(param.name, "test"))
+            if param.name in kwargs:
+                del kwargs[param.name]
+    return pos_args
+
+
+def _call_with_guessed_args(method) -> None:
+    """Call `method` with values guessed from its signature; swallow failures."""
+    sig = inspect.signature(method)
+    kwargs = _guess_kwargs(sig)
+    try:
+        pos_args = _split_positional_args(sig, kwargs)
+        method(*pos_args, **kwargs)
+    except Exception as e:
+        print(f"Operation failed: {type(e).__name__}")
+
+
 def test_api_brute_force(mock_session):
     _ = mock_session
-    # Test all auth paths
-    try:
-        client = Api(base_url="http://test.com", token="token")
-        client.get_headers()
-    except Exception:
-        pass
-
-    try:
-        client = Api(base_url="http://test.com", username="u", password="p")
-        client.get_headers()
-    except Exception:
-        pass
-
-    try:
-        client = Api(base_url="http://test.com", client_id="id", client_secret="secret")
-        client.get_headers()
-    except Exception:
-        pass
+    _exercise_auth_construction_paths()
 
     client = Api(base_url="http://test.com", token="mock_token")
 
     # Introspect all methods
     for name, method in inspect.getmembers(client, predicate=inspect.ismethod):
-        if name.startswith("_") or name in [
-            "request",
-            "get_token",
-            "get_headers",
-            "handle_pagination",
-        ]:
+        if not _is_introspectable_api_method(name):
             continue
-
         print(f"Calling {name}...")
-        sig = inspect.signature(method)
-        kwargs: dict[str, Any] = {}
-        for param in sig.parameters.values():
-            if param.name == "kwargs":
-                continue
-            # Guessing values
-            if "id" in param.name or param.annotation == int:
-                kwargs[param.name] = 123
-            elif (
-                "variables" in param.name
-                or "extra_vars" in param.name
-                or "inputs" in param.name
-            ):
-                kwargs[param.name] = "{}"
-            elif "scm_type" in param.name:
-                kwargs[param.name] = "git"
-            elif "enabled" in param.name:
-                kwargs[param.name] = True
-            elif param.annotation == dict:
-                kwargs[param.name] = {}
-            else:
-                kwargs[param.name] = "test"
-
-        try:
-            # Handle positional args
-            pos_args = []
-            for param in sig.parameters.values():
-                if param.default == inspect.Parameter.empty and param.kind in (
-                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                    inspect.Parameter.POSITIONAL_ONLY,
-                ):
-                    pos_args.append(kwargs.get(param.name, "test"))
-                    if param.name in kwargs:
-                        del kwargs[param.name]
-            method(*pos_args, **kwargs)
-        except Exception as e:
-            print(f"Operation failed: {type(e).__name__}")
+        _call_with_guessed_args(method)
 
 
 def test_mcp_server_coverage(mock_session):
