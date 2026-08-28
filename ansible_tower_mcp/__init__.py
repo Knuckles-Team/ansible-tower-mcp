@@ -43,30 +43,54 @@ def _import_module_safely(module_name: str):
         return None
 
 
-def __getattr__(name: str) -> Any:
-    # Handle availability flags dynamically without eager imports
-    if name == "_MCP_AVAILABLE":
-        mcp_key = next((k for k in OPTIONAL_MODULES if "mcp_server" in k), None)
-        if mcp_key:
-            return _import_module_safely(mcp_key) is not None
-        return False
-    if name == "_AGENT_AVAILABLE":
-        agent_key = next((k for k in OPTIONAL_MODULES if "agent_server" in k), None)
-        if agent_key:
-            return _import_module_safely(agent_key) is not None
-        return False
+# Maps a dynamic availability-flag attribute to the substring that identifies
+# its backing optional module in OPTIONAL_MODULES.
+_AVAILABILITY_FLAGS = {
+    "_MCP_AVAILABLE": "mcp_server",
+    "_AGENT_AVAILABLE": "agent_server",
+}
 
-    # Check optional modules
+# Sentinel distinguishing "attribute not found" from a legitimate `None` value.
+_ATTRIBUTE_NOT_FOUND = object()
+
+
+def _optional_module_is_available(module_key_substring: str) -> bool:
+    """Report whether the optional module matching the substring can be imported."""
+    module_name = next(
+        (k for k in OPTIONAL_MODULES if module_key_substring in k), None
+    )
+    if module_name is None:
+        return False
+    return _import_module_safely(module_name) is not None
+
+
+def _load_optional_module(module_name: str) -> Any:
+    """Import and cache one optional module, exposing its public members."""
+    if module_name not in _loaded_optional_modules:
+        module = _import_module_safely(module_name)
+        if module is not None:
+            _loaded_optional_modules[module_name] = module
+            _expose_members(module)
+    return _loaded_optional_modules.get(module_name)
+
+
+def _find_optional_module_attribute(name: str) -> Any:
+    """Search every optional module (loading as needed) for `name`."""
     for module_name in OPTIONAL_MODULES:
-        if module_name not in _loaded_optional_modules:
-            module = _import_module_safely(module_name)
-            if module is not None:
-                _loaded_optional_modules[module_name] = module
-                _expose_members(module)
-
-        module = _loaded_optional_modules.get(module_name)
+        module = _load_optional_module(module_name)
         if module is not None and hasattr(module, name):
             return getattr(module, name)
+    return _ATTRIBUTE_NOT_FOUND
+
+
+def __getattr__(name: str) -> Any:
+    # Handle availability flags dynamically without eager imports
+    if name in _AVAILABILITY_FLAGS:
+        return _optional_module_is_available(_AVAILABILITY_FLAGS[name])
+
+    found = _find_optional_module_attribute(name)
+    if found is not _ATTRIBUTE_NOT_FOUND:
+        return found
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
