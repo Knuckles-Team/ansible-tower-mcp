@@ -1,9 +1,9 @@
 {
-  "algorithm": "agent-utilities:mcp-tool-schema-compat:v1",
+  "algorithm": "agent-connector-sdk:mcp-tool-contract-compat:v2",
   "connector": "ansible-tower-mcp",
   "schema_version": "1",
   "tools": {
-    "ansible_tower_job_templates": "7c7beacd5edd983e6767f649beb2940e10c2f475965f1a4597b3029f3065d375",
-    "ansible_tower_jobs": "6210cf31d32395035041aa4b482dc623429b1d11a54ca39214f5c8cd6c41bac4"
+    "ansible_tower_job_templates": "2cc43d1b037a3e7bea3493ebba97b1dbea63dc763722f5bc252c5b978feffe27",
+    "ansible_tower_jobs": "b66e0c7c1687dcdf37018562acfbff75b2e776a398cef86ef6addf9fd05686df"
   }
 }

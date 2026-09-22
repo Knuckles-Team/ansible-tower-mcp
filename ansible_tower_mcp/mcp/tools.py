@@ -1,5 +1,6 @@
 # ansible_tower_mcp/mcp/tools.py
 import json
+from typing import Literal
 
 from fastmcp import Context, FastMCP
 from fastmcp.dependencies import Depends
@@ -185,7 +186,14 @@ def register_job_templates_tools(mcp: FastMCP):
 
     @mcp.tool(tags={"job-templates"})
     async def ansible_tower_job_templates(
-        action: str = Field(
+        action: Literal[
+            "create_job_template",
+            "delete_job_template",
+            "get_job_template",
+            "launch_job",
+            "list_job_templates",
+            "update_job_template",
+        ] = Field(
             description="Action to perform. Must be one of: 'list_job_templates', 'get_job_template', 'create_job_template', 'update_job_template', 'delete_job_template', 'launch_job'"
         ),
         params_json: str = Field(
@@ -227,7 +235,14 @@ def register_jobs_tools(mcp: FastMCP):
 
     @mcp.tool(tags={"jobs"})
     async def ansible_tower_jobs(
-        action: str = Field(
+        action: Literal[
+            "cancel_job",
+            "get_job",
+            "get_job_events",
+            "get_job_stdout",
+            "list_jobs",
+            "relaunch_job",
+        ] = Field(
             description="Action to perform. Must be one of: 'list_jobs', 'get_job', 'cancel_job', 'relaunch_job', 'get_job_events', 'get_job_stdout'"
         ),
         params_json: str = Field(
