@@ -184,7 +184,18 @@ _JOB_TEMPLATES_ACTIONS = frozenset(
 def register_job_templates_tools(mcp: FastMCP):
     """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register job templates tools with FastMCP."""
 
-    @mcp.tool(tags={"job-templates"})
+    @mcp.tool(
+        tags={"job-templates"},
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": True,
+        },
+        meta={
+            "eg.annotations": {"modalities_in": ["text"], "modalities_out": ["text"]}
+        },
+    )
     async def ansible_tower_job_templates(
         action: Literal[
             "create_job_template",
@@ -233,7 +244,18 @@ _JOBS_ACTIONS = frozenset(
 def register_jobs_tools(mcp: FastMCP):
     """CONCEPT:AT-OS.config.route-workflow-templates-operations: Register jobs tools with FastMCP."""
 
-    @mcp.tool(tags={"jobs"})
+    @mcp.tool(
+        tags={"jobs"},
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": True,
+        },
+        meta={
+            "eg.annotations": {"modalities_in": ["text"], "modalities_out": ["text"]}
+        },
+    )
     async def ansible_tower_jobs(
         action: Literal[
             "cancel_job",
