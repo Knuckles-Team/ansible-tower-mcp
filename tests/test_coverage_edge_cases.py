@@ -24,7 +24,8 @@ def test_lazy_imports():
 
     # Test attributes
     assert ansible_tower_mcp._MCP_AVAILABLE is True
-    assert ansible_tower_mcp._AGENT_AVAILABLE is True
+    # agent_server.py retired (EH-480 policy update): always unavailable now.
+    assert ansible_tower_mcp._AGENT_AVAILABLE is False
 
     # Clear optional module cache and globals/sys.modules to trigger the raw lazy load attribute return path
     import sys
@@ -61,25 +62,6 @@ def test_lazy_imports():
 # ==========================================
 # 2. Test Agent Server CLI & Entry Points
 # ==========================================
-
-
-def test_agent_server_cli():
-    with patch("sys.argv", ["agent_server.py", "--debug"]):
-        with patch("agent_utilities.create_agent_server") as mock_server:
-            with (
-                patch("agent_utilities.initialize_workspace"),
-                patch(
-                    "agent_utilities.load_identity", return_value={"name": "Test Agent"}
-                ),
-            ):
-                runpy.run_module("ansible_tower_mcp.agent_server", run_name="__main__")
-                mock_server.assert_called_once()
-                assert mock_server.call_args[1]["debug"] is True
-
-    with patch("sys.argv", ["ansible_tower_mcp"]):
-        with patch("ansible_tower_mcp.agent_server.agent_server") as mock_agent_server:
-            runpy.run_module("ansible_tower_mcp.__main__", run_name="__main__")
-            mock_agent_server.assert_called_once()
 
 
 # ==========================================

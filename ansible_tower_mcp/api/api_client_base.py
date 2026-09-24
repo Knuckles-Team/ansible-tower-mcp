@@ -6,10 +6,8 @@ from typing import Any
 from urllib.parse import urljoin
 
 import requests
-from agent_utilities.core.transport_security import (
-    ResolvedTLSProfile,
-    resolve_tls_profile,
-)
+from agent_connector_sdk.tls.profile import ResolvedTLSProfile
+from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
 logger = logging.getLogger(__name__)
 

@@ -12,7 +12,7 @@ def test_tls_profile_is_strict_and_no_boolean_toggle_is_packaged() -> None:
     auth_source = (ROOT / "ansible_tower_mcp" / "auth.py").read_text(
         encoding="utf-8"
     )
-    assert "resolve_configured_tls_profile" in auth_source
+    assert "resolve_tls_profile" in auth_source
 
     config = json.loads(
         (ROOT / "ansible_tower_mcp" / "mcp_config.json").read_text(

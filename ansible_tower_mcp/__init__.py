@@ -9,7 +9,6 @@ __all__: list[str] = []
 CORE_MODULES: list[str] = ["ansible_tower_mcp.api_client"]
 
 OPTIONAL_MODULES = {
-    "ansible_tower_mcp.agent_server": "agent",
     "ansible_tower_mcp.mcp.mcp_server": "mcp",
 }
 

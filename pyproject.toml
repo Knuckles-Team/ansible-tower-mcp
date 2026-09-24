@@ -9,7 +9,7 @@ description = "Ansible Tower MCP Server for Agentic AI!"
 readme = "README.md"
 classifiers = [ "Development Status :: 5 - Production/Stable", "License :: Public Domain", "Environment :: Console", "Operating System :: POSIX :: Linux", "Programming Language :: Python :: 3",]
 requires-python = ">=3.12, <3.15"
-dependencies = [ "agent-utilities>=2.0.0,<3.0.0",]
+dependencies = [ "agent-connector-sdk>=0.1.0,<1.0.0", "agent-utilities>=2.0.0,<3.0.0",]
 [[project.authors]]
 name = "Project Maintainers"
 email = "maintainers@users.noreply.github.com"
@@ -19,14 +19,12 @@ text = "MIT"
 
 [project.optional-dependencies]
 mcp = [ "agent-utilities[mcp]>=2.0.0,<3.0.0",]
-agent = [ "agent-utilities[agent-runtime,logfire]>=2.0.0,<3.0.0",]
 all = [ "agent-utilities[mcp,agent-runtime,logfire]>=2.0.0,<3.0.0",]
 test = [
     "pytest-xdist>=3.8.0", "pytest>=9.1.1", "pytest-asyncio>=1.4.0", "pytest-cov>=7.1.0",]
 
 [project.scripts]
 ansible-tower-mcp = "ansible_tower_mcp.mcp.mcp_server:mcp_server"
-ansible-tower-agent = "ansible_tower_mcp.agent_server:agent_server"
 
 [project.entry-points."agent_utilities.skill_providers"]
 ansible-tower-mcp = "ansible_tower_mcp.skills"
@@ -47,6 +45,7 @@ members = ["."]
 include-package-data = true
 
 [tool.uv.sources]
+agent-connector-sdk = { path = ".uv-workspace-siblings/agent-connector-sdk", editable = true }
 agent-utilities = { path = ".uv-workspace-siblings/agent-utilities", editable = true }
 
 [tool.uv]
