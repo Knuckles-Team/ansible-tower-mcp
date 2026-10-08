@@ -1,7 +1,7 @@
 # Usage — MCP / API / CLI
 
 `ansible-tower-mcp` exposes the same capability three ways: as **MCP tools** an
-agent calls, as a **Python API** (`Api`) you import, and as a **CLI** that runs
+agent calls, as a **Python API** (`Api`) the operator import, and as a **CLI** that runs
 the server processes. The complete tool surface and the ecosystem role are
 described in [Overview](overview.md).
 
