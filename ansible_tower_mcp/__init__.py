@@ -56,9 +56,7 @@ _ATTRIBUTE_NOT_FOUND = object()
 
 def _optional_module_is_available(module_key_substring: str) -> bool:
     """Report whether the optional module matching the substring can be imported."""
-    module_name = next(
-        (k for k in OPTIONAL_MODULES if module_key_substring in k), None
-    )
+    module_name = next((k for k in OPTIONAL_MODULES if module_key_substring in k), None)
     if module_name is None:
         return False
     return _import_module_safely(module_name) is not None
