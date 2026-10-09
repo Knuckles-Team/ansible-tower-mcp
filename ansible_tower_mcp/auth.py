@@ -16,16 +16,16 @@ Authentication priority:
 See ``docs/guides/oauth_sso.md`` in agent-utilities for full details.
 """
 
+import logging
 import threading
 
-from agent_utilities.base_utilities import get_logger
-from agent_utilities.core.config import setting
-from agent_utilities.core.transport_security import resolve_configured_tls_profile
+from agent_connector_sdk.config import setting
+from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
 local = threading.local()
 from ansible_tower_mcp.api_client import Api
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_client():
@@ -42,7 +42,7 @@ def get_client():
     )
 
     base_url = setting("ANSIBLE_BASE_URL")
-    tls_profile = resolve_configured_tls_profile(
+    tls_profile = resolve_tls_profile(
         "ANSIBLE_TOWER",
         profile_name=setting("ANSIBLE_TOWER_TLS_PROFILE"),
     )

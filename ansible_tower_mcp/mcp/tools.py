@@ -714,7 +714,7 @@ def register_kg_ingest_tools(mcp: FastMCP):
         records = getattr(client, method)(**kwargs)
         if isinstance(records, dict):
             records = records.get("results", [records])
-        result = ingestor(records)
+        result = await ingestor(records)
         return {
             "resource_type": resource_type,
             "listed": len(records),
@@ -755,7 +755,7 @@ def register_kg_ingest_tools(mcp: FastMCP):
         stdout = (
             stdout_resp.get("stdout") if isinstance(stdout_resp, dict) else stdout_resp
         )
-        stored = ingest_job_log(
+        stored = await ingest_job_log(
             job_id,
             stdout,
             job_status=job.get("status") if isinstance(job, dict) else None,

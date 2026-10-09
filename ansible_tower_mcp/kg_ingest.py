@@ -1,83 +1,129 @@
-"""Native epistemic-graph ingestion for Ansible Tower records (typed graph nodes).
+"""Epistemic-graph ingestion for Ansible Tower records (typed graph nodes).
 
-CONCEPT:AU-KG.ingest.enterprise-source-extractor. The package natively pushes its
-Ansible Tower / AWX data into the ONE epistemic-graph knowledge graph as **typed OWL
-nodes** (`:JobTemplate`, `:Job`, `:Inventory`, `:Host`, `:AnsibleProject`, …) + links,
-through the required
-``agent_utilities.knowledge_graph.memory.native_ingest`` authority. Node ids follow
-``ansible:<class>:<extId>``; ``node_type`` matches the classes federated by
-``ansible_tower_mcp.ontology`` (``ansible.ttl``).
+CONCEPT:AU-KG.ingest.enterprise-source-extractor. The package pushes its Ansible
+Tower / AWX data into the ONE epistemic-graph knowledge graph as **typed OWL
+nodes** (`:JobTemplate`, `:Job`, `:Inventory`, `:Host`, `:AnsibleProject`, …) +
+links, through `agent_connector_sdk.ingest` -- the generated `SourceIngest`
+client, not a local ingestion helper. Node ids follow `ansible:<class>:<extId>`;
+`node_type` matches the classes federated by `ansible_tower_mcp.ontology`
+(`ansible.ttl`).
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from agent_utilities.knowledge_graph.memory.native_ingest import (
-    ingest_documents as _native_ingest_documents,
-)
-from agent_utilities.knowledge_graph.memory.native_ingest import (
-    ingest_entities as _native_ingest_entities,
+from agent_connector_sdk.ingest import (
+    ChangeSet,
+    Document,
+    Entity,
+    IngestBinding,
+    IngestError,
+    KnowledgeIngest,
+    Relationship,
+    current_ingest,
 )
 
-_SOURCE = "ansible-tower-mcp"
-_DOMAIN = "ansible"
+_BINDING = IngestBinding(connector="ansible-tower-mcp", stream="ansible")
+
+_ENTITY_RESERVED_KEYS = frozenset({"id", "node_type"})
+_RELATIONSHIP_RESERVED_KEYS = frozenset({"source", "target", "relationship"})
+
+
+def _to_entity(record: dict[str, Any]) -> Entity:
+    return Entity(
+        id=record.get("id"),
+        node_type=record.get("node_type"),
+        properties={
+            key: value
+            for key, value in record.items()
+            if key not in _ENTITY_RESERVED_KEYS
+        },
+    )
+
+
+def _to_relationship(record: dict[str, Any]) -> Relationship:
+    properties = {
+        key: value
+        for key, value in record.items()
+        if key not in _RELATIONSHIP_RESERVED_KEYS
+    }
+    return Relationship(
+        source=record["source"],
+        target=record["target"],
+        relationship=record["relationship"],
+        properties=properties or None,
+    )
 
 
 # --------------------------------------------------------------------------- #
 # Public API — thin mappers (records -> typed entity/relationship dicts).
 # --------------------------------------------------------------------------- #
-def ingest_entities(
+async def ingest_entities(
     entities: list[dict[str, Any]],
     relationships: list[dict[str, Any]] | None = None,
     *,
-    source: str = _SOURCE,
-    domain: str = _DOMAIN,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
-    """Write typed nodes (+ edges) into epistemic-graph via the shared primitive.
+    """Write typed nodes (+ edges) into epistemic-graph via the SDK ingest facade.
 
     ``entities`` use canonical ``node_type`` and relationships use canonical
-    ``relationship``. Engine and validation failures raise ``NativeIngestError``.
+    ``relationship``. A malformed change set or a refused commit raises
+    ``IngestError``.
     """
-    return _native_ingest_entities(
-        entities,
-        relationships,
-        source=source,
-        domain=domain,
-        client=client,
-        graph=graph,
+    if not entities:
+        raise IngestError("ingest_entities needs at least one entity")
+    change_set = ChangeSet(
+        entities=tuple(_to_entity(entity) for entity in entities),
+        relationships=tuple(
+            _to_relationship(relationship) for relationship in relationships or ()
+        ),
     )
+    service = ingest or current_ingest()
+    receipt = await service.submit(_BINDING, change_set)
+    return {"nodes": receipt.affected_count, "edges": receipt.relationship_count}
 
 
-def ingest_documents(
+async def ingest_documents(
     docs: list[dict[str, Any]],
     *,
-    source: str = _SOURCE,
-    domain: str = _DOMAIN,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Write text records (e.g. job stdout) as ``:Document`` nodes for semantic search.
 
     Each doc: ``{"id":..., "text":..., "title"?:..., "source_uri"?:..., ...props}``.
-    Delegates directly to the required native ingestion authority.
     """
-    return _native_ingest_documents(
-        docs, source=source, domain=domain, client=client, graph=graph
+    if not docs:
+        raise IngestError("ingest_documents needs at least one document")
+    change_set = ChangeSet(
+        documents=tuple(
+            Document(
+                id=doc["id"],
+                text=doc["text"],
+                title=doc.get("title"),
+                source_uri=doc.get("source_uri"),
+                properties={
+                    key: value
+                    for key, value in doc.items()
+                    if key not in {"id", "text", "title", "source_uri"}
+                },
+            )
+            for doc in docs
+        )
     )
+    service = ingest or current_ingest()
+    receipt = await service.submit(_BINDING, change_set)
+    return {"nodes": receipt.affected_count, "edges": receipt.relationship_count}
 
 
 def _clean(props: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in props.items() if v is not None}
 
 
-def ingest_job_templates(
+async def ingest_job_templates(
     templates: list[dict[str, Any]],
     *,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Ansible Tower job-template records → ``:JobTemplate`` nodes (+ links)."""
     entities: list[dict[str, Any]] = []
@@ -118,14 +164,13 @@ def ingest_job_templates(
                     "relationship": "usesProject",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
-def ingest_jobs(
+async def ingest_jobs(
     jobs: list[dict[str, Any]],
     *,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Ansible Tower job records → ``:Job`` nodes (+ launchedFrom/usesInventory)."""
     entities: list[dict[str, Any]] = []
@@ -168,14 +213,13 @@ def ingest_jobs(
                     "relationship": "usesInventory",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
-def ingest_inventories(
+async def ingest_inventories(
     inventories: list[dict[str, Any]],
     *,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Ansible Tower inventory records → ``:Inventory`` nodes (+ inOrganization)."""
     entities: list[dict[str, Any]] = []
@@ -206,14 +250,13 @@ def ingest_inventories(
                     "relationship": "inOrganization",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
-def ingest_hosts(
+async def ingest_hosts(
     hosts: list[dict[str, Any]],
     *,
-    client: Any | None = None,
-    graph: str | None = None,
+    ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
     """Map Ansible Tower host records → ``:Host`` nodes (+ belongsToInventory)."""
     entities: list[dict[str, Any]] = []
@@ -244,7 +287,7 @@ def ingest_hosts(
                     "relationship": "belongsToInventory",
                 }
             )
-    return ingest_entities(entities, relationships, client=client, graph=graph)
+    return await ingest_entities(entities, relationships, ingest=ingest)
 
 
 _INGESTORS = {
