@@ -28,6 +28,27 @@ from ansible_tower_mcp.api_client import Api
 logger = logging.getLogger(__name__)
 
 
+def _exchange_delegated_token() -> str:
+    """RFC 8693 Token Exchange via ``agent_connector_sdk.auth.delegation``."""
+    import httpx
+    from agent_connector_sdk.auth.delegation import (
+        DelegationSettings,
+        current_user_token,
+        exchange_token,
+    )
+    from agent_connector_sdk.exceptions import LoginRequiredError
+
+    settings = DelegationSettings.from_settings()
+    subject_token = current_user_token()
+    if not subject_token:
+        raise LoginRequiredError("no verified caller token to delegate")
+    with httpx.Client(timeout=30) as http_client:
+        access_token = exchange_token(
+            settings, subject_token=subject_token, http_client=http_client
+        )
+    return access_token.value
+
+
 def get_client():
     """Create an Ansible Tower API client with the best available auth method.
 
@@ -36,10 +57,7 @@ def get_client():
     Returns a new client on each call (no singleton) because Ansible Tower
     sessions may expire and tools run in independent request contexts.
     """
-    from agent_utilities.mcp.delegated_auth import (
-        get_delegated_token,
-        is_delegation_enabled,
-    )
+    from agent_connector_sdk.auth.delegation import DelegationSettings
 
     base_url = setting("ANSIBLE_BASE_URL")
     tls_profile = resolve_tls_profile(
@@ -48,12 +66,9 @@ def get_client():
     )
 
     # --- Path 1: OIDC Delegation (RFC 8693 Token Exchange) ---
-    if is_delegation_enabled():
+    if DelegationSettings.from_settings().enabled:
         try:
-            delegated_token = get_delegated_token(
-                audience=setting("AUDIENCE", base_url),
-                scopes=setting("DELEGATED_SCOPES", "api"),
-            )
+            delegated_token = _exchange_delegated_token()
             logger.info("Using OIDC delegated token for Ansible Tower API")
             return Api(
                 base_url=base_url,
