@@ -1,80 +1,97 @@
-"""Native epistemic-graph blob ingestion for job logs — Wire-First coverage.
+"""Epistemic-graph blob ingestion for job logs — Wire-First coverage.
 
-Exercises ``ingest_job_log`` with a fake ``MediaStore`` (no engine required),
-asserting the store_media call, byte encoding, and provenance/extra fields.
-CONCEPT:AU-KG.ingest.list-durable-media.
+Exercises ``ingest_job_log`` against a fake ``agent_connector_sdk.ingest``
+transport (no engine required), asserting the stored media asset's bytes,
+mime type, provenance/extra fields, and the asset id/digest returned from the
+commit receipt's raw admissions. CONCEPT:AU-KG.ingest.list-durable-media.
 """
 
 from __future__ import annotations
 
-import pytest
-from agent_utilities.knowledge_graph.memory.native_ingest import NativeIngestError
+from types import SimpleNamespace
+from typing import Any
 
-import ansible_tower_mcp.kg_media as kg_media
+import pytest
+from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
+
 from ansible_tower_mcp.kg_media import ingest_job_log
 
 
-class _Stored:
-    def __init__(self, asset_id, digest):
-        self.asset_id = asset_id
-        self.digest = digest
+class _FakeTransport:
+    def __init__(self) -> None:
+        self.stored_blobs: list[bytes] = []
+        self.requests: list[Any] = []
 
+    async def source_status(self, _connector: str, _stream: str) -> Any:
+        return SimpleNamespace(accepted_checkpoint=None)
 
-class _FakeStore:
-    def __init__(self):
-        self.calls = []
+    async def store_blob(self, data: bytes) -> str:
+        self.stored_blobs.append(data)
+        return "deadbeef"
 
-    def store_media(self, data, *, media_type, mime_type, source, name, extra):
-        self.calls.append(
-            {
-                "data": data,
-                "media_type": media_type,
-                "mime_type": mime_type,
-                "source": source,
-                "name": name,
-                "extra": extra,
-            }
+    async def submit(self, request: Any) -> Any:
+        self.requests.append(request)
+        media_records = [r for r in request.records if r.record_id == "blob:deadbeef"]
+        return SimpleNamespace(
+            affected_count=len(request.records),
+            relationship_count=len(request.relationships),
+            raw_admissions=[
+                SimpleNamespace(
+                    record_id=record.record_id, raw_digest="deadbeef", deduplicated=False
+                )
+                for record in media_records
+            ],
         )
-        return _Stored("asset-1", "deadbeef")
 
 
-def test_ingest_job_log_stores_blob():
-    store = _FakeStore()
-    res = ingest_job_log(
+@pytest.fixture
+def ingest() -> tuple[KnowledgeIngest, _FakeTransport]:
+    transport = _FakeTransport()
+    return KnowledgeIngest(transport, loop=None), transport
+
+
+@pytest.mark.asyncio
+async def test_ingest_job_log_stores_blob(ingest):
+    service, transport = ingest
+    res = await ingest_job_log(
         512,
         "PLAY [all] ***\nok: [web01]\n",
         job_status="successful",
-        media_store=store,
+        ingest=service,
     )
-    assert res == {"asset_id": "asset-1", "digest": "deadbeef", "size_bytes": 27}
-    call = store.calls[0]
-    assert call["media_type"] == "file"
-    assert call["mime_type"] == "text/plain"
-    assert call["source"] == "ansible-tower-mcp"
-    assert call["name"] == "ansible-job-512.log"
-    assert call["extra"] == {"job_id": "512", "status": "successful"}
-    assert isinstance(call["data"], bytes)
+    assert res == {"asset_id": "blob:deadbeef", "digest": "deadbeef", "size_bytes": 27}
+    assert transport.stored_blobs == [b"PLAY [all] ***\nok: [web01]\n"]
+    request = transport.requests[0]
+    media_record = next(r for r in request.records if r.record_id == "blob:deadbeef")
+    assert media_record.payload["mime_type"] == "text/plain"
+    assert media_record.payload["name"] == "ansible-job-512.log"
+    assert media_record.payload["job_id"] == "512"
+    assert media_record.payload["status"] == "successful"
 
 
-def test_ingest_job_log_accepts_bytes():
-    store = _FakeStore()
-    res = ingest_job_log(9, b"raw-bytes", media_store=store)
+@pytest.mark.asyncio
+async def test_ingest_job_log_accepts_bytes(ingest):
+    service, transport = ingest
+    res = await ingest_job_log(9, b"raw-bytes", ingest=service)
     assert res is not None
     assert res["size_bytes"] == len(b"raw-bytes")
-    assert store.calls[0]["data"] == b"raw-bytes"
+    assert transport.stored_blobs == [b"raw-bytes"]
 
 
-def test_ingest_job_log_noops_on_empty():
-    store = _FakeStore()
-    assert ingest_job_log(1, "", media_store=store) is None
-    assert ingest_job_log(None, "x", media_store=store) is None
-    assert store.calls == []
+@pytest.mark.asyncio
+async def test_ingest_job_log_noops_on_empty(ingest):
+    service, transport = ingest
+    assert await ingest_job_log(1, "", ingest=service) is None
+    assert await ingest_job_log(None, "x", ingest=service) is None
+    assert transport.stored_blobs == []
 
 
-def test_ingest_job_log_propagates_native_failure(monkeypatch):
-    def fail():
-        raise NativeIngestError("native media store is unavailable")
+@pytest.mark.asyncio
+async def test_ingest_job_log_propagates_commit_failure():
+    class _FailingTransport(_FakeTransport):
+        async def submit(self, request: Any) -> Any:
+            raise RuntimeError("epistemic-graph is unreachable")
 
-    monkeypatch.setattr(kg_media, "_native_media_store", fail)
-    with pytest.raises(NativeIngestError, match="unavailable"):
-        ingest_job_log(1, "some log")
+    service = KnowledgeIngest(_FailingTransport(), loop=None)
+    with pytest.raises(IngestError):
+        await ingest_job_log(1, "some log", ingest=service)
