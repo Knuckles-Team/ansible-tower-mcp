@@ -88,97 +88,107 @@ def test_agent_server_cli():
 
 
 def test_auth_flows():
-    orig_delegated_auth = sys.modules.get("agent_utilities.mcp.delegated_auth")
-    mock_delegated_auth = MagicMock()
-    sys.modules["agent_utilities.mcp.delegated_auth"] = mock_delegated_auth
+    from types import SimpleNamespace
 
-    try:
-        from ansible_tower_mcp.auth import get_client
+    from ansible_tower_mcp.auth import get_client
 
-        # Path 1: OIDC Delegation
-        mock_delegated_auth.is_delegation_enabled.return_value = True
-        mock_delegated_auth.get_delegated_token.return_value = "example_delegated_token"
-        mock_delegated_auth.get_user_identity.return_value = {"email": "user@test.com"}
+    delegation_settings = "agent_connector_sdk.auth.delegation.DelegationSettings"
 
-        with patch.dict(
-            os.environ, {"ANSIBLE_BASE_URL": "http://test", "ENABLE_DELEGATION": "True"}
-        ):
-            with patch("ansible_tower_mcp.auth.Api") as mock_api_class:
-                _ = get_client()
-                mock_api_class.assert_called_once_with(
-                    base_url="http://test",
-                    token="example_delegated_token",
-                    tls_profile=ANY,
-                )
-
-        # Path 1 Failure Fallback to Username/Password
-        mock_delegated_auth.is_delegation_enabled.return_value = True
-        mock_delegated_auth.get_delegated_token.side_effect = Exception(
-            "Delegation failed"
+    # Path 1: OIDC Delegation
+    with (
+        patch(
+            f"{delegation_settings}.from_settings",
+            return_value=SimpleNamespace(enabled=True),
+        ),
+        patch(
+            "ansible_tower_mcp.auth._exchange_delegated_token",
+            return_value="example_delegated_token",
+        ),
+        patch.dict(os.environ, {"ANSIBLE_BASE_URL": "http://test"}),
+        patch("ansible_tower_mcp.auth.Api") as mock_api_class,
+    ):
+        _ = get_client()
+        mock_api_class.assert_called_once_with(
+            base_url="http://test",
+            token="example_delegated_token",
+            tls_profile=ANY,
         )
 
-        with patch.dict(
+    # Path 1 Failure Fallback to Username/Password
+    with (
+        patch(
+            f"{delegation_settings}.from_settings",
+            return_value=SimpleNamespace(enabled=True),
+        ),
+        patch(
+            "ansible_tower_mcp.auth._exchange_delegated_token",
+            side_effect=Exception("Delegation failed"),
+        ),
+        patch.dict(
             os.environ,
             {
                 "ANSIBLE_BASE_URL": "http://test",
-                "ENABLE_DELEGATION": "True",
                 "ANSIBLE_USERNAME": "test_user",
                 "ANSIBLE_PASSWORD": "test_password",
             },
-        ):
-            with patch("ansible_tower_mcp.auth.Api") as mock_api_class:
-                _ = get_client()
-                mock_api_class.assert_called_once_with(
-                    base_url="http://test",
-                    username="test_user",
-                    password="test_password",
-                    tls_profile=ANY,
-                )
+        ),
+        patch("ansible_tower_mcp.auth.Api") as mock_api_class,
+    ):
+        _ = get_client()
+        mock_api_class.assert_called_once_with(
+            base_url="http://test",
+            username="test_user",
+            password="test_password",
+            tls_profile=ANY,
+        )
 
-        # Path 2: OAuth Client Credentials
-        mock_delegated_auth.is_delegation_enabled.return_value = False
-
-        with patch.dict(
+    # Path 2: OAuth Client Credentials
+    with (
+        patch(
+            f"{delegation_settings}.from_settings",
+            return_value=SimpleNamespace(enabled=False),
+        ),
+        patch.dict(
             os.environ,
             {
                 "ANSIBLE_BASE_URL": "http://test",
                 "ANSIBLE_CLIENT_ID": "client_id_123",
                 "ANSIBLE_CLIENT_SECRET": "example_client_secret",
             },
-        ):
-            with patch("ansible_tower_mcp.auth.Api") as mock_api_class:
-                _ = get_client()
-                mock_api_class.assert_called_once_with(
-                    base_url="http://test",
-                    client_id="client_id_123",
-                    client_secret="example_client_secret",
-                    tls_profile=ANY,
-                )
+        ),
+        patch("ansible_tower_mcp.auth.Api") as mock_api_class,
+    ):
+        _ = get_client()
+        mock_api_class.assert_called_once_with(
+            base_url="http://test",
+            client_id="client_id_123",
+            client_secret="example_client_secret",
+            tls_profile=ANY,
+        )
 
-        # Path 3: Username / Password Fallback
-        mock_delegated_auth.is_delegation_enabled.return_value = False
-
-        with patch.dict(
+    # Path 3: Username / Password Fallback
+    with (
+        patch(
+            f"{delegation_settings}.from_settings",
+            return_value=SimpleNamespace(enabled=False),
+        ),
+        patch.dict(
             os.environ,
             {
                 "ANSIBLE_BASE_URL": "http://test",
                 "ANSIBLE_USERNAME": "test_user",
                 "ANSIBLE_PASSWORD": "test_password",
             },
-        ):
-            with patch("ansible_tower_mcp.auth.Api") as mock_api_class:
-                _ = get_client()
-                mock_api_class.assert_called_once_with(
-                    base_url="http://test",
-                    username="test_user",
-                    password="test_password",
-                    tls_profile=ANY,
-                )
-    finally:
-        if orig_delegated_auth is not None:
-            sys.modules["agent_utilities.mcp.delegated_auth"] = orig_delegated_auth
-        else:
-            sys.modules.pop("agent_utilities.mcp.delegated_auth", None)
+        ),
+        patch("ansible_tower_mcp.auth.Api") as mock_api_class,
+    ):
+        _ = get_client()
+        mock_api_class.assert_called_once_with(
+            base_url="http://test",
+            username="test_user",
+            password="test_password",
+            tls_profile=ANY,
+        )
 
 
 # ==========================================
