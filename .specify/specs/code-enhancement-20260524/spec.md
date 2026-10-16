@@ -19,7 +19,7 @@
 ## Functional Requirements
 
 - **FR-001**: Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
-- **FR-002**: Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
+- **FR-002**: Minor update: agent-connector-sdk 0.2.40 (installed) -> 0.16.0
 - **FR-003**: Needs attention: tools.py (651L) — Low cohesion: 16 distinct concepts in one file
 - **FR-004**: 9 functions with nesting depth >4
 - **FR-005**: 6 tests without assertions
@@ -52,7 +52,7 @@
 - **FR-032**: Only 13% of env vars documented in README.md
 - **FR-033**: Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME, ANSIBLE_TOWER_TLS_PROFILE, AUDIENCE, AUTH_TYPE, CREDENTIALSTOOL
 - **FR-034**: 8 Python env vars not in .env.example: ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSIBLE_CLIENT_SECRET, ANSIBLE_PASSWORD, ANSIBLE_USERNAME
-- **FR-035**: Analysis error: No module named 'agent_utilities.knowledge_graph'
+- **FR-035**: Analysis error: No module named 'agent_connector_sdk.knowledge_graph'
 
 ## Success Criteria
 

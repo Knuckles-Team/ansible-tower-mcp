@@ -9,7 +9,6 @@ __all__: list[str] = []
 CORE_MODULES: list[str] = ["ansible_tower_mcp.api_client"]
 
 OPTIONAL_MODULES = {
-    "ansible_tower_mcp.agent_server": "agent",
     "ansible_tower_mcp.mcp.mcp_server": "mcp",
 }
 
@@ -47,7 +46,6 @@ def _import_module_safely(module_name: str):
 # its backing optional module in OPTIONAL_MODULES.
 _AVAILABILITY_FLAGS = {
     "_MCP_AVAILABLE": "mcp_server",
-    "_AGENT_AVAILABLE": "agent_server",
 }
 
 # Sentinel distinguishing "attribute not found" from a legitimate `None` value.

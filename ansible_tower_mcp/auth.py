@@ -13,7 +13,7 @@ Authentication priority:
 3. **Username / Password** — Falls back to ``ANSIBLE_USERNAME`` and
    ``ANSIBLE_PASSWORD`` with the native token-based auth.
 
-See ``docs/guides/oauth_sso.md`` in agent-utilities for full details.
+See ``docs/guides/oauth_sso.md`` in agent-connector-sdk for full details.
 """
 
 import logging

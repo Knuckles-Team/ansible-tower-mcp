@@ -22,7 +22,7 @@ The base install is intentionally minimal. Install the extra for what the operat
 
 | Extra | Install | Pulls in |
 |---|---|---|
-| `mcp` | `pip install "ansible-tower-mcp[mcp]"` | FastMCP MCP-server runtime (`agent-utilities[mcp]`) |
+| `mcp` | `pip install "ansible-tower-mcp[mcp]"` | FastMCP MCP-server runtime (`agent-connector-sdk`) |
 | `agent` | `pip install "ansible-tower-mcp[agent]"` | Pydantic-AI agent server + Logfire tracing |
 | `all` | `pip install "ansible-tower-mcp[all]"` | Everything above (MCP + agent + Logfire) |
 | `test` | `pip install "ansible-tower-mcp[test]"` | `pytest`, `pytest-asyncio`, `pytest-cov`, `pytest-xdist` |
