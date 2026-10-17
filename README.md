@@ -1,5 +1,5 @@
 # Ansible Tower Mcp
-## CLI or API | MCP | Agent
+## CLI or API | MCP
 
 ![PyPI - Version](https://img.shields.io/pypi/v/ansible-tower-mcp)
 ![MCP Server](https://badge.mcpx.dev?type=server 'MCP Server')
@@ -513,7 +513,6 @@ ansible-tower-agent --provider openai --model-id gpt-4o
 ```
 
 ### Docker Compose Orchestration
-The following `docker/agent.compose.yml` configures the Agent, Web UI, and Terminal Interface together:
 
 ```yaml
 version: '3.8'
@@ -545,7 +544,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  ansible-tower-mcp-agent:
     image: example/ansible-tower-mcp@sha256:<digest>
     container_name: ansible-tower-mcp-agent
     hostname: ansible-tower-mcp-agent
@@ -611,7 +609,6 @@ Pick the extra that matches what the operator want to run:
 | Extra | Installs | Use when |
 |-------|----------|----------|
 | `ansible-tower-mcp[mcp]` | Connector-focused MCP server (`agent-connector-sdk` — FastMCP/FastAPI + `epistemic-graph[full]`) | The operator only run the **MCP server** (smallest install / image) |
-| `ansible-tower-mcp[agent]` | Agent runtime (`agent-connector-sdk` — model orchestration + `epistemic-graph[full]`) | The operator run the **integrated agent** |
 | `ansible-tower-mcp[all]` | Everything (`mcp` + `agent` + `logfire`) | Development / both surfaces |
 
 ```bash
@@ -619,34 +616,28 @@ Pick the extra that matches what the operator want to run:
 uv pip install "ansible-tower-mcp[mcp]"
 
 # Agent runtime (adds model orchestration to the shared graph engine)
-uv pip install "ansible-tower-mcp[agent]"
 
 # Everything (development)
 uv pip install "ansible-tower-mcp[all]"      # or: python -m pip install "ansible-tower-mcp[all]"
 ```
 
-### Container images (`:mcp` vs `:agent`)
+### Container images (`:mcp`)
 
-One multi-stage `docker/Dockerfile` builds two right-sized images, selected by `--target`:
+One multi-stage `docker/Dockerfile` builds the MCP-only image (`--target mcp`):
 
 | Image tag | Build target | Contents | Entrypoint |
 |-----------|--------------|----------|------------|
 | `example/ansible-tower-mcp:mcp` | `--target mcp` | `ansible-tower-mcp[mcp]` — **connector-focused**, includes `epistemic-graph[full]`; no model-orchestration stack | `ansible-tower-mcp` |
-| `example/ansible-tower-mcp@sha256:<digest>` | `--target agent` (default) | `ansible-tower-mcp[agent]` — **agent runtime**, model orchestration + `epistemic-graph[full]` | `ansible-tower-agent` |
 
 ```bash
 docker build --target mcp   -t example/ansible-tower-mcp:mcp    docker/   # connector-focused MCP server
-docker build --target agent -t example/ansible-tower-mcp:agent-local docker/   # agent runtime
 ```
 
-`docker/mcp.compose.yml` runs the connector-focused `:mcp` server; `docker/agent.compose.yml` runs the
 agent (`immutable agent digest`) with a co-located `:mcp` sidecar.
 
 ### Knowledge-graph database (`epistemic-graph`)
 
-Both `[mcp]` and `[agent]` carry the **epistemic-graph** engine through the required
 Agent Connector SDK core dependency (`epistemic-graph[full]`). The `[mcp]` extra keeps
-the server connector-focused; `[agent]` also enables model orchestration. Local
 deployments can use the bundled engine. For production or shared state, run
 **epistemic-graph as a dedicated database service** and configure the runtime to use it.
 Deployment recipes (single-node + Raft HA), connection configuration, and architecture

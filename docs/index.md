@@ -25,7 +25,6 @@ server. It provides:
 - **Action-routed MCP tools** — one consolidated tool per resource domain,
   individually togglable through environment switches to keep the LLM tool
   surface compact.
-- **An A2A agent server** — a graph-routed Pydantic-AI agent (console script
   `ansible-tower-agent`) that calls the MCP tools over an `MCP_URL`.
 
 Authentication resolves automatically across OIDC token delegation, OAuth
