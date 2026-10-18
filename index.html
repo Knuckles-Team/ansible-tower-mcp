@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Ansible Tower / AWX automation API + MCP Server + A2A Agent — a typed control surface for Ansible Automation Platform in the agent-utilities ecosystem.">
+        <meta name="description" content="Ansible Tower / AWX automation API + MCP Server + A2A Agent — a typed control surface for Ansible Automation Platform in the agent-connector-sdk ecosystem.">
       
       
       
@@ -764,7 +764,7 @@
 
 <h1 id="ansible-tower-mcp">ansible-tower-mcp<a class="headerlink" href="#ansible-tower-mcp" title="Permanent link">&para;</a></h1>
 <p>Ansible Tower / AWX automation <strong>API + MCP Server + A2A Agent</strong> for the
-agent-utilities ecosystem — a typed, deterministic control surface for Ansible
+agent-connector-sdk ecosystem — a typed, deterministic control surface for Ansible
 Automation Platform job templates, inventories, jobs, and credentials.</p>
 <div class="admonition info">
 <p class="admonition-title">Official documentation</p>
@@ -785,8 +785,7 @@ server. It provides:</p>
   jobs, projects, credentials, organizations, teams, users, schedules, system).</li>
 <li><strong>Action-routed MCP tools</strong> — one consolidated tool per resource domain,
   individually togglable through environment switches to keep the LLM tool
-  surface compact.</li>
-<li><strong>An A2A agent server</strong> — a graph-routed Pydantic-AI agent (console script
+  surface compact.
   <code>ansible-tower-agent</code>) that calls the MCP tools over an <code>MCP_URL</code>.</li>
 </ul>
 <p>Authentication resolves automatically across OIDC token delegation, OAuth
