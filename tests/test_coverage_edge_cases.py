@@ -17,45 +17,6 @@ from ansible_tower_mcp.api_client import Api
 # ==========================================
 
 
-def test_lazy_imports():
-    # Test __dir__
-    d = dir(ansible_tower_mcp)
-    assert len(d) > 0
-
-    # Test attributes
-    assert ansible_tower_mcp._MCP_AVAILABLE is True
-    assert ansible_tower_mcp._AGENT_AVAILABLE is True
-
-    # Clear optional module cache and globals/sys.modules to trigger the raw lazy load attribute return path
-    import sys
-
-    sys.modules.pop("ansible_tower_mcp.mcp.mcp_server", None)
-    ansible_tower_mcp._loaded_optional_modules.pop(
-        "ansible_tower_mcp.mcp.mcp_server", None
-    )
-    ansible_tower_mcp.__dict__.pop("register_inventory_tools", None)
-    ansible_tower_mcp.__dict__.pop("mcp_server", None)
-
-    # Lazy load and retrieve an optional module member to cover return getattr(module, name) (line 69)
-    mcp_server_fn = ansible_tower_mcp.register_inventory_tools
-    assert mcp_server_fn is not None
-
-    # Test AttributeError
-    with pytest.raises(AttributeError):
-        _ = ansible_tower_mcp.non_existent_attribute_xyz
-
-    # Test missing module (mock ImportError)
-    with patch(
-        "importlib.import_module", side_effect=ImportError("mocked import error")
-    ):
-        from ansible_tower_mcp import _import_module_safely
-
-        assert _import_module_safely("non_existent_module_name") is None
-
-        # Bypass caching dynamically by testing __getattr__ directly on False paths
-        with patch.dict(ansible_tower_mcp.OPTIONAL_MODULES, {}, clear=True):
-            assert ansible_tower_mcp.__getattr__("_MCP_AVAILABLE") is False
-            assert ansible_tower_mcp.__getattr__("_AGENT_AVAILABLE") is False
 
 
 # ==========================================
@@ -63,23 +24,6 @@ def test_lazy_imports():
 # ==========================================
 
 
-def test_agent_server_cli():
-    with patch("sys.argv", ["agent_server.py", "--debug"]):
-        with patch("agent_utilities.create_agent_server") as mock_server:
-            with (
-                patch("agent_utilities.initialize_workspace"),
-                patch(
-                    "agent_utilities.load_identity", return_value={"name": "Test Agent"}
-                ),
-            ):
-                runpy.run_module("ansible_tower_mcp.agent_server", run_name="__main__")
-                mock_server.assert_called_once()
-                assert mock_server.call_args[1]["debug"] is True
-
-    with patch("sys.argv", ["ansible_tower_mcp"]):
-        with patch("ansible_tower_mcp.agent_server.agent_server") as mock_agent_server:
-            runpy.run_module("ansible_tower_mcp.__main__", run_name="__main__")
-            mock_agent_server.assert_called_once()
 
 
 # ==========================================

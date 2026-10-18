@@ -1,5 +1,5 @@
 {
-  "api_version": "graphos.io/v1",
+  "api_version": "arbora.io/v1",
   "artifacts": {
     "ansible_tower_mcp/connectors/mcp_source_presets.json": "8fb4ce14eff06664ed76e419654a9603d15f3945b42655afa2cd84db38126b08",
     "ansible_tower_mcp/connectors/tool_schema_fingerprints.json": "2a501c5108f15b8fb04bb18f403a727a3b333dbe6b4f5edde2f1df7b1813f0bc",
@@ -18,7 +18,7 @@
     "synthetic_fixture_contract": "passed"
   },
   "compatibility": {
-    "agent_utilities": ">=2.5.0,<3",
+    "agent_connector_sdk": ">=2.5.0,<3",
     "bundle_schema": "2",
     "epistemic_graph": ">=2.27.0,<3"
   },

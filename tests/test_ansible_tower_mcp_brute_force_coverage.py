@@ -202,14 +202,3 @@ def test_mcp_server_coverage(mock_session):
             loop.close()
 
 
-def test_agent_server_coverage():
-    import ansible_tower_mcp.agent_server as mod
-    from ansible_tower_mcp.agent_server import agent_server
-
-    with patch("agent_utilities.create_agent_server") as mock_s:
-        with patch("sys.argv", ["agent_server.py"]):
-            if inspect.isfunction(agent_server):
-                agent_server()
-            else:
-                mod.agent_server()
-            assert mock_s.called

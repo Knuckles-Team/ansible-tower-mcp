@@ -18,7 +18,7 @@
 ## Functional Requirements
 
 - **FR-001**: Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0
-- **FR-002**: Minor update: agent-utilities 0.2.40 (installed) -> 0.16.0
+- **FR-002**: Minor update: agent-connector-sdk 0.2.40 (installed) -> 0.16.0
 - **FR-003**: Monolithic: mcp_server.py (707L) — 1 functions with high complexity (worst: get_mcp_instance at 64L, CC=17); Low cohesion: 18 distinct concepts in one file
 - **FR-004**: 9 functions with nesting depth >4
 - **FR-005**: 6 tests without assertions

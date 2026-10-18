@@ -39,7 +39,7 @@ client id / secret pair.
 
 ```python
 from ansible_tower_mcp.api_client import Api
-from agent_utilities.core.transport_security import resolve_configured_tls_profile
+from agent_connector_sdk.core.transport_security import resolve_configured_tls_profile
 
 api = Api(
     base_url="https://your-tower.example.com",

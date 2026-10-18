@@ -63,11 +63,9 @@ Store the real remote URL, outbound identity reference, and TLS-profile referenc
 <!-- END GENERATED: deployment-options -->
 
 This page covers running `ansible-tower-mcp` as a long-lived server: the
-transports, the companion A2A agent server, a Docker Compose stack, putting it
 behind a Caddy reverse proxy, and giving it a DNS name with Technitium.
 
 > `ansible-tower-mcp` ships **two** servers: an **MCP server** (console script
-> `ansible-tower-mcp`) and an **A2A agent server** (console script
 > `ansible-tower-agent`). The MCP server is a typed, deterministic tool surface;
 > the agent server is a graph-routed Pydantic-AI agent that calls those tools
 > over an `MCP_URL`.
@@ -179,7 +177,6 @@ docker compose -f docker/mcp.compose.yml logs -f
 
 ## Run the agent server
 
-The companion **A2A agent server** is the `ansible-tower-agent` console script.
 It is a graph-routed Pydantic-AI agent that connects to the MCP server over
 `MCP_URL` and exposes an AG-UI web interface and an A2A endpoint on its own port
 (default `9012`):
@@ -191,13 +188,11 @@ export MODEL_ID=gpt-4o
 ansible-tower-agent --host 0.0.0.0 --port 9012
 ```
 
-The repo ships [`docker/agent.compose.yml`](https://github.com/Knuckles-Team/ansible-tower-mcp/blob/main/docker/agent.compose.yml),
 which runs the MCP server and the agent server together. The agent service wires
 `MCP_URL` to the MCP container and publishes the agent on `:9012`:
 
 ```yaml
 services:
-  ansible-tower-mcp-agent:
     image: example/ansible-tower-mcp@sha256:<digest>
     container_name: ansible-tower-mcp-agent
     depends_on:
@@ -215,7 +210,6 @@ services:
 ```
 
 ```bash
-docker compose -f docker/agent.compose.yml up -d
 ```
 
 ## Behind a Caddy reverse proxy
