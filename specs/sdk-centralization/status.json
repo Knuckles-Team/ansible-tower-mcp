@@ -2,7 +2,7 @@
   "schema_version": 2,
   "spec_id": "CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION",
   "owner_repo": "ansible-tower-mcp",
-  "delivery_state": "SPECIFIED",
+  "delivery_state": "VERIFIED",
   "requirement_ids": [
     "CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R001",
     "CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R002"
@@ -11,18 +11,28 @@
     {
       "id": "CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R001",
       "title": "Governed HTTP",
-      "delivery_state": "SPECIFIED",
-      "landed_in": [],
-      "verified_by": []
+      "delivery_state": "VERIFIED",
+      "landed_in": [
+        "821085ad8dc6"
+      ],
+      "verified_by": [
+        "tests/test_sdk_centralization.py:15"
+      ]
     },
     {
       "id": "CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R002",
       "title": "Shared pagination",
-      "delivery_state": "LANDED",
+      "delivery_state": "VERIFIED",
       "landed_in": [
+        "821085ad8dc6",
         "e1739fd28b9e"
       ],
-      "verified_by": []
+      "verified_by": [
+        "tests/test_sdk_centralization.py:25",
+        "tests/test_sdk_centralization.py:48",
+        "tests/test_sdk_centralization.py:66",
+        "tests/test_sdk_centralization.py:85"
+      ]
     }
   ]
 }
