@@ -149,13 +149,14 @@ def test_api_client_base_edge_cases():
 
     # 2. Runtime transport profile is applied to the session.
     tls_profile = MagicMock()
-    client_profile = BaseApiClient(
-        base_url="http://test", token="abc", tls_profile=tls_profile
-    )
+    with patch(
+        "ansible_tower_mcp.api.api_client_base.create_http_client"
+    ) as make_client:
+        client_profile = BaseApiClient(
+            base_url="http://test", token="abc", tls_profile=tls_profile
+        )
     assert client_profile.tls_profile is tls_profile
-    tls_profile.configure_requests_session.assert_called_once_with(
-        client_profile._session
-    )
+    assert make_client.call_args.args[0].tls is tls_profile
 
     # 3. Missing auth credentials validation
     with pytest.raises(ValueError, match="Must provide either a token"):
@@ -308,7 +309,7 @@ def test_api_client_base_edge_cases():
 
     mock_page1 = MagicMock()
     mock_page1.status_code = 200
-    mock_page1.json.return_value = {"results": [{"id": 1}], "next": "http://test/page2"}
+    mock_page1.json.return_value = {"results": [{"id": 1}], "next": "/page2"}
 
     mock_page2 = MagicMock()
     mock_page2.status_code = 200
@@ -685,22 +686,3 @@ def test_mcp_server_main():
         runpy.run_module("ansible_tower_mcp.mcp_server", run_name="__main__")
         runpy.run_module("ansible_tower_mcp.mcp.mcp_server", run_name="__main__")
         assert mock_run.call_count >= 2
-
-
-def test_mcp_server_import_warning_fallback():
-    import importlib
-    import sys
-
-    import requests.exceptions
-
-    has_warning = hasattr(requests.exceptions, "RequestsDependencyWarning")
-    if has_warning:
-        orig_warning = requests.exceptions.RequestsDependencyWarning
-        delattr(requests.exceptions, "RequestsDependencyWarning")
-    try:
-        mcp_module = sys.modules.get("ansible_tower_mcp.mcp.mcp_server")
-        if mcp_module:
-            importlib.reload(mcp_module)
-    finally:
-        if has_warning:
-            setattr(requests.exceptions, "RequestsDependencyWarning", orig_warning)

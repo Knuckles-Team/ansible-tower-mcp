@@ -5,7 +5,9 @@ import re
 from typing import Any
 from urllib.parse import urljoin
 
-import requests
+from agent_connector_sdk.http.client import create_http_client
+from agent_connector_sdk.http.options import HttpClientOptions
+from agent_connector_sdk.http.pagination import cursor_target
 from agent_connector_sdk.tls.profile import ResolvedTLSProfile
 from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
@@ -31,9 +33,14 @@ class BaseApiClient:
         self.token = token
         self.client_id = client_id
         self.client_secret = client_secret
-        self._session = requests.Session()
         self.tls_profile = tls_profile or resolve_tls_profile("ANSIBLE_TOWER")
-        self.tls_profile.configure_requests_session(self._session)
+        self._session = create_http_client(
+            HttpClientOptions(
+                base_url=base_url,
+                tls=self.tls_profile,
+                allow_plaintext=base_url.startswith("http://"),
+            )
+        )
 
         if (
             not token
@@ -204,7 +211,15 @@ class BaseApiClient:
                 response = self.request("GET", str(next_url))
             if "results" in response:
                 results.extend(response["results"])
-                next_url = response.get("next")
+                cursor = response.get("next")
+                next_url = (
+                    urljoin(
+                        self.base_url,
+                        cursor_target(str(cursor), base_url=self.base_url),
+                    )
+                    if cursor
+                    else None
+                )
             else:
                 break
         return results
