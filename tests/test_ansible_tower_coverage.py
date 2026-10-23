@@ -10,7 +10,7 @@ from ansible_tower_mcp.api_client import Api
 
 @pytest.fixture
 def mock_session():
-    with patch("requests.Session") as mock_sess:
+    with patch("ansible_tower_mcp.api.api_client_base.create_http_client") as mock_sess:
         session = mock_sess.return_value
 
         # Mock auth response

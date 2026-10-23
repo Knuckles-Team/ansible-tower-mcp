@@ -12,4 +12,4 @@ Read the existing specs first. Extend the spec that owns the behavior. Create a 
 
 ## Local specifications
 
-This repository has no local spec yet.
+- [`CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION`](sdk-centralization/spec.md) — Move HTTP transport and pagination onto the shared SDK.

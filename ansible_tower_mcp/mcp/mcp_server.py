@@ -5,16 +5,6 @@ from fastmcp.utilities.logging import get_logger
 
 # FastMCP Server & Command-Line Interfaces
 
-# Filter RequestsDependencyWarning early to prevent log spam
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    try:
-        from requests.exceptions import RequestsDependencyWarning
-
-        warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
-    except ImportError:
-        pass
-
 warnings.filterwarnings("ignore", message=".*urllib3.*or chardet.*")
 warnings.filterwarnings("ignore", message=".*urllib3.*or charset_normalizer.*")
 
