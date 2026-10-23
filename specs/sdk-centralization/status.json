@@ -18,8 +18,10 @@
     {
       "id": "CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R002",
       "title": "Shared pagination",
-      "delivery_state": "SPECIFIED",
-      "landed_in": [],
+      "delivery_state": "LANDED",
+      "landed_in": [
+        "e1739fd28b9e"
+      ],
       "verified_by": []
     }
   ]
