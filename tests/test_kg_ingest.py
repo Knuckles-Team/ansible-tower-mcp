@@ -71,7 +71,7 @@ async def test_ingest_entities_writes_nodes_and_edges(ingest):
     a_record = next(r for r in request.records if r.record_id == "a")
     assert a_record.payload["name"] == "j"
     assert request.relationships[0].relation_reference.endswith(
-        "resources/Job/relations/launchedFrom"
+        "relations/Job/launchedFrom"
     )
 
 
@@ -97,8 +97,8 @@ async def test_ingest_jobs_maps_job_and_links(ingest):
     assert record.payload["jobStatus"] == "successful"
     assert record.payload["externalToolId"] == "512"
     relation_refs = {r.relation_reference for r in request.relationships}
-    assert any(ref.endswith("relations/launchedFrom") for ref in relation_refs)
-    assert any(ref.endswith("relations/usesInventory") for ref in relation_refs)
+    assert any(ref.endswith("/launchedFrom") for ref in relation_refs)
+    assert any(ref.endswith("/usesInventory") for ref in relation_refs)
 
 
 @pytest.mark.asyncio
@@ -123,7 +123,7 @@ async def test_ingest_job_templates_maps_template_and_project(ingest):
     )
     assert record.payload["playbook"] == "site.yml"
     relation_refs = {r.relation_reference for r in request.relationships}
-    assert any(ref.endswith("relations/usesProject") for ref in relation_refs)
+    assert any(ref.endswith("/usesProject") for ref in relation_refs)
 
 
 @pytest.mark.asyncio
