@@ -1,14 +1,11 @@
 {
   "api_version": "arbora.io/v1",
   "artifacts": {
-    "ansible_tower_mcp/connectors/mcp_source_presets.json": "78313f47c3ac3cfebe2298d695a5e791596c66a2ffa78051bcf504a3e8f45328",
-    "ansible_tower_mcp/connectors/tool_schema_fingerprints.json": "85cf1bdb4c0f9d89bc72ddc8dea922381c6742331fae53dea34ba613c9e2cd73",
     "ansible_tower_mcp/ontology/ansible.ttl": "4adbc6232045fc12eadf3e728d9d2ee10058f7fc8f5d0227d7164db4d4e70a26",
     "ansible_tower_mcp/ontology/fixtures/records.json": "ac007b75fb7682f4820f0ccdd8eb08433f8ebe64b9a72588e45b6d08471839a6",
     "ansible_tower_mcp/ontology/mappings/source.yaml": "5835e5281fc5edde46ab73d273d48739437872a30c5b60fb61be28b14d011f39",
     "ansible_tower_mcp/ontology/migrations/manifest.json": "95dafbc5f19d2c0ee08e9ecd3bde25d3ad0e5f651438b63ccef4102e013ca052",
-    "ansible_tower_mcp/ontology/shapes/connector.shacl.ttl": "40768186c7b784160084f168fdba837c3b8d86099a4930d86bdec97308523569",
-    "connector_manifest.yml": "2ffa78b7d401d3b54d9854ddaf2fc16c535fb61eb61645e3718f3edd683591e5"
+    "ansible_tower_mcp/ontology/shapes/connector.shacl.ttl": "40768186c7b784160084f168fdba837c3b8d86099a4930d86bdec97308523569"
   },
   "checks": {
     "declared_tool_schema": "passed",

@@ -41,9 +41,8 @@
     rdfs:label "Workflow Job Template" ;
     rdfs:comment "A graph of job templates run as a coordinated workflow (ansible_tower_workflow_templates)." .
 
-:Job a owl:Class ;
-    rdfs:label "Job" ;
-    rdfs:comment "A single execution (run) of a Job Template against an Inventory, with a status and stdout log (ansible_tower_jobs)." .
+:Job a owl:Class .
+
 
 :WorkflowJob a owl:Class ;
     rdfs:label "Workflow Job" ;
@@ -53,17 +52,14 @@
     rdfs:label "Ad Hoc Command" ;
     rdfs:comment "A one-off module command run directly against an Inventory (ansible_tower_ad_hoc_commands)." .
 
-:Credential a owl:Class ;
-    rdfs:label "Credential" ;
-    rdfs:comment "A stored secret (machine, SCM, cloud) a job uses to authenticate (ansible_tower_credentials)." .
+:Credential a owl:Class .
 
-:Schedule a owl:Class ;
-    rdfs:label "Schedule" ;
-    rdfs:comment "An rrule-based recurring trigger for a job or workflow template (ansible_tower_schedules)." .
 
-:Team a owl:Class ;
-    rdfs:label "Team" ;
-    rdfs:comment "A group of users within an organization used for RBAC (ansible_tower_teams)." .
+:Schedule a owl:Class .
+
+
+:Team a owl:Class .
+
 
 # --- links (owl:ObjectProperty) ---
 
@@ -169,5 +165,9 @@
     groups, hosts, SCM-backed projects, job and workflow templates, their job
     executions (with status, elapsed, and captured stdout logs), ad hoc commands,
     credentials and schedules — federated into the agent-connector-sdk knowledge-graph
-    hub. Reuses the shared :Document and :Blob classes for job output.""" ;
-    owl:imports <http://knuckles.team/kg> .
+    hub. Reuses the shared :Document and :Blob classes for job output.""" .
+
+# ontology-codemod R3
+<http://knuckles.team/kg#Host> rdfs:subClassOf <http://knuckles.team/kg/infrastructure#Host> .
+<http://knuckles.team/kg#InventoryGroup> rdfs:subClassOf <http://knuckles.team/kg#ResourceGroup> .
+<http://knuckles.team/kg#WorkflowJob> rdfs:subClassOf <http://knuckles.team/kg#Job> .
