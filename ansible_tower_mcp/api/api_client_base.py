@@ -7,11 +7,15 @@ from urllib.parse import urljoin
 
 from agent_connector_sdk.http.client import create_http_client
 from agent_connector_sdk.http.options import HttpClientOptions
-from agent_connector_sdk.http.pagination import cursor_target
+from agent_connector_sdk.httpsupport.pagination import PaginationIterator
 from agent_connector_sdk.tls.profile import ResolvedTLSProfile
 from agent_connector_sdk.tls.resolve import resolve_tls_profile
 
 logger = logging.getLogger(__name__)
+
+#: Bounds on one paginated sweep; the SDK iterator sets ``truncated`` past them.
+_MAX_PAGES = 10_000
+_MAX_PAGINATED_ITEMS = 1_000_000
 
 
 class BaseApiClient:
@@ -198,28 +202,24 @@ class BaseApiClient:
     def handle_pagination(
         self, endpoint: str, params: dict[str, Any] | None = None
     ) -> list[dict[str, Any]]:
-        """Handle paginated results from Ansible API."""
-        results = []
-        next_url: str | None = urljoin(self.base_url, endpoint)
-        first_request = True
+        """Collect every page of an Ansible list endpoint.
 
-        while next_url:
-            if first_request:
-                response = self.request("GET", str(next_url), params=params)
-                first_request = False
-            else:
-                response = self.request("GET", str(next_url))
-            if "results" in response:
-                results.extend(response["results"])
-                cursor = response.get("next")
-                next_url = (
-                    urljoin(
-                        self.base_url,
-                        cursor_target(str(cursor), base_url=self.base_url),
-                    )
-                    if cursor
-                    else None
-                )
-            else:
-                break
-        return results
+        The SDK ``next_url`` iterator follows the body ``next`` link. It refuses
+        a link that leaves the API origin and stops on a repeated link.
+        """
+
+        def fetch(
+            url: str, page_params: dict[str, Any] | None
+        ) -> tuple[Any, dict[str, str]]:
+            return self.request("GET", url, params=page_params), {}
+
+        pages = PaginationIterator(
+            fetch,
+            urljoin(self.base_url, endpoint),
+            mode="next_url",
+            params=params,
+            items_path="results",
+            max_items=_MAX_PAGINATED_ITEMS,
+            max_pages=_MAX_PAGES,
+        )
+        return list(pages)

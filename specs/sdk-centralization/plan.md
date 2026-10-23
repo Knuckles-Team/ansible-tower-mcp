@@ -10,6 +10,7 @@ The SDK retry policy replaces connector-local retry handling.
 ## Implementation units
 
 - `ansible_tower_mcp/api/api_client_base.py`: builds the governed client from the runtime TLS profile.
+- `ansible_tower_mcp/api/api_client_base.py`: `handle_pagination` drives the SDK `PaginationIterator` in `next_url` mode. A sweep stops after 10,000 pages or 1,000,000 records.
 
 ## Interfaces and live integration path
 
