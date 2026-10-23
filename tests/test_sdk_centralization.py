@@ -12,6 +12,7 @@ from agent_connector_sdk.httpsupport.pagination import PaginationOriginError
 from ansible_tower_mcp.api.api_client_base import BaseApiClient
 
 
+@pytest.mark.spec("CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R001")
 def test_api_client_uses_sdk_http_client():
     client = BaseApiClient(base_url="https://tower.example", token="t")
     assert isinstance(client._session, httpx.Client)
@@ -21,6 +22,7 @@ def test_api_client_uses_sdk_http_client():
         assert "import requests" not in text, source
 
 
+@pytest.mark.spec("CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R002")
 def test_pagination_rejects_cross_origin_cursor(monkeypatch):
     client = BaseApiClient(base_url="https://tower.example", token="t")
     pages = iter(
@@ -43,6 +45,7 @@ def _paged_client(monkeypatch, pages: dict[str, dict]) -> tuple[BaseApiClient, l
     return client, calls
 
 
+@pytest.mark.spec("CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R002")
 def test_pagination_follows_relative_and_absolute_next(monkeypatch):
     first = "https://tower.example/api/v2/hosts/"
     second = "https://tower.example/api/v2/hosts/?page=2"
@@ -60,6 +63,7 @@ def test_pagination_follows_relative_and_absolute_next(monkeypatch):
     assert calls == [(first, {"page_size": 1}), (second, None), (third, None)]
 
 
+@pytest.mark.spec("CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R002")
 @pytest.mark.parametrize(
     "next_url",
     [
@@ -78,6 +82,7 @@ def test_pagination_rejects_origin_change(monkeypatch, next_url):
     assert calls == [(first, None)]
 
 
+@pytest.mark.spec("CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION-R002")
 def test_pagination_stops_on_a_repeated_next(monkeypatch):
     first = "https://tower.example/api/v2/hosts/"
     second = "https://tower.example/api/v2/hosts/?page=2"
