@@ -12,10 +12,13 @@
       "title": "Default content",
       "delivery_state": "VERIFIED",
       "landed_in": [
+        "2242ab3f6869",
+        "cd7b5c14d117",
         "e19f9a19843d"
       ],
       "verified_by": [
-        "tests/test_default_content_surfaces.py:15"
+        "tests/test_connector_tool_parity.py:12",
+        "tests/test_default_content_surfaces.py:17"
       ]
     }
   ]

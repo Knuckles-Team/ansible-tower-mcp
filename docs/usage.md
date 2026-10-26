@@ -49,11 +49,11 @@ api = Api(
 )
 
 # Reads
-version = api.get_ansible_version()            # controller version
-stats = api.get_dashboard_stats()              # dashboard counters
-inventories = api.list_inventories()           # paginated records
-templates = api.list_job_templates()           # job templates
-jobs = api.list_jobs()                          # recent jobs
+version = api.get_ansible_version()  # controller version
+stats = api.get_dashboard_stats()  # dashboard counters
+inventories = api.list_inventories()  # paginated records
+templates = api.list_job_templates()  # job templates
+jobs = api.list_jobs()  # recent jobs
 ```
 
 Build a client straight from the environment (resolves OIDC delegation, OAuth,
@@ -61,7 +61,8 @@ or username / password automatically):
 
 ```python
 from ansible_tower_mcp.auth import get_client
-api = get_client()        # reads ANSIBLE_* from the environment / .env
+
+api = get_client()  # reads ANSIBLE_* from the environment / .env
 ```
 
 ### Launching work

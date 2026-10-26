@@ -1,3 +1,5 @@
+from agent_connector_sdk.connector_identity import connector_version
+
 #!/usr/bin/env python
 from ansible_tower_mcp.api.api_client_credentials import Api as CredentialsApi
 from ansible_tower_mcp.api.api_client_groups import Api as GroupsApi
@@ -12,7 +14,7 @@ from ansible_tower_mcp.api.api_client_teams import Api as TeamsApi
 from ansible_tower_mcp.api.api_client_templates import Api as TemplatesApi
 from ansible_tower_mcp.api.api_client_users import Api as UsersApi
 
-__version__ = "3.3.3"
+__version__ = connector_version("ansible_tower_mcp")
 
 
 class Api(

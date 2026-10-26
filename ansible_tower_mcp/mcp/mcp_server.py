@@ -1,6 +1,9 @@
 # ansible_tower_mcp/mcp/mcp_server.py
 import warnings
+from pathlib import Path
 
+from agent_connector_sdk.connector_identity import connector_version
+from agent_connector_sdk.mcp.content import ConnectorContent
 from fastmcp.utilities.logging import get_logger
 
 # FastMCP Server & Command-Line Interfaces
@@ -39,7 +42,7 @@ from ansible_tower_mcp.mcp.tools import (
     register_workflow_templates_tools,
 )
 
-__version__ = "1.16.0"
+__version__ = connector_version("ansible_tower_mcp")
 
 __all__ = [
     "__version__",
@@ -74,8 +77,13 @@ def get_mcp_instance() -> tuple[Any, ...]:
     load_config()
     args, mcp, middlewares = create_mcp_server(
         name="ansible-tower-mcp MCP",
-        version=__version__,
+        version=connector_version("ansible_tower_mcp"),
         instructions="ansible-tower-mcp MCP Server — Condensed Action-Routed Tools.",
+        content=ConnectorContent.for_package(
+            "ansible_tower_mcp",
+            Path(__file__).resolve().parents[1],
+            connector_version("ansible_tower_mcp"),
+        ),
     )
 
     @mcp.custom_route("/health", methods=["GET"])
