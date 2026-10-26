@@ -1,6 +1,6 @@
-# tests/conftest.py
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 # CONCEPT:AT-OS.config.standardized-test-fixtures-mocks: Standardized Test Fixtures and Mocks
 

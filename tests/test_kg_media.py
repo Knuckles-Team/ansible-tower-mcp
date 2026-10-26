@@ -37,7 +37,9 @@ class _FakeTransport:
             relationship_count=len(request.relationships),
             raw_admissions=[
                 SimpleNamespace(
-                    record_id=record.record_id, raw_digest="deadbeef", deduplicated=False
+                    record_id=record.record_id,
+                    raw_digest="deadbeef",
+                    deduplicated=False,
                 )
                 for record in media_records
             ],

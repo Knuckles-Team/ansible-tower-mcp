@@ -9,15 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_tls_profile_is_strict_and_no_boolean_toggle_is_packaged() -> None:
-    auth_source = (ROOT / "ansible_tower_mcp" / "auth.py").read_text(
-        encoding="utf-8"
-    )
+    auth_source = (ROOT / "ansible_tower_mcp" / "auth.py").read_text(encoding="utf-8")
     assert "resolve_tls_profile" in auth_source
 
     config = json.loads(
-        (ROOT / "ansible_tower_mcp" / "mcp_config.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "ansible_tower_mcp" / "mcp_config.json").read_text(encoding="utf-8")
     )
     environment = config["mcpServers"]["ansible-tower-mcp"]["env"]
     assert "MCP_TOOL_MODE" in environment
