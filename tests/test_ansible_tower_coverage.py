@@ -69,17 +69,15 @@ def _is_introspectable_api_method(name: str) -> bool:
 
 def _guess_kwarg_value(param: inspect.Parameter) -> Any:
     """Guess a plausible test value for one method parameter, by name/annotation."""
-    if "id" in param.name or param.annotation == int:
+    if "id" in param.name or param.annotation is int:
         return 123
-    if any(
-        token in param.name for token in ("variables", "extra_vars", "inputs")
-    ):
+    if any(token in param.name for token in ("variables", "extra_vars", "inputs")):
         return "{}"
     if "scm_type" in param.name:
         return "git"
     if "enabled" in param.name:
         return True
-    if param.annotation == dict:
+    if param.annotation is dict:
         return {}
     return "test"
 
@@ -100,9 +98,7 @@ def _is_required_positional(param: inspect.Parameter) -> bool:
     )
 
 
-def _split_positional_args(
-    sig: inspect.Signature, kwargs: dict[str, Any]
-) -> list[Any]:
+def _split_positional_args(sig: inspect.Signature, kwargs: dict[str, Any]) -> list[Any]:
     """Pull `sig`'s required positional params out of `kwargs` (in place)."""
     pos_args = []
     for param in sig.parameters.values():

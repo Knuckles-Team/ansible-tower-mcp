@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-from importlib.metadata import version
 import importlib
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest

@@ -4,12 +4,10 @@ import json
 import os
 import re
 import runpy
-import sys
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
-import ansible_tower_mcp
 from ansible_tower_mcp.api_client import Api
 
 # ==========================================
@@ -17,13 +15,9 @@ from ansible_tower_mcp.api_client import Api
 # ==========================================
 
 
-
-
 # ==========================================
 # 2. Test Agent Server CLI & Entry Points
 # ==========================================
-
-
 
 
 # ==========================================

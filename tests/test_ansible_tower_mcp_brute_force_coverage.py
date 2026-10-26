@@ -51,11 +51,11 @@ def _trigger_auth_flows(api) -> None:
     """Exercise Api's authentication code paths; failures are expected."""
     try:
         api._authenticate_oauth()
-    except:
+    except Exception:
         pass
     try:
         api.get_token()
-    except:
+    except Exception:
         pass
 
 
@@ -63,7 +63,7 @@ def _fill_missing_required_kwargs(sig: inspect.Signature, kwargs: dict) -> None:
     """Add a guessed value for any required parameter `kwargs` is missing."""
     for p_name, p in sig.parameters.items():
         if p.default == inspect.Parameter.empty and p_name not in kwargs:
-            kwargs[p_name] = "test" if p.annotation == str else 1
+            kwargs[p_name] = "test" if p.annotation is str else 1
 
 
 def _build_api_method_kwargs(sig: inspect.Signature) -> dict:
@@ -81,7 +81,7 @@ def _build_api_method_kwargs(sig: inspect.Signature) -> dict:
 def _call_quietly(method, kwargs: dict) -> None:
     try:
         method(**kwargs)
-    except:
+    except Exception:
         pass
 
 
@@ -133,7 +133,7 @@ def _fill_missing_tool_params(sig: inspect.Signature, params: dict) -> None:
         if p.default != inspect.Parameter.empty or p_name in _SKIPPED_TOOL_PARAM_NAMES:
             continue
         if p_name not in params:
-            params[p_name] = "test" if p.annotation == str else 1
+            params[p_name] = "test" if p.annotation is str else 1
 
 
 def _scope_params_to_signature(sig: inspect.Signature, params: dict) -> dict:
@@ -158,7 +158,7 @@ async def _call_tool_quietly(mcp, tool) -> None:
     try:
         params = _build_tool_call_params(inspect.signature(tool.fn))
         await mcp.call_tool(tool.name, params)
-    except:
+    except Exception:
         pass
 
 
@@ -189,9 +189,8 @@ def test_mcp_server_coverage(mock_session):
         return await call_next(context)
 
     with patch.object(RateLimitingMiddleware, "on_request", mock_on_request):
-        with patch("ansible_tower_mcp.auth.get_client") as mock_api:
+        with patch("ansible_tower_mcp.auth.get_client"):
             # Setup mock API methods
-            mock_inst = mock_api.return_value
             # We want tools to succeed or at least not crash
 
             mcp_data = get_mcp_instance()

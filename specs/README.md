@@ -12,4 +12,5 @@ Read the existing specs first. Extend the spec that owns the behavior. Create a 
 
 ## Local specifications
 
+- [`CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT`](connector-content/spec.md) — Packaged connector content surfaces.
 - [`CONN-ANSIBLE-TOWER-MCP-SDK-CENTRALIZATION`](sdk-centralization/spec.md) — Move HTTP transport and pagination onto the shared SDK.

@@ -118,9 +118,7 @@ async def test_ingest_job_templates_maps_template_and_project(ingest):
     )
     assert res == {"nodes": 1, "edges": 2}
     request = transport.requests[0]
-    record = next(
-        r for r in request.records if r.record_id == "ansible:jobtemplate:7"
-    )
+    record = next(r for r in request.records if r.record_id == "ansible:jobtemplate:7")
     assert record.payload["playbook"] == "site.yml"
     relation_refs = {r.relation_reference for r in request.relationships}
     assert any(ref.endswith("/usesProject") for ref in relation_refs)
