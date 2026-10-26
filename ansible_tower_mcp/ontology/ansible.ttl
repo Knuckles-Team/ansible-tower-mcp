@@ -171,3 +171,8 @@
 <http://knuckles.team/kg#Host> rdfs:subClassOf <http://knuckles.team/kg/infrastructure#Host> .
 <http://knuckles.team/kg#InventoryGroup> rdfs:subClassOf <http://knuckles.team/kg#ResourceGroup> .
 <http://knuckles.team/kg#WorkflowJob> rdfs:subClassOf <http://knuckles.team/kg#Job> .
+
+# semantic-core mappings (AUD-001..003; reviewed against public Medulla 2.27.7)
+<http://knuckles.team/kg#JobTemplate> rdfs:subClassOf <http://knuckles.team/kg#Template> .
+<http://knuckles.team/kg#WorkflowJobTemplate> rdfs:subClassOf <http://knuckles.team/kg#WorkflowDefinition> .
+<http://knuckles.team/kg#AdHocCommand> rdfs:subClassOf <http://knuckles.team/kg#ActionInvocation> .
