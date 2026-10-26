@@ -3,6 +3,7 @@ import os
 import ast
 import glob
 import sys
+from typing import TypeGuard
 
 BASELINES = {
     "adguard-home-agent": 89.2,
@@ -35,7 +36,9 @@ def _is_api_client_class(node: ast.ClassDef) -> bool:
     return "api" in class_name or "client" in class_name or node.name == "Api"
 
 
-def _is_public_client_method(item) -> bool:
+def _is_public_client_method(
+    item: ast.stmt,
+) -> TypeGuard[ast.FunctionDef | ast.AsyncFunctionDef]:
     return (
         isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
         and not item.name.startswith("_")
@@ -239,9 +242,7 @@ def _discover_agent_dirs(agents_dir: str) -> list:
         d
         for d in all_agent_dirs
         # Avoid directories starting with dot or venv
-        if not (
-            os.path.basename(d).startswith(".") or "venv" in d or "egg-info" in d
-        )
+        if not (os.path.basename(d).startswith(".") or "venv" in d or "egg-info" in d)
     ]
 
 

@@ -4,6 +4,11 @@ import importlib
 import inspect
 from typing import Any
 
+from agent_connector_sdk.connector import Connector
+
+from ansible_tower_mcp.api_client import Api
+from ansible_tower_mcp.auth import get_client
+
 __all__: list[str] = []
 
 CORE_MODULES: list[str] = ["ansible_tower_mcp.api_client"]
@@ -93,3 +98,16 @@ def __getattr__(name: str) -> Any:
 
 def __dir__() -> list[str]:
     return sorted(list(globals().keys()) + __all__)
+
+
+# The SDK serves this connector through the same API client and registrar module
+# as the legacy MCP entry point.  Keeping the declaration here makes the
+# canonical server's operation and action-split tool names discoverable without
+# changing the connector's existing implementation.
+connector = Connector(
+    api=Api,
+    get_client=get_client,
+    tools="ansible_tower_mcp.mcp.tools",
+    instructions="Ansible Tower MCP Server — condensed and typed Tower operations.",
+)
+__all__.append("connector")

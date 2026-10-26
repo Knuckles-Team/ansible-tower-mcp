@@ -50,7 +50,9 @@ async def ingest_job_log(
         extra["status"] = job_status
     blob_name = name or f"ansible-job-{job_id}.log"
 
-    asset = MediaAsset(data=data, mime_type="text/plain", name=blob_name, properties=extra)
+    asset = MediaAsset(
+        data=data, mime_type="text/plain", name=blob_name, properties=extra
+    )
     change_set = ChangeSet(media=(asset,))
     service = ingest or current_ingest()
     receipt = await service.submit(_BINDING, change_set)

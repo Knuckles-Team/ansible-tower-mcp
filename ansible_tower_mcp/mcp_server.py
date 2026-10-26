@@ -1,5 +1,7 @@
+from agent_connector_sdk.connector_identity import connector_version
+
 # Thin delegation wrapper for backward compatibility with external scripts, pyproject.toml scripts, and eager imports.
-__version__ = "3.3.3"
+__version__ = connector_version("ansible_tower_mcp")
 
 from ansible_tower_mcp.mcp.mcp_server import (
     get_mcp_instance,
