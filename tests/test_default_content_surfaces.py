@@ -80,15 +80,11 @@ def test_sdk_floor_supports_content_identity_and_current_pack_protocol() -> None
     declared = list(project.get("dependencies", []))
     for extra in project.get("optional-dependencies", {}).values():
         declared.extend(extra)
-    sdk = [
-        Requirement(value)
-        for value in declared
-        if value.startswith("agent-connector-sdk")
-    ]
+    sdk = [Requirement(value) for value in declared if value.startswith("scion-sdk")]
     assert sdk
     for requirement in sdk:
-        assert requirement.specifier.contains("0.5.5")
-        assert not requirement.specifier.contains("0.5.4")
+        assert requirement.specifier.contains("0.5.9")
+        assert not requirement.specifier.contains("0.5.8")
 
 
 def test_production_pack_includes_packaged_ontology_and_shapes() -> None:

@@ -315,10 +315,12 @@ def test_api_client_base_edge_cases():
         assert results == [{"id": 1}, {"id": 2}]
         assert mock_req_method.call_count == 2
 
-    # Break pagination when 'results' is not present
+    # A page without the declared record list is a typed SDK pagination error
+    from agent_connector_sdk.httpsupport.pagination_page import PaginationPageError
+
     with patch.object(client_pag, "request", return_value={"no_results": []}):
-        results = client_pag.handle_pagination("/api/v2/items/")
-        assert results == []
+        with pytest.raises(PaginationPageError):
+            client_pag.handle_pagination("/api/v2/items/")
 
 
 # ==========================================
