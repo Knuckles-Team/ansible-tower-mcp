@@ -9,7 +9,7 @@ It must keep every tool and its behavior unchanged.
 
 The `ansible-tower-mcp` repository owns Ansible Tower operations and mappings.
 The shared connector SDK owns the governed HTTP client, retry policy, and pagination checks.
-Rows are governed by SDK-CENTRALIZED-CAPABILITIES-R014 in the SDK specification.
+Rows are governed by SCION-CENTRALIZED-CAPABILITIES-R014 in the SDK specification.
 
 Component: Connector integration
 References: [Connector SDK](https://github.com/Knuckles-Team/agent-connector-sdk/blob/main/specs/centralized-capabilities/plan.md)
