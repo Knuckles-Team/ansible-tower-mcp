@@ -83,7 +83,7 @@ def test_sdk_floor_supports_content_identity_and_current_pack_protocol() -> None
     sdk = [
         Requirement(value)
         for value in declared
-        if value.startswith("agent-connector-sdk")
+        if value.startswith("scion-sdk")
     ]
     assert sdk
     for requirement in sdk:
