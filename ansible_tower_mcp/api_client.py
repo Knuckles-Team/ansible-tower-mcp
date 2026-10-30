@@ -1,4 +1,4 @@
-from agent_connector_sdk.connector_identity import connector_version
+from scion_sdk.connector_identity import connector_version
 
 #!/usr/bin/env python
 from ansible_tower_mcp.api.api_client_credentials import Api as CredentialsApi

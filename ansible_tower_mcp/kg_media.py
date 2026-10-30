@@ -3,7 +3,7 @@
 CONCEPT:AU-KG.ingest.list-durable-media. A job's raw stdout log — potentially large,
 ANSI-coloured playbook output — is stored as a content-addressed **blob** with a
 ``:Blob`` graph node in ONE cross-modal ACID commit, via the
-``agent_connector_sdk.ingest`` knowledge-ingest facade (``ChangeSet.media`` +
+``scion_sdk.ingest`` knowledge-ingest facade (``ChangeSet.media`` +
 ``KnowledgeIngest.submit``). This makes the raw log bytes durable, deduped, and
 queryable inside the knowledge graph, not just a transient API response.
 """
@@ -13,7 +13,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from agent_connector_sdk.ingest import (
+from scion_sdk.ingest import (
     ChangeSet,
     IngestBinding,
     KnowledgeIngest,

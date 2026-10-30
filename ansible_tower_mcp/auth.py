@@ -13,14 +13,14 @@ Authentication priority:
 3. **Username / Password** — Falls back to ``ANSIBLE_USERNAME`` and
    ``ANSIBLE_PASSWORD`` with the native token-based auth.
 
-See ``docs/guides/oauth_sso.md`` in agent-connector-sdk for full details.
+See ``docs/guides/oauth_sso.md`` in scion-sdk for full details.
 """
 
 import logging
 import threading
 
-from agent_connector_sdk.config import setting
-from agent_connector_sdk.tls.resolve import resolve_tls_profile
+from scion_sdk.config import setting
+from scion_sdk.tls.resolve import resolve_tls_profile
 
 local = threading.local()
 from ansible_tower_mcp.api_client import Api
@@ -29,14 +29,14 @@ logger = logging.getLogger(__name__)
 
 
 def _exchange_delegated_token() -> str:
-    """RFC 8693 Token Exchange via ``agent_connector_sdk.auth.delegation``."""
+    """RFC 8693 Token Exchange via ``scion_sdk.auth.delegation``."""
     import httpx
-    from agent_connector_sdk.auth.delegation import (
+    from scion_sdk.auth.delegation import (
         DelegationSettings,
         current_user_token,
         exchange_token,
     )
-    from agent_connector_sdk.exceptions import LoginRequiredError
+    from scion_sdk.exceptions import LoginRequiredError
 
     settings = DelegationSettings.from_settings()
     subject_token = current_user_token()
@@ -57,7 +57,7 @@ def get_client():
     Returns a new client on each call (no singleton) because Ansible Tower
     sessions may expire and tools run in independent request contexts.
     """
-    from agent_connector_sdk.auth.delegation import DelegationSettings
+    from scion_sdk.auth.delegation import DelegationSettings
 
     base_url = setting("ANSIBLE_BASE_URL")
     tls_profile = resolve_tls_profile(

@@ -12,7 +12,7 @@ The shared connector SDK owns the governed HTTP client, retry policy, and pagina
 Rows are governed by SCION-CENTRALIZED-CAPABILITIES-R014 in the SDK specification.
 
 Component: Connector integration
-References: [Connector SDK](https://github.com/Knuckles-Team/agent-connector-sdk/blob/main/specs/centralized-capabilities/plan.md)
+References: [Connector SDK](https://github.com/Knuckles-Team/scion-sdk/blob/main/specs/centralized-capabilities/plan.md)
 Code: ../../ansible_tower_mcp/api/api_client_base.py ../../tests/test_sdk_centralization.py
 
 ## Non-goals

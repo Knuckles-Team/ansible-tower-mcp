@@ -4,7 +4,7 @@ Governing specification: [spec.md](spec.md).
 
 ## Existing system and reuse
 
-The connector reuses `agent_connector_sdk.http.create_http_client` for all vendor requests.
+The connector reuses `scion_sdk.http.create_http_client` for all vendor requests.
 The SDK retry policy replaces connector-local retry handling.
 
 ## Implementation units

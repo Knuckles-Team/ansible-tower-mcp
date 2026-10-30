@@ -12,7 +12,7 @@ description: >-
 license: MIT
 tags: [ansible-tower, awx, jobs, automation, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Ansible Tower Job Execution

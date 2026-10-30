@@ -1,6 +1,6 @@
 """Epistemic-graph blob ingestion for job logs — Wire-First coverage.
 
-Exercises ``ingest_job_log`` against a fake ``agent_connector_sdk.ingest``
+Exercises ``ingest_job_log`` against a fake ``scion_sdk.ingest``
 transport (no engine required), asserting the stored media asset's bytes,
 mime type, provenance/extra fields, and the asset id/digest returned from the
 commit receipt's raw admissions. CONCEPT:AU-KG.ingest.list-durable-media.
@@ -12,7 +12,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
+from scion_sdk.ingest import IngestError, KnowledgeIngest
 
 from ansible_tower_mcp.kg_media import ingest_job_log
 

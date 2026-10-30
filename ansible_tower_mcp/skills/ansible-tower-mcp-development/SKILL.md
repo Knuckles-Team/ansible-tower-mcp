@@ -10,7 +10,7 @@ license: MIT
 tags: [ansible-tower-mcp, development, connector, test, gates]
 tier: repository
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 
@@ -18,7 +18,7 @@ metadata:
 
 This repository owns the Ansible Tower/AWX transport, mappings, MCP tools, and
 agent entry points. Shared connector contracts and transports belong to
-`agent-connector-sdk`; admission, serving, and durable graph state belong to
+`scion-sdk`; admission, serving, and durable graph state belong to
 their owning repositories. Read `AGENTS.md` before changing code and keep
 provider credentials and endpoints out of source, logs, and skill content.
 
@@ -62,7 +62,7 @@ with local copies or bypass a failing check.
 
 ## Connector-specific checks
 
-- Keep the MCP and agent surfaces aligned with `agent-connector-sdk`.
+- Keep the MCP and agent surfaces aligned with `scion-sdk`.
 - Validate environment and TLS settings before making provider calls.
 - Mock external Tower/AWX calls in tests; never use live credentials in a
   local gate.

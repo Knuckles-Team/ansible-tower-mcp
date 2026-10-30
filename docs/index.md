@@ -1,7 +1,7 @@
 # ansible-tower-mcp
 
 Ansible Tower / AWX automation **API + MCP Server + A2A Agent** for the
-agent-connector-sdk ecosystem — a typed, deterministic control surface for Ansible
+scion-sdk ecosystem — a typed, deterministic control surface for Ansible
 Automation Platform job templates, inventories, jobs, and credentials.
 
 !!! info "Official documentation"

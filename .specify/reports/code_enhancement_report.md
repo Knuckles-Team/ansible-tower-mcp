@@ -42,7 +42,7 @@ xychart-beta
 `██████████████░░░░░░` 74/100
 
 > [!NOTE]
-> Detected ecosystem marker: agent-connector-sdk → Agent-Utilities Ecosystem
+> Detected ecosystem marker: scion-sdk → Agent-Utilities Ecosystem
 
 | Criterion | Points | Evidence | Reasoning |
 |-----------|--------|----------|-----------|
@@ -74,7 +74,7 @@ xychart-beta
 | dependency_freshness | 94 | `source=${WORKSPACE_ROOT}/agent-packages/agents/ansible-to` | Audited 5 deps (3 installed, 2 constraint-only). 0 major, 2 minor, 0 patch updates |
 
 **Findings:**
-- Minor update: agent-connector-sdk 0.2.40 (installed) -> 0.16.0
+- Minor update: scion-sdk 0.2.40 (installed) -> 0.16.0
 
 ---
 
@@ -313,7 +313,7 @@ xychart-beta
 | 14 | 🔴 High | Environment Variables | Only 13% of env vars documented in README.md | High | Medium |
 | 15 | 🔴 High | Environment Variables | Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, | High | Medium |
 | 16 | 🔴 High | Environment Variables | 8 Python env vars not in .env.example: ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSI | High | Medium |
-| 17 | 🟡 Medium | Project Analysis | Detected ecosystem marker: agent-connector-sdk → Agent-Utilities Ecosystem | Medium | Low |
+| 17 | 🟡 Medium | Project Analysis | Detected ecosystem marker: scion-sdk → Agent-Utilities Ecosystem | Medium | Low |
 | 18 | 🟡 Medium | Project Analysis | Protocol support: MCP | Medium | Low |
 | 19 | 🟡 Medium | Test Coverage | 6 tests without assertions | Medium | Low |
 | 20 | 🟡 Medium | Test Coverage | 14 potential doc-test drift items | Medium | Low |
@@ -324,7 +324,7 @@ xychart-beta
 | 25 | 🟡 Medium | Changelog Audit | No changelog entries within the last 30 days | Medium | Low |
 | 26 | 🟡 Medium | Changelog Audit | keepachangelog not installed — pip install 'universal-skills[code-enhancer]' | Medium | Low |
 | 27 | 🟢 Low | Dependency Audit | Minor update: pytest-xdist 3.6.0 (constraint — not installed) -> 3.8.0 | Low | Low |
-| 28 | 🟢 Low | Dependency Audit | Minor update: agent-connector-sdk 0.2.40 (installed) -> 0.16.0 | Low | Low |
+| 28 | 🟢 Low | Dependency Audit | Minor update: scion-sdk 0.2.40 (installed) -> 0.16.0 | Low | Low |
 | 29 | 🟢 Low | Documentation & Governance | README.md missing sections: usage|quick start | Low | Low |
 | 30 | 🟢 Low | Documentation & Governance | 2 broken internal links in README.md | Low | Low |
 

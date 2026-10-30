@@ -1,4 +1,4 @@
-from agent_connector_sdk.connector_identity import connector_version
+from scion_sdk.connector_identity import connector_version
 
 # Thin delegation wrapper for backward compatibility with external scripts, pyproject.toml scripts, and eager imports.
 __version__ = connector_version("ansible_tower_mcp")
