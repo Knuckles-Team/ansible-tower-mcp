@@ -6,8 +6,8 @@ from pathlib import Path
 
 import httpx
 import pytest
-from agent_connector_sdk.http.errors import HttpProblemError
-from agent_connector_sdk.httpsupport.pagination import PaginationOriginError
+from scion_sdk.http.errors import HttpProblemError
+from scion_sdk.httpsupport.pagination import PaginationOriginError
 
 from ansible_tower_mcp.api.api_client_base import BaseApiClient
 

@@ -2,8 +2,8 @@
 
 Exercises the real ``ingest_entities`` / ``ingest_jobs`` / ``ingest_job_templates`` /
 ``ingest_inventories`` / ``ingest_hosts`` seam against a fake
-``agent_connector_sdk.ingest`` transport (no engine required). The real SDK request
-builder (``agent_connector_sdk.ingest.request.build_request``) still runs, so a
+``scion_sdk.ingest`` transport (no engine required). The real SDK request
+builder (``scion_sdk.ingest.request.build_request``) still runs, so a
 malformed change set is still caught by the SDK's own contract, not re-derived here;
 only the final network commit is faked. CONCEPT:AU-KG.ingest.enterprise-source-extractor.
 """
@@ -14,8 +14,8 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from agent_connector_sdk.ingest import IngestError, KnowledgeIngest
 from epistemic_graph.generated.source_ingestion import SourceIngestionRequest
+from scion_sdk.ingest import IngestError, KnowledgeIngest
 
 from ansible_tower_mcp.kg_ingest import (
     ingest_entities,

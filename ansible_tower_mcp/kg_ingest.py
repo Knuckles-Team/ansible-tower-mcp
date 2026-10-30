@@ -3,7 +3,7 @@
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. The package pushes its Ansible
 Tower / AWX data into the ONE epistemic-graph knowledge graph as **typed OWL
 nodes** (`:JobTemplate`, `:Job`, `:Inventory`, `:Host`, `:AnsibleProject`, …) +
-links, through `agent_connector_sdk.ingest` -- the generated `SourceIngest`
+links, through `scion_sdk.ingest` -- the generated `SourceIngest`
 client, not a local ingestion helper. Node ids follow `ansible:<class>:<extId>`;
 `node_type` matches the classes federated by `ansible_tower_mcp.ontology`
 (`ansible.ttl`).
@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from agent_connector_sdk.ingest import (
+from scion_sdk.ingest import (
     ChangeSet,
     Document,
     Entity,

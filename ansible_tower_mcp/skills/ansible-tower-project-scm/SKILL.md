@@ -12,7 +12,7 @@ description: >-
 license: MIT
 tags: [ansible-tower, awx, scm, projects, schedules, mcp]
 metadata:
-  author: Genius
+  author: Knuckles-Team
   version: '0.1.0'
 ---
 # Ansible Tower Project & Schedule Management

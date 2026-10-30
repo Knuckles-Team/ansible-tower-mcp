@@ -164,7 +164,7 @@
     rdfs:comment """Ansible Tower / AWX automation model — organizations, inventories,
     groups, hosts, SCM-backed projects, job and workflow templates, their job
     executions (with status, elapsed, and captured stdout logs), ad hoc commands,
-    credentials and schedules — federated into the agent-connector-sdk knowledge-graph
+    credentials and schedules — federated into the scion-sdk knowledge-graph
     hub. Reuses the shared :Document and :Blob classes for job output.""" .
 
 # ontology-codemod R3

@@ -4,7 +4,7 @@ import importlib
 import inspect
 from typing import Any
 
-from agent_connector_sdk.connector import Connector
+from scion_sdk.connector import Connector
 
 from ansible_tower_mcp.api_client import Api
 from ansible_tower_mcp.auth import get_client

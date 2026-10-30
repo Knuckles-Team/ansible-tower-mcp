@@ -30,7 +30,7 @@ def test_auth_flows():
 
     from ansible_tower_mcp.auth import get_client
 
-    delegation_settings = "agent_connector_sdk.auth.delegation.DelegationSettings"
+    delegation_settings = "scion_sdk.auth.delegation.DelegationSettings"
 
     # Path 1: OIDC Delegation
     with (
@@ -316,7 +316,7 @@ def test_api_client_base_edge_cases():
         assert mock_req_method.call_count == 2
 
     # A page without the declared record list is a typed SDK pagination error
-    from agent_connector_sdk.httpsupport.pagination_page import PaginationPageError
+    from scion_sdk.httpsupport.pagination_page import PaginationPageError
 
     with patch.object(client_pag, "request", return_value={"no_results": []}):
         with pytest.raises(PaginationPageError):
