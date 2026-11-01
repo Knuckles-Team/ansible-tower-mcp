@@ -6,3 +6,6 @@ Governing spec: [spec.md](spec.md).
 |---|---|---|---|
 | T-001 | `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R001` | `tests/test_default_content_surfaces.py` | The listings include the packaged skills, ontology and prompts. |
 | T-002 | `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R001` | `tests/test_semantic_core_mappings.py` | The approved connector classes reach their shared core parents and every ontology/shape resource is served with exact packaged bytes. |
+
+## Rows awaiting bound tests
+- `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R002`: planned proof `tests/test_access_contracts.py::test_competency_contracts_certified`. Expected: Ontology certification passes and tests/recordings/job_run.json validates against the job_run contract keyed on id.. Refusal: A contract column not in the ontology, or a recording lacking id, fails..
