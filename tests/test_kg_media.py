@@ -94,7 +94,7 @@ async def test_ingest_job_log_noops_on_empty(ingest):
 async def test_ingest_job_log_propagates_commit_failure():
     class _FailingTransport(_FakeTransport):
         async def submit(self, request: Any) -> Any:
-            raise RuntimeError("epistemic-graph is unreachable")
+            raise RuntimeError("medulla is unreachable")
 
     service = KnowledgeIngest(_FailingTransport(), loop=None)
     with pytest.raises(IngestError):

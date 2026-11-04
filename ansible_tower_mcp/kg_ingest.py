@@ -1,7 +1,7 @@
 """Epistemic-graph ingestion for Ansible Tower records (typed graph nodes).
 
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. The package pushes its Ansible
-Tower / AWX data into the ONE epistemic-graph knowledge graph as **typed OWL
+Tower / AWX data into the ONE medulla knowledge graph as **typed OWL
 nodes** (`:JobTemplate`, `:Job`, `:Inventory`, `:Host`, `:AnsibleProject`, …) +
 links, through `scion_sdk.ingest` -- the generated `SourceIngest`
 client, not a local ingestion helper. Node ids follow `ansible:<class>:<extId>`;
@@ -65,7 +65,7 @@ async def ingest_entities(
     *,
     ingest: KnowledgeIngest | None = None,
 ) -> dict[str, int]:
-    """Write typed nodes (+ edges) into epistemic-graph via the SDK ingest facade.
+    """Write typed nodes (+ edges) into medulla via the SDK ingest facade.
 
     ``entities`` use canonical ``node_type`` and relationships use canonical
     ``relationship``. A malformed change set or a refused commit raises
