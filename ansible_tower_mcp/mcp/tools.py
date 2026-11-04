@@ -688,7 +688,7 @@ def register_kg_ingest_tools(mcp: FastMCP):
             default=None, description="MCP context for progress reporting"
         ),
     ) -> dict:
-        """Natively ingest Ansible Tower resources into epistemic-graph as typed nodes.
+        """Natively ingest Ansible Tower resources into medulla as typed nodes.
 
         Lists the resource via the Ansible Tower API and pushes the records (with their
         ontology links) into the knowledge graph via the fast engine client. Best-effort:
