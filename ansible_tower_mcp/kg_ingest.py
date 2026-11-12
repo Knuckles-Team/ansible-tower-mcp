@@ -1,4 +1,4 @@
-"""Epistemic-graph ingestion for Ansible Tower records (typed graph nodes).
+"""Medulla ingestion for Ansible Tower records (typed graph nodes).
 
 CONCEPT:AU-KG.ingest.enterprise-source-extractor. The package pushes its Ansible
 Tower / AWX data into the ONE medulla knowledge graph as **typed OWL

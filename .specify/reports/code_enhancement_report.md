@@ -42,12 +42,12 @@ xychart-beta
 `██████████████░░░░░░` 74/100
 
 > [!NOTE]
-> Detected ecosystem marker: scion-sdk → Agent-Utilities Ecosystem
+> Detected ecosystem marker: scion-sdk → Meristem Ecosystem
 
 | Criterion | Points | Evidence | Reasoning |
 |-----------|--------|----------|-----------|
 | has_pyproject | 10 | `pyproject.toml and requirements.txt` | Both pyproject.toml and requirements.txt exist, fulfilling mandatory Python proj |
-| project_type_detected | 10 | `Agent-Utilities Ecosystem` | Identified 1 ecosystem marker(s) in dependencies |
+| project_type_detected | 10 | `Meristem Ecosystem` | Identified 1 ecosystem marker(s) in dependencies |
 | externalized_prompts | 0 | `${WORKSPACE_ROOT}/agent-packages/agents/ansible-tower-mcp` | No prompts/ directory found. Prompts may be hardcoded in source. |
 | observability | 0 | `dependency list` | No observability tools (logfire, sentry, opentelemetry) found |
 | testing_suite | 10 | `tests dir: True, pytest dep: True` | Tests directory exists, pytest in dependencies |
@@ -313,7 +313,7 @@ xychart-beta
 | 14 | 🔴 High | Environment Variables | Only 13% of env vars documented in README.md | High | Medium |
 | 15 | 🔴 High | Environment Variables | Undocumented env vars: AD_HOC_COMMANDSTOOL, ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, | High | Medium |
 | 16 | 🔴 High | Environment Variables | 8 Python env vars not in .env.example: ANSIBLE_BASE_URL, ANSIBLE_CLIENT_ID, ANSI | High | Medium |
-| 17 | 🟡 Medium | Project Analysis | Detected ecosystem marker: scion-sdk → Agent-Utilities Ecosystem | Medium | Low |
+| 17 | 🟡 Medium | Project Analysis | Detected ecosystem marker: scion-sdk → Meristem Ecosystem | Medium | Low |
 | 18 | 🟡 Medium | Project Analysis | Protocol support: MCP | Medium | Low |
 | 19 | 🟡 Medium | Test Coverage | 6 tests without assertions | Medium | Low |
 | 20 | 🟡 Medium | Test Coverage | 14 potential doc-test drift items | Medium | Low |

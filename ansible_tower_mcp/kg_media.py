@@ -1,4 +1,4 @@
-"""Epistemic-graph blob ingestion for Ansible Tower job logs.
+"""Medulla blob ingestion for Ansible Tower job logs.
 
 CONCEPT:AU-KG.ingest.list-durable-media. A job's raw stdout log — potentially large,
 ANSI-coloured playbook output — is stored as a content-addressed **blob** with a

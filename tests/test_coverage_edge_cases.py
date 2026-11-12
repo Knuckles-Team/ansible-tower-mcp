@@ -143,7 +143,7 @@ def test_api_client_base_edge_cases():
     # 2. Runtime transport profile is applied to the session.
     tls_profile = MagicMock()
     with patch(
-        "ansible_tower_mcp.api.api_client_base.create_http_client"
+        "ansible_tower_mcp.api.api_client_base.build_http_client"
     ) as make_client:
         client_profile = BaseApiClient(
             base_url="http://test", token="abc", tls_profile=tls_profile
