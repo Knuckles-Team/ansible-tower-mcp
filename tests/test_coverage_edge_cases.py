@@ -2,7 +2,6 @@ import asyncio
 import inspect
 import json
 import os
-import re
 import runpy
 from unittest.mock import ANY, MagicMock, patch
 
@@ -494,41 +493,11 @@ def test_mcp_server_tools_all_actions():
     from ansible_tower_mcp.mcp.mcp_server import (
         get_mcp_instance,
         mcp_server,
-        register_ad_hoc_commands_tools,
-        register_credentials_tools,
-        register_groups_tools,
-        register_hosts_tools,
-        register_inventory_tools,
-        register_job_templates_tools,
-        register_jobs_tools,
-        register_organizations_tools,
-        register_projects_tools,
-        register_schedules_tools,
-        register_system_tools,
-        register_teams_tools,
-        register_users_tools,
-        register_workflow_jobs_tools,
-        register_workflow_templates_tools,
+        register_kg_ingest_tools,
     )
 
     mcp = FastMCP("test_coverage_mcp")
-
-    # Register all tools into the dummy mcp server
-    register_inventory_tools(mcp)
-    register_hosts_tools(mcp)
-    register_groups_tools(mcp)
-    register_job_templates_tools(mcp)
-    register_jobs_tools(mcp)
-    register_projects_tools(mcp)
-    register_credentials_tools(mcp)
-    register_organizations_tools(mcp)
-    register_teams_tools(mcp)
-    register_users_tools(mcp)
-    register_ad_hoc_commands_tools(mcp)
-    register_workflow_templates_tools(mcp)
-    register_workflow_jobs_tools(mcp)
-    register_schedules_tools(mcp)
-    register_system_tools(mcp)
+    register_kg_ingest_tools(mcp)
 
     mock_client = MagicMock()
     from unittest.mock import AsyncMock
@@ -537,7 +506,6 @@ def test_mcp_server_tools_all_actions():
     mock_ctx.info = AsyncMock()
 
     async def run_async_test():
-        # List all tools and call every action branch dynamically!
         tool_objs = mcp.list_tools()
         if (
             inspect.iscoroutine(tool_objs)
@@ -545,38 +513,18 @@ def test_mcp_server_tools_all_actions():
             or hasattr(tool_objs, "__await__")
         ):
             tool_objs = await tool_objs
+        names = {tool.name for tool in tool_objs}
+        assert names == {"ansible_ingest_resources", "ansible_ingest_job_log"}
         for tool in tool_objs:
-            sig = inspect.signature(tool.fn)  # type: ignore
-            action_param = sig.parameters.get("action")
-            if not action_param or not hasattr(action_param.default, "description"):
-                continue
-
-            desc = action_param.default.description
-            actions = re.findall(r"'([^']+)'", desc)
-            if not actions:
-                continue
-
-            print(f"Testing tool {tool.name} with actions: {actions}")
-            for act in actions:
-                # Call valid action path
-                res = await tool.fn(  # type: ignore
-                    action=act, params_json="{}", client=mock_client, ctx=mock_ctx
-                )
-                assert isinstance(res, (dict, list, MagicMock))
-
-            # Call invalid action path to cover ValueError / fallback raise
-            with pytest.raises(ValueError, match="Unknown action"):
-                await tool.fn(  # type: ignore
-                    action="invalid_coverage_action_xyz",
-                    params_json="{}",
-                    client=mock_client,
-                    ctx=mock_ctx,
-                )
-
-            # Call invalid params_json to cover exception handling block
+            # No hand-written tool routes an action argument.
+            assert "action" not in inspect.signature(tool.fn).parameters  # type: ignore
             err_res = await tool.fn(  # type: ignore
-                action=actions[0],
                 params_json="invalid json string {",
+                **(
+                    {"resource_type": "jobs"}
+                    if tool.name == "ansible_ingest_resources"
+                    else {}
+                ),
                 client=mock_client,
                 ctx=mock_ctx,
             )

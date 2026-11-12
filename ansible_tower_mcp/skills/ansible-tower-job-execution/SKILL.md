@@ -5,7 +5,7 @@ description: >-
   Launch and monitor Ansible Tower / AWX automation via the ansible-tower-mcp MCP
   server — run job templates and workflows, watch job status, stream stdout, cancel
   runs, and fire ad hoc module commands. Use when the agent must kick off a playbook
-  run, check whether a job succeeded or failed, pull a failed job's log, relaunch a
+  run, check whether a job succeeded or failed, pull a failed job's log, rerun a
   job, or run a one-off ad hoc command against an inventory. Do NOT use for defining
   inventories/hosts (use ansible-tower-inventory-management) or wiring SCM-backed
   playbook sources (use ansible-tower-project-scm).
@@ -24,7 +24,7 @@ Domain-typed control of Ansible Tower **job templates**, **workflow templates**,
 - Launch a job template (optionally with `extra_vars`) or a workflow template.
 - Poll a running job's `status`, read its stdout, or fetch its structured events.
 - Triage a failed run (get the job, pull its stdout log).
-- Cancel or relaunch a job; run a one-off ad hoc module command.
+- Cancel a job (launch its template again to rerun it); run a one-off ad hoc module command.
 
 ## When NOT to use
 - Creating/updating inventories, hosts, or groups → `ansible-tower-inventory-management`.
@@ -43,28 +43,30 @@ Connect via the `mcp-client` skill against the **`ansible-tower-mcp`** MCP serve
 | `ANSIBLE_TOKEN` | optional | Pre-minted OAuth token |
 | `ANSIBLE_VERIFY` | optional | TLS verification toggle (default false) |
 
-`MCP_TOOL_MODE` (`condensed`|`verbose`|`both`) selects the condensed surface (below)
-vs. the 1:1 verbose tools.
 
-## Tools & actions
-Prefer the **condensed** tools; each takes `action` + a `params_json` **JSON string**
-whose keys are passed straight to the client method.
+## Tools
+One typed tool per operation; pass each argument by name.
 
-| Condensed tool | Actions |
-|----------------|---------|
-| `ansible_tower_job_templates` | `list_job_templates`, `get_job_template`, `create_job_template`, `update_job_template`, `delete_job_template` |
-| `ansible_tower_jobs` | `list_jobs`, `get_job`, `cancel_job`, `relaunch_job`, `get_job_events`, `get_job_stdout` |
-| `ansible_tower_workflow_templates` | `list_workflow_templates`, `get_workflow_template`, `launch_workflow` |
-| `ansible_tower_workflow_jobs` | `list_workflow_jobs`, `get_workflow_job`, `cancel_workflow_job` |
-| `ansible_tower_ad_hoc_commands` | `run_ad_hoc_command`, `get_ad_hoc_command`, `cancel_ad_hoc_command` |
+| Tool | Use |
+|------|-----|
+| `ansible_tower_list_job_templates`, `ansible_tower_get_job_template` | Find and read a job template |
+| `ansible_tower_create_job_template`, `ansible_tower_update_job_template`, `ansible_tower_delete_job_template` | Define, change or retire a template |
+| `ansible_tower_launch_job` | Launch a template (optionally with `extra_vars`) |
+| `ansible_tower_list_jobs`, `ansible_tower_get_job` | Poll runs and read a run's status |
+| `ansible_tower_get_job_events`, `ansible_tower_get_job_stdout` | Structured events and the log of a run |
+| `ansible_tower_cancel_job` | Cancel a running job |
+| `ansible_tower_list_workflow_templates`, `ansible_tower_get_workflow_template`, `ansible_tower_launch_workflow` | Find and launch workflows |
+| `ansible_tower_list_workflow_jobs`, `ansible_tower_get_workflow_job`, `ansible_tower_cancel_workflow_job` | Follow or cancel a workflow run |
+| `ansible_tower_run_ad_hoc_command`, `ansible_tower_get_ad_hoc_command`, `ansible_tower_cancel_ad_hoc_command` | One-off module commands |
+| `ansible_ingest_resources`, `ansible_ingest_job_log` | Push runs and logs into the knowledge graph |
 
 ### Key parameters
 - `template_id` — required to launch a job/workflow template.
 - `extra_vars` — a **JSON string** of playbook variables (validated as JSON).
-- `job_id` — required for `get_job`, `get_job_stdout`, `cancel_job`, `relaunch_job`.
+- `job_id` — required for `ansible_tower_get_job`, `ansible_tower_get_job_stdout` and `ansible_tower_cancel_job`.
 - Ad hoc: `inventory_id`, `credential_id`, `module_name`, `module_args`, `verbosity` (0-4).
 
-## Recipes (`params_json`)
+## Recipes (tool arguments)
 Launch a job template with vars:
 ```json
 {"template_id": 7, "extra_vars": "{\"env\":\"prod\",\"limit\":\"web\"}"}
@@ -83,7 +85,6 @@ Run an ad hoc ping against an inventory:
 ```
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
 - `extra_vars` / `module_args` must themselves be valid JSON strings; the client
   raises "Invalid JSON" otherwise.
 - Launching returns immediately with a job record — the run is async; poll

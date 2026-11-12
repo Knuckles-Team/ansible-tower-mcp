@@ -17,7 +17,7 @@ playbooks) and **schedules** (rrule triggers that launch templates on a cadence)
 - Launching or monitoring the resulting runs → `ansible-tower-job-execution`.
 - Defining the hosts a project's playbooks target → `ansible-tower-inventory-management`.
 - Storing repository **credentials** beyond referencing a `credential_id` → the
-  `ansible_tower_credentials` tool.
+  credential tools (`ansible_tower_list_credentials`, `ansible_tower_get_credential`).
 
 ## Prerequisites & environment
 Connect via the `mcp-client` skill against the **`ansible-tower-mcp`** MCP server.
@@ -29,22 +29,16 @@ Connect via the `mcp-client` skill against the **`ansible-tower-mcp`** MCP serve
 | `ANSIBLE_CLIENT_ID` / `ANSIBLE_CLIENT_SECRET` | optional | OAuth2 |
 | `ANSIBLE_TOWER_TLS_PROFILE` | optional | Runtime TLS profile selector; verification is mandatory |
 
-## Tools & actions
-Prefer the **condensed** tools; each takes `action` + a `params_json` **JSON string**.
+## Tools
+One typed tool per operation; pass each argument by name.
 
-| Condensed tool | Actions |
-|----------------|---------|
-| `ansible_tower_projects` | `list_projects`, `get_project`, `create_project`, `update_project`, `delete_project`, `sync_project` |
-| `ansible_tower_schedules` | `list_schedules`, `get_schedule`, `create_schedule`, `update_schedule`, `delete_schedule` |
+| Tool | Use |
+|------|-----|
+| `ansible_tower_list_projects`, `ansible_tower_get_project`, `ansible_tower_create_project`, `ansible_tower_update_project`, `ansible_tower_delete_project` | SCM-backed projects |
+| `ansible_tower_sync_project` | Refresh a project's playbooks from SCM |
+| `ansible_tower_list_schedules`, `ansible_tower_get_schedule`, `ansible_tower_create_schedule`, `ansible_tower_update_schedule`, `ansible_tower_delete_schedule` | Recurring schedules |
 
-### Key parameters
-- `organization_id` + `scm_type` — required to `create_project` (`git|hg|svn|manual`).
-- `scm_url` — required for non-manual SCM types; `scm_branch` optional.
-- `project_id` — required for `sync_project` / `get_project`.
-- `rrule` — iCal RFC 5545 recurrence string for a schedule.
-- `unified_job_template_id` — the job/workflow template a schedule triggers.
-
-## Recipes (`params_json`)
+## Recipes (tool arguments)
 Create a git-backed project:
 ```json
 {"name": "infra-playbooks", "organization_id": 1, "scm_type": "git", "scm_url": "[configured-endpoint] "scm_branch": "main"}
@@ -59,7 +53,6 @@ Schedule a template to run nightly:
 ```
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
 - `scm_type` must be one of `git|hg|svn|manual`; non-manual types require `scm_url`.
 - `sync_project` is async — it POSTs a project update; poll `get_project` for
   `status` / `last_job_run` to confirm the sync finished.

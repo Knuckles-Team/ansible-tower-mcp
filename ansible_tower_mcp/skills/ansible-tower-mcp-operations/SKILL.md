@@ -12,7 +12,7 @@ Use the provider's governed MCP tools through Arbora delegation.
 ## Workflow
 
 1. Establish the verified GraphSession and tenant before discovery or retrieval.
-2. Discover the current condensed tool surface; never assume a stale tool name or schema.
+2. Discover the current tool surface; never assume a stale tool name or schema.
 3. Prefer read-only inspection first. For changes, present impact and use the provider's
    dry-run or preview mode when available.
 4. Execute mutations as fenced WorkItems so retries remain idempotent and auditable.
@@ -31,3 +31,15 @@ Use the provider's governed MCP tools through Arbora delegation.
 
 Read [the workflow catalog](references/catalog.md) only when the request needs a
 provider-specific procedure, parameter map, script, or reference asset.
+
+## Tools
+
+One typed tool per operation. The domain skills name the job, inventory and project tools; this skill covers the rest.
+
+| Area | Tools |
+|------|-------|
+| Credentials | `ansible_tower_list_credential_types`, `ansible_tower_list_credentials`, `ansible_tower_get_credential`, `ansible_tower_create_credential`, `ansible_tower_update_credential`, `ansible_tower_delete_credential` |
+| Organizations | `ansible_tower_list_organizations`, `ansible_tower_get_organization`, `ansible_tower_create_organization`, `ansible_tower_update_organization`, `ansible_tower_delete_organization` |
+| Teams | `ansible_tower_list_teams`, `ansible_tower_get_team`, `ansible_tower_create_team`, `ansible_tower_update_team`, `ansible_tower_delete_team` |
+| Users | `ansible_tower_list_users`, `ansible_tower_get_user`, `ansible_tower_create_user`, `ansible_tower_update_user`, `ansible_tower_delete_user` |
+| Platform | `ansible_tower_get_ansible_version`, `ansible_tower_get_dashboard_stats`, `ansible_tower_get_metrics` |

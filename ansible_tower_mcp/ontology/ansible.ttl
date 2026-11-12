@@ -176,3 +176,8 @@
 <http://knuckles.team/kg#JobTemplate> rdfs:subClassOf <http://knuckles.team/kg#Template> .
 <http://knuckles.team/kg#WorkflowJobTemplate> rdfs:subClassOf <http://knuckles.team/kg#WorkflowDefinition> .
 <http://knuckles.team/kg#AdHocCommand> rdfs:subClassOf <http://knuckles.team/kg#ActionInvocation> .
+
+# connector-surface core roll-up
+<http://knuckles.team/kg#AnsibleOrganization> rdfs:subClassOf <http://knuckles.team/kg#Organization> .
+<http://knuckles.team/kg#Inventory> rdfs:subClassOf <http://knuckles.team/kg#Collection> .
+<http://knuckles.team/kg#AnsibleProject> rdfs:subClassOf <http://knuckles.team/kg#Repository> .
