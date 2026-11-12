@@ -24,23 +24,7 @@ from starlette.responses import JSONResponse
 from ansible_tower_mcp.api_client import Api
 from ansible_tower_mcp.auth import get_client
 from ansible_tower_mcp.mcp import tools
-from ansible_tower_mcp.mcp.tools import (
-    register_ad_hoc_commands_tools,
-    register_credentials_tools,
-    register_groups_tools,
-    register_hosts_tools,
-    register_inventory_tools,
-    register_job_templates_tools,
-    register_jobs_tools,
-    register_organizations_tools,
-    register_projects_tools,
-    register_schedules_tools,
-    register_system_tools,
-    register_teams_tools,
-    register_users_tools,
-    register_workflow_jobs_tools,
-    register_workflow_templates_tools,
-)
+from ansible_tower_mcp.mcp.tools import register_kg_ingest_tools
 
 __version__ = connector_version("ansible_tower_mcp")
 
@@ -48,21 +32,7 @@ __all__ = [
     "__version__",
     "get_mcp_instance",
     "mcp_server",
-    "register_inventory_tools",
-    "register_hosts_tools",
-    "register_groups_tools",
-    "register_job_templates_tools",
-    "register_jobs_tools",
-    "register_projects_tools",
-    "register_credentials_tools",
-    "register_organizations_tools",
-    "register_teams_tools",
-    "register_users_tools",
-    "register_ad_hoc_commands_tools",
-    "register_workflow_templates_tools",
-    "register_workflow_jobs_tools",
-    "register_schedules_tools",
-    "register_system_tools",
+    "register_kg_ingest_tools",
 ]
 
 logger = get_logger(name="ansible-tower-mcp")
@@ -78,7 +48,7 @@ def get_mcp_instance() -> tuple[Any, ...]:
     args, mcp, middlewares = create_mcp_server(
         name="ansible-tower-mcp MCP",
         version=connector_version("ansible_tower_mcp"),
-        instructions="ansible-tower-mcp MCP Server — Condensed Action-Routed Tools.",
+        instructions="ansible-tower-mcp MCP Server — One typed tool per Ansible Tower operation.",
         content=ConnectorContent.for_package(
             "ansible_tower_mcp",
             Path(__file__).resolve().parents[1],

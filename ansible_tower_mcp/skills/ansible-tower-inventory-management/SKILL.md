@@ -30,7 +30,7 @@ the targets automation runs against, plus their organization and variables.
 - Launching or monitoring jobs against the inventory → `ansible-tower-job-execution`.
 - SCM-backed playbook projects → `ansible-tower-project-scm`.
 - Organization / team / user RBAC beyond inventory ownership → the
-  `ansible_tower_organizations` / `ansible_tower_teams` / `ansible_tower_users` tools.
+  organization, team and user tools (`ansible_tower_list_organizations`, `ansible_tower_list_teams`, `ansible_tower_list_users`).
 
 ## Prerequisites & environment
 Connect via the `mcp-client` skill against the **`ansible-tower-mcp`** MCP server.
@@ -42,22 +42,17 @@ Connect via the `mcp-client` skill against the **`ansible-tower-mcp`** MCP serve
 | `ANSIBLE_CLIENT_ID` / `ANSIBLE_CLIENT_SECRET` | optional | OAuth2 |
 | `ANSIBLE_VERIFY` | optional | TLS verification toggle |
 
-## Tools & actions
-Prefer the **condensed** tools; each takes `action` + a `params_json` **JSON string**.
+## Tools
+One typed tool per operation; pass each argument by name.
 
-| Condensed tool | Actions |
-|----------------|---------|
-| `ansible_tower_inventory` | `list_inventories`, `get_inventory`, `create_inventory`, `update_inventory`, `delete_inventory` |
-| `ansible_tower_hosts` | `list_hosts`, `get_host`, `create_host`, `update_host`, `delete_host` |
-| `ansible_tower_groups` | `list_groups`, `get_group`, `create_group`, `update_group`, `delete_group`, `add_host_to_group`, `remove_host_from_group` |
+| Tool | Use |
+|------|-----|
+| `ansible_tower_list_inventories`, `ansible_tower_get_inventory`, `ansible_tower_create_inventory`, `ansible_tower_update_inventory`, `ansible_tower_delete_inventory` | Inventories |
+| `ansible_tower_list_hosts`, `ansible_tower_get_host`, `ansible_tower_create_host`, `ansible_tower_update_host`, `ansible_tower_delete_host` | Hosts |
+| `ansible_tower_list_groups`, `ansible_tower_get_group`, `ansible_tower_create_group`, `ansible_tower_update_group`, `ansible_tower_delete_group` | Groups (scoped by `inventory_id`) |
+| `ansible_tower_add_host_to_group`, `ansible_tower_remove_host_from_group` | Group membership |
 
-### Key parameters
-- `organization_id` — required to `create_inventory`.
-- `inventory_id` — required for host/group creation and scoped listing.
-- `variables` — a **JSON string** of host/group variables (validated as JSON).
-- `group_id` + `host_id` — for `add_host_to_group` / `remove_host_from_group`.
-
-## Recipes (`params_json`)
+## Recipes (tool arguments)
 Create an inventory under org 1:
 ```json
 {"name": "prod-web", "organization_id": 1, "description": "Production web tier"}
@@ -76,9 +71,8 @@ Add a host to a group:
 ```
 
 ## Gotchas
-- `params_json` is a **string** of JSON, not an object — serialize it.
 - `variables` must be a valid JSON string; the client raises "Invalid JSON" otherwise.
-- `ansible_tower_groups` `list_groups` requires an `inventory_id` (groups are scoped).
+- `ansible_tower_list_groups` requires an `inventory_id` (groups are scoped).
 - `remove_host_from_group` disassociates (does not delete) the host.
 - Deleting an inventory cascades to its hosts and groups in Tower — confirm first.
 

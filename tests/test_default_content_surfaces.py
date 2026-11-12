@@ -37,6 +37,8 @@ async def _listings():
         resources = {str(r.uri) for r in await client.list_resources()}
         prompts = {p.name for p in await client.list_prompts()}
         for uri in resources:
+            if uri.endswith("/contracts.ttl"):
+                continue  # rendered from connector_contracts.py, not a packaged file
             if uri.startswith(("ontology://", "shapes://")):
                 directory = ROOT / "ontology"
                 if uri.startswith("shapes://"):
@@ -88,8 +90,8 @@ def test_sdk_floor_supports_content_identity_and_current_pack_protocol() -> None
         floor = max(
             Version(s.version) for s in requirement.specifier if s.operator == ">="
         )
-        assert floor >= Version("0.7.0")
-        assert requirement.specifier.contains("0.7.0")
+        assert floor >= Version("0.9.0")
+        assert requirement.specifier.contains("0.9.0")
         assert not requirement.specifier.contains("0.5.9")
 
 
@@ -110,6 +112,8 @@ def test_production_pack_includes_packaged_ontology_and_shapes() -> None:
     assert pack.server_package_version == version("ansible-tower-mcp")
     uris = {str(entry.uri) for entry in pack.archive.entries}
     for entry in pack.archive.entries:
+        if str(entry.uri).endswith("/contracts.ttl"):
+            continue  # rendered from connector_contracts.py, not a packaged file
         if entry.uri.startswith(("ontology://", "shapes://")):
             name = entry.uri.rsplit("/", 1)[-1]
             directory = (

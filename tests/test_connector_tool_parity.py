@@ -76,6 +76,8 @@ def test_canonical_server_serves_every_packaged_content_payload(monkeypatch):
         expected_resources.add(f"shapes://ansible-tower-mcp/{path.name}")
     assert expected_resources <= resources
     for uri, text in payloads.items():
+        if uri.endswith("/contracts.ttl"):
+            continue  # rendered from connector_contracts.py, not a packaged file
         directory = ROOT / "ontology"
         if uri.startswith("shapes://"):
             directory /= "shapes"
