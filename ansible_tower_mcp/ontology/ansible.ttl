@@ -1,7 +1,8 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix core: <https://knuckles-team.github.io/ontology/core#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix dc: <http://purl.org/dc/terms/> .
-@prefix : <http://knuckles.team/kg#> .
+@prefix : <https://knuckles-team.github.io/ontology/connector/ansible-tower#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -26,6 +27,7 @@
     rdfs:comment "A named group of hosts within an Inventory (ansible_tower_groups)." .
 
 :Host a owl:Class ;
+    rdfs:subClassOf core:InfrastructureHost ;
     rdfs:label "Host" ;
     rdfs:comment "A managed node targeted by automation, belonging to an Inventory (ansible_tower_hosts)." .
 
@@ -41,7 +43,8 @@
     rdfs:label "Workflow Job Template" ;
     rdfs:comment "A graph of job templates run as a coordinated workflow (ansible_tower_workflow_templates)." .
 
-:Job a owl:Class .
+:Job a owl:Class ;
+    rdfs:subClassOf core:Job .
 
 
 :WorkflowJob a owl:Class ;
@@ -52,13 +55,16 @@
     rdfs:label "Ad Hoc Command" ;
     rdfs:comment "A one-off module command run directly against an Inventory (ansible_tower_ad_hoc_commands)." .
 
-:Credential a owl:Class .
+:Credential a owl:Class ;
+    rdfs:subClassOf core:Credential .
 
 
-:Schedule a owl:Class .
+:Schedule a owl:Class ;
+    rdfs:subClassOf core:Schedule .
 
 
-:Team a owl:Class .
+:Team a owl:Class ;
+    rdfs:subClassOf core:Team .
 
 
 # --- links (owl:ObjectProperty) ---
@@ -159,7 +165,7 @@
     rdfs:comment "Timestamp a Job or Workflow Job completed." ;
     rdfs:range xsd:dateTime .
 
-<http://knuckles.team/kg/ansible> a owl:Ontology ;
+<https://knuckles-team.github.io/ontology/connector/ansible> a owl:Ontology ;
     rdfs:label "Ansible Tower Automation Ontology" ;
     rdfs:comment """Ansible Tower / AWX automation model — organizations, inventories,
     groups, hosts, SCM-backed projects, job and workflow templates, their job
@@ -168,16 +174,16 @@
     hub. Reuses the shared :Document and :Blob classes for job output.""" .
 
 # ontology-codemod R3
-<http://knuckles.team/kg#Host> rdfs:subClassOf <http://knuckles.team/kg/infrastructure#Host> .
-<http://knuckles.team/kg#InventoryGroup> rdfs:subClassOf <http://knuckles.team/kg#ResourceGroup> .
-<http://knuckles.team/kg#WorkflowJob> rdfs:subClassOf <http://knuckles.team/kg#Job> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#Host> rdfs:subClassOf <https://knuckles-team.github.io/ontology/infrastructure#Host> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#InventoryGroup> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#ResourceGroup> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#WorkflowJob> rdfs:subClassOf <https://knuckles-team.github.io/ontology/connector/ansible-tower#Job> .
 
 # semantic-core mappings (AUD-001..003; reviewed against public Medulla 2.27.7)
-<http://knuckles.team/kg#JobTemplate> rdfs:subClassOf <http://knuckles.team/kg#Template> .
-<http://knuckles.team/kg#WorkflowJobTemplate> rdfs:subClassOf <http://knuckles.team/kg#WorkflowDefinition> .
-<http://knuckles.team/kg#AdHocCommand> rdfs:subClassOf <http://knuckles.team/kg#ActionInvocation> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#JobTemplate> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#Template> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#WorkflowJobTemplate> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#WorkflowDefinition> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#AdHocCommand> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#ActionInvocation> .
 
 # connector-surface core roll-up
-<http://knuckles.team/kg#AnsibleOrganization> rdfs:subClassOf <http://knuckles.team/kg#Organization> .
-<http://knuckles.team/kg#Inventory> rdfs:subClassOf <http://knuckles.team/kg#Collection> .
-<http://knuckles.team/kg#AnsibleProject> rdfs:subClassOf <http://knuckles.team/kg#Repository> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#AnsibleOrganization> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#Organization> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#Inventory> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#Collection> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#AnsibleProject> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#Repository> .
