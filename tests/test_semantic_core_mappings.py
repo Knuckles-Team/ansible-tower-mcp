@@ -12,7 +12,10 @@ ONTOLOGY = ROOT / "ontology"
 TTL = ONTOLOGY / "ansible.ttl"
 MAPPINGS = (
     ("JobTemplate", "https://knuckles-team.github.io/ontology/core#Template"),
-    ("WorkflowJobTemplate", "https://knuckles-team.github.io/ontology/core#WorkflowDefinition"),
+    (
+        "WorkflowJobTemplate",
+        "https://knuckles-team.github.io/ontology/core#WorkflowDefinition",
+    ),
     ("AdHocCommand", "https://knuckles-team.github.io/ontology/core#ActionInvocation"),
 )
 
@@ -22,7 +25,9 @@ def test_approved_classes_reach_shared_core_parents():
     graph.parse(TTL, format="turtle")
     for local_name, parent_iri in MAPPINGS:
         assert (
-            rdflib.URIRef(f"https://knuckles-team.github.io/ontology/connector/ansible-tower#{local_name}"),
+            rdflib.URIRef(
+                f"https://knuckles-team.github.io/ontology/connector/ansible-tower#{local_name}"
+            ),
             rdflib.RDFS.subClassOf,
             rdflib.URIRef(parent_iri),
         ) in graph
