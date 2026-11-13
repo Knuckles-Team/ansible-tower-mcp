@@ -130,6 +130,18 @@
     rdfs:comment "Execution status of a Job, Workflow Job or Ad Hoc Command (successful, failed, running, pending, canceled)." ;
     rdfs:range xsd:string .
 
+:finishedAt a owl:DatatypeProperty ;
+    rdfs:label "finished at" ;
+    rdfs:comment "Timestamp at which a Job run finished, as returned by ansible_tower_list_jobs." ;
+    rdfs:domain :Job ;
+    rdfs:range xsd:dateTime .
+
+:templateName a owl:DatatypeProperty ;
+    rdfs:label "template name" ;
+    rdfs:comment "Name of the Job Template a Job run was launched from." ;
+    rdfs:domain :Job ;
+    rdfs:range xsd:string .
+
 :elapsed a owl:DatatypeProperty ;
     rdfs:label "elapsed" ;
     rdfs:comment "Wall-clock run time of a Job in seconds." ;

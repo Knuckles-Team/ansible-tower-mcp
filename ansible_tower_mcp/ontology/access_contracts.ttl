@@ -1,0 +1,25 @@
+@prefix ac: <https://knuckles-team.github.io/agent-connector-sdk/access#> .
+@prefix kg: <http://knuckles.team/kg#> .
+@prefix infra: <http://knuckles.team/kg/infrastructure#> .
+@prefix atac: <http://knuckles.team/kg/ansible-tower-access#> .
+
+# Read contract for the competency read of the Ansible Tower connector: the job
+# runs listed by the existing ansible_tower_list_jobs tool. The tool is
+# generated from the client method list_jobs; no new tool is introduced. A Tower
+# job record carries no host id, so no hostId column is bound.
+
+atac:jobRunAccess a ac:AccessContract ;
+    ac:classIri infra:AutomationJob ;
+    ac:sourceId "ansible-tower-mcp" ;
+    ac:entity "job_run" ;
+    ac:keyField "id" ;
+    ac:accessKind "mcp_tool" ;
+    ac:operation "ansible_tower_list_jobs" ;
+    ac:pagination "none" .
+
+atac:jobStatus a ac:PropertyBinding ;
+    ac:contract atac:jobRunAccess ; ac:property kg:jobStatus ; ac:field "status" .
+atac:finishedAt a ac:PropertyBinding ;
+    ac:contract atac:jobRunAccess ; ac:property kg:finishedAt ; ac:field "finished" .
+atac:templateName a ac:PropertyBinding ;
+    ac:contract atac:jobRunAccess ; ac:property kg:templateName ; ac:field "name" .

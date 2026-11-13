@@ -1,0 +1,21 @@
+[
+  {
+    "id": 42,
+    "type": "job",
+    "name": "Patch hosts",
+    "status": "failed",
+    "finished": "2026-11-01T10:15:00.000000Z",
+    "started": "2026-11-01T10:10:00.000000Z",
+    "elapsed": 300.0,
+    "job_template": 7,
+    "inventory": 3,
+    "project": 5,
+    "playbook": "patch.yml",
+    "summary_fields": {
+      "job_template": {
+        "id": 7,
+        "name": "Patch hosts"
+      }
+    }
+  }
+]
