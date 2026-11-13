@@ -1,5 +1,8 @@
 @prefix ac: <https://knuckles-team.github.io/agent-connector-sdk/access#> .
 @prefix kg: <http://knuckles.team/kg#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix infra: <http://knuckles.team/kg/infrastructure#> .
 @prefix atac: <http://knuckles.team/kg/ansible-tower-access#> .
 
@@ -23,3 +26,14 @@ atac:finishedAt a ac:PropertyBinding ;
     ac:contract atac:jobRunAccess ; ac:property kg:finishedAt ; ac:field "finished" .
 atac:templateName a ac:PropertyBinding ;
     ac:contract atac:jobRunAccess ; ac:property kg:templateName ; ac:field "name" .
+
+# Columns of the job run read that ansible.ttl does not declare yet.
+kg:finishedAt a owl:DatatypeProperty ;
+    rdfs:label "finished at" ;
+    rdfs:domain kg:Job ;
+    rdfs:range xsd:dateTime .
+
+kg:templateName a owl:DatatypeProperty ;
+    rdfs:label "template name" ;
+    rdfs:domain kg:Job ;
+    rdfs:range xsd:string .

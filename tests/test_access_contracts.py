@@ -18,8 +18,9 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = parse_access_contracts(
     (ROOT / "ansible_tower_mcp/ontology/access_contracts.ttl").read_text()
 )
-ONTOLOGY = (
-    resources.files("ansible_tower_mcp").joinpath("ontology", "ansible.ttl").read_text()
+ONTOLOGY = "\n".join(
+    resources.files("ansible_tower_mcp").joinpath("ontology", name).read_text()
+    for name in ("ansible.ttl", "access_contracts.ttl")
 )
 KG = "http://knuckles.team/kg#"
 
@@ -53,7 +54,8 @@ def test_competency_contracts_certified(monkeypatch):
     assert contract.class_iri == "http://knuckles.team/kg/infrastructure#AutomationJob"
     for prop, _field in contract.predicates:
         assert prop.startswith(KG)
-        assert f"\n:{prop.removeprefix(KG)} a owl:" in ONTOLOGY, prop
+        local = prop.removeprefix(KG)
+        assert f"\n:{local} a owl:" in ONTOLOGY or f"\nkg:{local} a owl:" in ONTOLOGY
     recording = json.loads((ROOT / "tests/recordings/job_run.json").read_text())
     assert recording
     served = _serve(monkeypatch, contract.operation, recording)
