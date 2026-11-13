@@ -1,10 +1,6 @@
-@prefix ac: <https://knuckles-team.github.io/agent-connector-sdk/access#> .
-@prefix kg: <http://knuckles.team/kg#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix infra: <http://knuckles.team/kg/infrastructure#> .
-@prefix atac: <http://knuckles.team/kg/ansible-tower-access#> .
+@prefix ac: <https://knuckles-team.github.io/ontology/access#> .
+@prefix : <https://knuckles-team.github.io/ontology/connector/ansible-tower#> .
+@prefix atac: <https://knuckles-team.github.io/ontology/connector/ansible-tower-access#> .
 
 # Read contract for the competency read of the Ansible Tower connector: the job
 # runs listed by the existing ansible_tower_list_jobs tool. The tool is
@@ -12,7 +8,7 @@
 # job record carries no host id, so no hostId column is bound.
 
 atac:jobRunAccess a ac:AccessContract ;
-    ac:classIri infra:AutomationJob ;
+    ac:classIri :Job ;
     ac:sourceId "ansible-tower-mcp" ;
     ac:entity "job_run" ;
     ac:keyField "id" ;
@@ -21,19 +17,8 @@ atac:jobRunAccess a ac:AccessContract ;
     ac:pagination "none" .
 
 atac:jobStatus a ac:PropertyBinding ;
-    ac:contract atac:jobRunAccess ; ac:property kg:jobStatus ; ac:field "status" .
+    ac:contract atac:jobRunAccess ; ac:property :jobStatus ; ac:field "status" .
 atac:finishedAt a ac:PropertyBinding ;
-    ac:contract atac:jobRunAccess ; ac:property kg:finishedAt ; ac:field "finished" .
+    ac:contract atac:jobRunAccess ; ac:property :finishedAt ; ac:field "finished" .
 atac:templateName a ac:PropertyBinding ;
-    ac:contract atac:jobRunAccess ; ac:property kg:templateName ; ac:field "name" .
-
-# Columns of the job run read that ansible.ttl does not declare yet.
-kg:finishedAt a owl:DatatypeProperty ;
-    rdfs:label "finished at" ;
-    rdfs:domain kg:Job ;
-    rdfs:range xsd:dateTime .
-
-kg:templateName a owl:DatatypeProperty ;
-    rdfs:label "template name" ;
-    rdfs:domain kg:Job ;
-    rdfs:range xsd:string .
+    ac:contract atac:jobRunAccess ; ac:property :templateName ; ac:field "name" .

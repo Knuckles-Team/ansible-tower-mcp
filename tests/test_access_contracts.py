@@ -22,7 +22,7 @@ ONTOLOGY = "\n".join(
     resources.files("ansible_tower_mcp").joinpath("ontology", name).read_text()
     for name in ("ansible.ttl", "access_contracts.ttl")
 )
-KG = "http://knuckles.team/kg#"
+KG = "https://knuckles-team.github.io/ontology/connector/ansible-tower#"
 
 
 def _serve(monkeypatch, operation, recording):
@@ -51,11 +51,11 @@ def test_competency_contracts_certified(monkeypatch):
     assert contract.access_kind == "mcp_tool"
     assert contract.pagination == "none"
     assert contract.key_field == "id"
-    assert contract.class_iri == "http://knuckles.team/kg/infrastructure#AutomationJob"
+    assert contract.class_iri == KG + "Job"
     for prop, _field in contract.predicates:
         assert prop.startswith(KG)
         local = prop.removeprefix(KG)
-        assert f"\n:{local} a owl:" in ONTOLOGY or f"\nkg:{local} a owl:" in ONTOLOGY
+        assert f"\n:{local} a owl:" in ONTOLOGY
     recording = json.loads((ROOT / "tests/recordings/job_run.json").read_text())
     assert recording
     served = _serve(monkeypatch, contract.operation, recording)
