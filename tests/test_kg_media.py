@@ -1,4 +1,4 @@
-"""Epistemic-graph blob ingestion for job logs — Wire-First coverage.
+"""Medulla blob ingestion for job logs — Wire-First coverage.
 
 Exercises ``ingest_job_log`` against a fake ``scion_sdk.ingest``
 transport (no engine required), asserting the stored media asset's bytes,

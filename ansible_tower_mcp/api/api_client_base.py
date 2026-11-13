@@ -5,7 +5,7 @@ import re
 from typing import Any
 from urllib.parse import urljoin
 
-from scion_sdk.http.client import create_http_client
+from scion_sdk.http.client import build_http_client
 from scion_sdk.http.options import HttpClientOptions
 from scion_sdk.httpsupport.pagination import PaginationIterator
 from scion_sdk.tls.profile import ResolvedTLSProfile
@@ -38,7 +38,7 @@ class BaseApiClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.tls_profile = tls_profile or resolve_tls_profile("ANSIBLE_TOWER")
-        self._session = create_http_client(
+        self._session = build_http_client(
             HttpClientOptions(
                 base_url=base_url,
                 tls=self.tls_profile,
