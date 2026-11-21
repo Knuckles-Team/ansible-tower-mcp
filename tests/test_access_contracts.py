@@ -22,7 +22,8 @@ ONTOLOGY = "\n".join(
     resources.files("ansible_tower_mcp").joinpath("ontology", name).read_text()
     for name in ("ansible.ttl", "access_contracts.ttl")
 )
-KG = "https://knuckles-team.github.io/ontology/connector/ansible-tower#"
+KG = "https://knuckles-team.github.io/ontology/core#"
+INFRA = "https://knuckles-team.github.io/ontology/infrastructure#"
 
 
 def _serve(monkeypatch, operation, recording):
@@ -53,9 +54,8 @@ def test_competency_contracts_certified(monkeypatch):
     assert contract.key_field == "id"
     assert contract.class_iri == KG + "Job"
     for prop, _field in contract.predicates:
-        assert prop.startswith(KG)
-        local = prop.removeprefix(KG)
-        assert f"\n:{local} a owl:" in ONTOLOGY
+        assert prop.startswith((KG, INFRA)), prop
+        assert f"\n:{prop.rsplit('#', 1)[-1]} a owl:" not in ONTOLOGY
     recording = json.loads((ROOT / "tests/recordings/job_run.json").read_text())
     assert recording
     served = _serve(monkeypatch, contract.operation, recording)

@@ -6,6 +6,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix infra: <https://knuckles-team.github.io/ontology/infrastructure#> .
 
 # Ansible Tower / AWX automation ontology — organizations, inventories, hosts,
 # projects, job templates, and their job executions. All classes and properties live
@@ -26,11 +27,6 @@
     rdfs:label "Inventory Group" ;
     rdfs:comment "A named group of hosts within an Inventory (ansible_tower_groups)." .
 
-:Host a owl:Class ;
-    rdfs:subClassOf core:InfrastructureHost ;
-    rdfs:label "Host" ;
-    rdfs:comment "A managed node targeted by automation, belonging to an Inventory (ansible_tower_hosts)." .
-
 :AnsibleProject a owl:Class ;
     rdfs:label "Ansible Project" ;
     rdfs:comment "An SCM-backed source of playbooks (git/hg/svn/manual) synced into Tower (ansible_tower_projects)." .
@@ -43,10 +39,6 @@
     rdfs:label "Workflow Job Template" ;
     rdfs:comment "A graph of job templates run as a coordinated workflow (ansible_tower_workflow_templates)." .
 
-:Job a owl:Class ;
-    rdfs:subClassOf core:Job .
-
-
 :WorkflowJob a owl:Class ;
     rdfs:label "Workflow Job" ;
     rdfs:comment "A single execution of a Workflow Job Template (ansible_tower_workflow_jobs)." .
@@ -54,18 +46,6 @@
 :AdHocCommand a owl:Class ;
     rdfs:label "Ad Hoc Command" ;
     rdfs:comment "A one-off module command run directly against an Inventory (ansible_tower_ad_hoc_commands)." .
-
-:Credential a owl:Class ;
-    rdfs:subClassOf core:Credential .
-
-
-:Schedule a owl:Class ;
-    rdfs:subClassOf core:Schedule .
-
-
-:Team a owl:Class ;
-    rdfs:subClassOf core:Team .
-
 
 # --- links (owl:ObjectProperty) ---
 
@@ -82,7 +62,7 @@
 :inGroup a owl:ObjectProperty ;
     rdfs:label "in group" ;
     rdfs:comment "Links a Host to an Inventory Group it is a member of." ;
-    rdfs:domain :Host ;
+    rdfs:domain infra:Host ;
     rdfs:range :InventoryGroup .
 
 :usesProject a owl:ObjectProperty ;
@@ -99,12 +79,12 @@
 :usesCredential a owl:ObjectProperty ;
     rdfs:label "uses credential" ;
     rdfs:comment "Links a Job Template, Job or Ad Hoc Command to a Credential it authenticates with." ;
-    rdfs:range :Credential .
+    rdfs:range core:Credential .
 
 :launchedFrom a owl:ObjectProperty ;
     rdfs:label "launched from" ;
     rdfs:comment "Links a Job to the Job Template it was launched from." ;
-    rdfs:domain :Job ;
+    rdfs:domain core:Job ;
     rdfs:range :JobTemplate .
 
 :workflowLaunchedFrom a owl:ObjectProperty ;
@@ -116,30 +96,25 @@
 :hasStdout a owl:ObjectProperty ;
     rdfs:label "has stdout" ;
     rdfs:comment "Links a Job to its captured stdout :Document (semantic-search text) or raw :Blob log." ;
-    rdfs:domain :Job .
+    rdfs:domain core:Job .
 
 :triggersTemplate a owl:ObjectProperty ;
     rdfs:label "triggers template" ;
     rdfs:comment "Links a Schedule to the Job Template or Workflow Job Template it triggers." ;
-    rdfs:domain :Schedule .
+    rdfs:domain core:Schedule .
 
 # --- fields (owl:DatatypeProperty) ---
-
-:jobStatus a owl:DatatypeProperty ;
-    rdfs:label "job status" ;
-    rdfs:comment "Execution status of a Job, Workflow Job or Ad Hoc Command (successful, failed, running, pending, canceled)." ;
-    rdfs:range xsd:string .
 
 :finishedAt a owl:DatatypeProperty ;
     rdfs:label "finished at" ;
     rdfs:comment "When a Job finished running." ;
-    rdfs:domain :Job ;
+    rdfs:domain core:Job ;
     rdfs:range xsd:dateTime .
 
 :templateName a owl:DatatypeProperty ;
     rdfs:label "template name" ;
     rdfs:comment "Name of the Job Template a Job was launched from." ;
-    rdfs:domain :Job ;
+    rdfs:domain core:Job ;
     rdfs:range xsd:string .
 
 :elapsed a owl:DatatypeProperty ;
@@ -186,9 +161,8 @@
     hub. Reuses the shared :Document and :Blob classes for job output.""" .
 
 # ontology-codemod R3
-<https://knuckles-team.github.io/ontology/connector/ansible-tower#Host> rdfs:subClassOf <https://knuckles-team.github.io/ontology/infrastructure#Host> .
 <https://knuckles-team.github.io/ontology/connector/ansible-tower#InventoryGroup> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#ResourceGroup> .
-<https://knuckles-team.github.io/ontology/connector/ansible-tower#WorkflowJob> rdfs:subClassOf <https://knuckles-team.github.io/ontology/connector/ansible-tower#Job> .
+<https://knuckles-team.github.io/ontology/connector/ansible-tower#WorkflowJob> rdfs:subClassOf core:Job .
 
 # semantic-core mappings (AUD-001..003; reviewed against public Medulla 2.27.7)
 <https://knuckles-team.github.io/ontology/connector/ansible-tower#JobTemplate> rdfs:subClassOf <https://knuckles-team.github.io/ontology/core#Template> .
