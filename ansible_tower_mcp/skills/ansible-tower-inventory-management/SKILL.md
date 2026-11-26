@@ -2,13 +2,7 @@
 name: ansible-tower-inventory-management
 skill_type: skill
 description: >-
-  Manage Ansible Tower / AWX inventories, groups, and managed hosts via the
-  ansible-tower-mcp MCP server — create and update inventories, add/remove hosts,
-  organize hosts into groups, and set host/group variables. Use when the agent must
-  define what automation runs against: build an inventory, register hosts, group
-  them, or edit host variables. Do NOT use for launching runs against an inventory
-  (use ansible-tower-job-execution) or managing playbook SCM sources (use
-  ansible-tower-project-scm).
+  Manage Ansible Tower / AWX inventories, groups, and managed hosts via the ansible-tower-mcp MCP server — create and update inventories, add/remove hosts, organize hosts into groups, and set host/group variables. Use when the agent must define what automation runs against: build an inventory, register hosts, group them, or edit host variables.
 license: MIT
 tags: [ansible-tower, awx, inventory, hosts, mcp]
 metadata:
@@ -16,6 +10,8 @@ metadata:
   version: '0.1.0'
 ---
 # Ansible Tower Inventory Management
+
+Scope: Manage Ansible Tower / AWX inventories, groups, and managed hosts via the ansible-tower-mcp MCP server — create and update inventories, add/remove hosts, organize hosts into groups, and set host/group variables. Use when the agent must define what automation runs against: build an inventory, register hosts, group them, or edit host variables. Do NOT use for launching runs against an inventory (use ansible-tower-job-execution) or managing playbook SCM sources (use ansible-tower-project-scm).
 
 Domain-typed control of Ansible Tower **inventories**, **groups**, and **hosts** —
 the targets automation runs against, plus their organization and variables.

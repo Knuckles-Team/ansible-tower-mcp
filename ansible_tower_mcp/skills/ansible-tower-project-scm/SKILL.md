@@ -2,13 +2,7 @@
 name: ansible-tower-project-scm
 skill_type: skill
 description: >-
-  Manage Ansible Tower / AWX projects (SCM-backed playbook sources) and their
-  recurring schedules via the ansible-tower-mcp MCP server — create git/hg/svn/manual
-  projects, trigger an SCM sync, and define rrule schedules that launch job or
-  workflow templates. Use when the agent must wire a playbook repository into Tower,
-  refresh project content, or schedule automation to run on a cadence. Do NOT use for
-  launching ad hoc runs (use ansible-tower-job-execution) or defining target
-  inventories/hosts (use ansible-tower-inventory-management).
+  Manage Ansible Tower / AWX projects (SCM-backed playbook sources) and their recurring schedules via the ansible-tower-mcp MCP server — create git/hg/svn/manual projects, trigger an SCM sync, and define rrule schedules that launch job or workflow templates. Use when the agent must wire a playbook repository into Tower, refresh project content, or schedule automation to run on a cadence.
 license: MIT
 tags: [ansible-tower, awx, scm, projects, schedules, mcp]
 metadata:
@@ -16,6 +10,8 @@ metadata:
   version: '0.1.0'
 ---
 # Ansible Tower Project & Schedule Management
+
+Scope: Manage Ansible Tower / AWX projects (SCM-backed playbook sources) and their recurring schedules via the ansible-tower-mcp MCP server — create git/hg/svn/manual projects, trigger an SCM sync, and define rrule schedules that launch job or workflow templates. Use when the agent must wire a playbook repository into Tower, refresh project content, or schedule automation to run on a cadence. Do NOT use for launching ad hoc runs (use ansible-tower-job-execution) or defining target inventories/hosts (use ansible-tower-inventory-management).
 
 Domain-typed control of Ansible Tower **projects** (the SCM-backed source of
 playbooks) and **schedules** (rrule triggers that launch templates on a cadence).
