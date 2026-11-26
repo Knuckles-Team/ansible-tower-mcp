@@ -3,9 +3,7 @@ name: ansible-tower-mcp-development
 skill_type: skill
 domain: development
 description: >-
-  Develop, test, gate, and release the ansible-tower-mcp connector. Use this
-  skill when changing the connector's API mappings, MCP tools, packaging,
-  documentation, or repository gates.
+  Develop, test, gate, and release the ansible-tower-mcp connector. Use this skill when changing the connector's API mappings, MCP tools, packaging, documentation, or repository gates.
 license: MIT
 tags: [ansible-tower-mcp, development, connector, test, gates]
 tier: repository

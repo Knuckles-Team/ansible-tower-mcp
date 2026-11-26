@@ -2,13 +2,7 @@
 name: ansible-tower-job-execution
 skill_type: skill
 description: >-
-  Launch and monitor Ansible Tower / AWX automation via the ansible-tower-mcp MCP
-  server — run job templates and workflows, watch job status, stream stdout, cancel
-  runs, and fire ad hoc module commands. Use when the agent must kick off a playbook
-  run, check whether a job succeeded or failed, pull a failed job's log, rerun a
-  job, or run a one-off ad hoc command against an inventory. Do NOT use for defining
-  inventories/hosts (use ansible-tower-inventory-management) or wiring SCM-backed
-  playbook sources (use ansible-tower-project-scm).
+  Launch and monitor Ansible Tower / AWX automation via the ansible-tower-mcp MCP server — run job templates and workflows, watch job status, stream stdout, cancel runs, and fire ad hoc module commands. Use when the agent must kick off a playbook run, check whether a job succeeded or failed, pull a failed job's log, rerun a job, or run a one-off ad hoc command against an inventory.
 license: MIT
 tags: [ansible-tower, awx, jobs, automation, mcp]
 metadata:
@@ -16,6 +10,8 @@ metadata:
   version: '0.1.0'
 ---
 # Ansible Tower Job Execution
+
+Scope: Launch and monitor Ansible Tower / AWX automation via the ansible-tower-mcp MCP server — run job templates and workflows, watch job status, stream stdout, cancel runs, and fire ad hoc module commands. Use when the agent must kick off a playbook run, check whether a job succeeded or failed, pull a failed job's log, rerun a job, or run a one-off ad hoc command against an inventory. Do NOT use for defining inventories/hosts (use ansible-tower-inventory-management) or wiring SCM-backed playbook sources (use ansible-tower-project-scm).
 
 Domain-typed control of Ansible Tower **job templates**, **workflow templates**,
 **jobs**, and **ad hoc commands** for launching and monitoring automation runs.
