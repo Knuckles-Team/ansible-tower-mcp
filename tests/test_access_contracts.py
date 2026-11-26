@@ -13,7 +13,6 @@ from scion_sdk.connector import build_server
 
 from ansible_tower_mcp.api.api_client_base import BaseApiClient
 
-ID = "CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R002"
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = parse_access_contracts(
     (ROOT / "ansible_tower_mcp/ontology/access_contracts.ttl").read_text()
@@ -45,7 +44,7 @@ def _serve(monkeypatch, operation, recording):
     return asyncio.run(call())
 
 
-@pytest.mark.spec(ID)
+@pytest.mark.spec("CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R002")
 def test_competency_contracts_certified(monkeypatch):
     (contract,) = CONTRACTS
     assert contract.entity == "job_run"
@@ -70,7 +69,7 @@ def test_competency_contracts_certified(monkeypatch):
         assert all(field in record for _, field in contract.predicates)
 
 
-@pytest.mark.spec(ID)
+@pytest.mark.spec("CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R002")
 def test_contract_refuses_a_recording_missing_a_bound_field():
     (contract,) = CONTRACTS
     record = {"id": 1, "status": "failed"}
