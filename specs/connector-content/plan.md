@@ -40,6 +40,16 @@ No unknowns. Each row names the code it touches.
 
 ## Phase 1: Design
 
+### Machine roll-up design
+
+1. **Owner.** ansible-tower-mcp owns its host class and ingest. Medulla owns the machine class.
+2. **Cohesion.** The class parent, the mapping and the link change together in the host ingest.
+3. **Dependency direction.** The connector imports `scion_sdk.machine`, which imports the engine client. Nothing points upward.
+4. **Interface depth.** none. The row reuses the SDK helper.
+5. **Special cases.** A refused key skips one link and never fails the record write.
+6. **State.** none. The connector holds no lifecycle. The lifecycle machine belongs to medulla.
+7. **Environment.** none. The roll-up and the link need no configuration.
+
 The rows are delivered in place; the design is the caller chain below.
 
 ## Phase 2: Task approach
@@ -61,4 +71,4 @@ The repository pre-commit hooks apply: `ruff-format`, `connector-standard`, `sec
 
 ## Cross-repo seams
 
-none. The cited owner rows are library capabilities the connector calls in process; spec.md names them.
+- `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R003.1` consumes the observer helper of `SCION-CENTRALIZED-CAPABILITIES-R057.1`. Contract: `contracts/machine-observer.md`.

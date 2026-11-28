@@ -9,3 +9,10 @@ Governing spec: [spec.md](spec.md).
 
 ## Rows awaiting bound tests
 - `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R002`: planned proof `tests/test_access_contracts.py::test_competency_contracts_certified`. Expected: Ontology certification passes and tests/recordings/job_run.json validates against the job_run contract keyed on id.. Refusal: A contract column not in the ontology, or a recording lacking id, fails..
+
+## Machine roll-up proofs
+
+- `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R003`: `tests/test_machine_rollup.py::test_pack_class_reaches_the_core_machine` (planned; the owning change adds the test)
+- `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R003.1`: `tests/test_machine_rollup.py::test_host_rolls_up_to_machine_and_ingest_emits_observes` (planned; the owning change adds the test)
+- `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R003.2`: `tests/test_machine_rollup.py::test_roll_up_is_wired_into_the_pack_and_ingest` (planned; the owning change adds the test)
+- `CONN-ANSIBLE-TOWER-MCP-CONNECTOR-CONTENT-R003.3`: `tests/test_machine_rollup.py::test_pack_class_reaches_the_core_machine` (planned; the owning change adds the test)
